@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600&display=swap');
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:#0d0d0d; font-family:'Sora',sans-serif; color:#f0ede8; padding:20px 12px 40px; }
+
+.page-title { text-align:center; font-size:17px; font-weight:700; margin-bottom:4px; letter-spacing:-0.02em; }
+.page-sub { text-align:center; font-size:11px; color:#555; margin-bottom:20px; font-family:'Noto Sans Devanagari',sans-serif; }
+
+/* Step indicator */
+.steps-bar { display:flex; align-items:center; justify-content:center; gap:0; margin-bottom:24px; overflow-x:auto; padding:0 8px; }
+.step-item { display:flex; flex-direction:column; align-items:center; gap:4px; cursor:pointer; min-width:52px; }
+.step-circle { width:28px; height:28px; border-radius:50%; border:2px solid #2a2a2a; background:#111; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:600; color:#555; transition:all 0.3s; }
+.step-circle.done { background:#e8472a; border-color:#e8472a; color:#fff; }
+.step-circle.active { background:#e8472a22; border-color:#e8472a; color:#e8472a; }
+.step-lbl { font-size:7px; color:#555; text-align:center; font-family:'Noto Sans Devanagari',sans-serif; white-space:nowrap; }
+.step-lbl.active { color:#e8472a; }
+.step-lbl.done { color:#888; }
+.step-line { width:20px; height:2px; background:#1e1e1e; margin-bottom:14px; flex-shrink:0; }
+.step-line.done { background:#e8472a; }
+
+/* Phone */
+.phone-wrap { display:flex; justify-content:center; }
+.phone { width:240px; background:#111; border-radius:36px; border:2px solid #2a2a2a; overflow:hidden; box-shadow:0 24px 60px rgba(0,0,0,0.7); }
+.status-bar { display:flex; justify-content:space-between; padding:10px 16px 4px; font-size:10px; color:#888; }
+.screen { background:#0f0f0f; min-height:480px; }
+
+/* Nav */
+.bottom-nav { display:flex; background:#111; border-top:1px solid #1e1e1e; padding:8px 0 10px; }
+.nav-item { flex:1; display:flex; flex-direction:column; align-items:center; gap:2px; cursor:pointer; }
+.nav-lbl { font-size:7px; color:#555; }
+.nav-item.active .nav-lbl { color:#e8472a; }
+.nav-dot { width:4px; height:4px; background:#e8472a; border-radius:50%; }
+
+/* Shared components */
+.sec-hdr { display:flex; justify-content:space-between; align-items:center; padding:0 14px; margin-bottom:8px; }
+.sec-title { font-size:10px; font-weight:600; }
+.sec-sub { font-size:8px; color:#555; }
+
+/* Nav arrows */
+.nav-row { display:flex; gap:10px; justify-content:center; margin-top:20px; }
+.nav-btn { padding:8px 22px; border-radius:20px; font-size:11px; font-weight:600; cursor:pointer; border:none; font-family:'Sora',sans-serif; transition:all 0.2s; }
+.btn-prev { background:#1e1e1e; color:#888; border:1px solid #2a2a2a; }
+.btn-next { background:#e8472a; color:#fff; }
+.btn-prev:hover { border-color:#444; color:#aaa; }
+.btn-next:hover { opacity:0.9; }
+
+/* Step description */
+.step-desc { text-align:center; margin:14px auto 0; max-width:300px; }
+.step-desc-title { font-size:13px; font-weight:600; margin-bottom:4px; }
+.step-desc-body { font-size:10px; color:#555; line-height:1.6; font-family:'Noto Sans Devanagari',sans-serif; }
+.bot-equiv { display:inline-block; margin-top:6px; background:#1e1e1e; border:1px solid #2a2a2a; border-radius:6px; padding:3px 10px; font-size:8px; color:#666; }
+
+/* ===== SCREEN STYLES ===== */
+
+/* S1: Home / PIN */
+.s1-top { padding:12px 14px 8px; }
+.s1-greeting { font-size:10px; color:#666; font-family:'Noto Sans Devanagari',sans-serif; }
+.s1-title { font-size:14px; font-weight:700; margin-bottom:10px; }
+.pin-input-box { background:#161616; border:1.5px solid #e8472a; border-radius:12px; padding:10px 14px; display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+.pin-icon { font-size:14px; }
+.pin-field { flex:1; }
+.pin-label { font-size:7px; color:#e8472a; margin-bottom:2px; }
+.pin-val { font-size:16px; font-weight:700; letter-spacing:4px; }
+.pin-cursor { display:inline-block; width:2px; height:16px; background:#e8472a; animation:blink 1s infinite; vertical-align:middle; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+.pin-hint { font-size:8px; color:#555; padding:0 14px; margin-bottom:12px; font-family:'Noto Sans Devanagari',sans-serif; }
+.keypad { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; padding:0 14px; }
+.key { background:#1a1a1a; border:1px solid #222; border-radius:10px; padding:10px; text-align:center; font-size:14px; font-weight:600; cursor:pointer; }
+.key.del { font-size:11px; color:#888; }
+.key.zero { grid-column:2; }
+
+/* S2: Shop list */
+.shop-card { margin:0 14px 8px; background:#161616; border:1px solid #222; border-radius:12px; overflow:hidden; cursor:pointer; }
+.shop-img { height:56px; display:flex; align-items:center; justify-content:center; font-size:22px; position:relative; }
+.shop-img.s1bg { background:linear-gradient(135deg,#1a0d05,#2d1a0a); }
+.shop-img.s2bg { background:linear-gradient(135deg,#0a0d1a,#0f152d); }
+.rating-pill { position:absolute; bottom:5px; right:8px; background:rgba(0,0,0,0.75); border-radius:5px; padding:2px 5px; font-size:8px; color:#f5c842; font-weight:600; }
+.shop-body { padding:7px 10px; }
+.shop-name { font-size:10px; font-weight:600; margin-bottom:2px; }
+.shop-meta { font-size:8px; color:#666; display:flex; gap:6px; }
+.open-dot { color:#4caf7d; }
+.distance-pill { background:#1e1e1e; border:1px solid #2a2a2a; border-radius:5px; padding:1px 5px; font-size:7px; color:#888; }
+
+/* S3: Service/category */
+.cat-row { display:grid; grid-template-columns:1fr 1fr; gap:8px; padding:0 14px; margin-bottom:10px; }
+.cat-card { background:#161616; border:1px solid #222; border-radius:11px; padding:10px; cursor:pointer; transition:border-color 0.2s; }
+.cat-card.sel { border-color:#e8472a; background:#e8472a0a; }
+.cat-icon { font-size:18px; margin-bottom:4px; }
+.cat-name { font-size:9px; font-weight:600; }
+.cat-count { font-size:7px; color:#666; margin-top:2px; }
+.svc-list { padding:0 14px; }
+.svc-row { display:flex; align-items:center; gap:8px; padding:7px 10px; background:#161616; border:1px solid #1e1e1e; border-radius:9px; margin-bottom:5px; cursor:pointer; }
+.svc-row.sel { border-color:#e8472a; background:#e8472a0a; }
+.svc-check { width:16px; height:16px; border-radius:4px; border:1.5px solid #333; display:flex; align-items:center; justify-content:center; font-size:9px; flex-shrink:0; }
+.svc-row.sel .svc-check { background:#e8472a; border-color:#e8472a; }
+.svc-info { flex:1; }
+.svc-name { font-size:9px; font-weight:500; }
+.svc-dur { font-size:7px; color:#666; }
+.svc-price { font-size:10px; font-weight:600; color:#4caf7d; }
+.cart-bar { margin:0 14px 10px; background:#e8472a22; border:1px solid #e8472a44; border-radius:9px; padding:7px 10px; display:flex; align-items:center; justify-content:space-between; }
+.cart-info { font-size:8px; color:#e8472a; }
+.cart-total { font-size:10px; font-weight:700; color:#e8472a; }
+
+/* S4: Barber + date + slot */
+.barbers-row { display:flex; gap:8px; padding:0 14px; margin-bottom:12px; overflow:hidden; }
+.barber { display:flex; flex-direction:column; align-items:center; gap:3px; cursor:pointer; }
+.b-av { width:42px; height:42px; border-radius:12px; background:#1e1e1e; border:2px solid #2a2a2a; display:flex; align-items:center; justify-content:center; font-size:18px; }
+.barber.sel .b-av { border-color:#e8472a; }
+.b-nm { font-size:7px; color:#888; }
+.barber.sel .b-nm { color:#e8472a; }
+.b-avail { font-size:6px; color:#4caf7d; }
+.date-row { display:flex; gap:5px; padding:0 14px; margin-bottom:10px; overflow:hidden; }
+.dc { display:flex; flex-direction:column; align-items:center; padding:5px 7px; border-radius:10px; background:#1a1a1a; border:1px solid #2a2a2a; cursor:pointer; min-width:32px; }
+.dc.a { background:#e8472a; border-color:#e8472a; }
+.dc.off { opacity:0.35; }
+.dd { font-size:6px; color:#888; }
+.dc.a .dd { color:rgba(255,255,255,0.75); }
+.dn { font-size:11px; font-weight:600; }
+.dc.a .dn { color:#fff; }
+.slots-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:5px; padding:0 14px; margin-bottom:10px; }
+.slot { padding:6px; border-radius:8px; background:#1a1a1a; border:1px solid #2a2a2a; text-align:center; font-size:9px; cursor:pointer; }
+.slot.bk { background:#111; border-color:#1a1a1a; color:#2a2a2a; text-decoration:line-through; }
+.slot.sl { background:#e8472a22; border-color:#e8472a; color:#e8472a; font-weight:600; }
+
+/* S5: Name/Phone */
+.form-section { padding:0 14px; }
+.field-box { background:#161616; border:1px solid #2a2a2a; border-radius:11px; padding:10px 12px; margin-bottom:8px; }
+.field-box.active { border-color:#e8472a; }
+.field-lbl { font-size:7px; color:#888; margin-bottom:3px; font-family:'Noto Sans Devanagari',sans-serif; }
+.field-val { font-size:12px; font-weight:500; display:flex; align-items:center; gap:4px; }
+.field-cursor { display:inline-block; width:1.5px; height:14px; background:#e8472a; animation:blink 1s infinite; }
+.otp-row { display:flex; gap:8px; margin-top:8px; }
+.otp-box { flex:1; background:#1a1a1a; border:1.5px solid #e8472a; border-radius:9px; padding:10px; text-align:center; font-size:16px; font-weight:700; }
+
+/* S6: Summary confirm */
+.summary-card { margin:0 14px 10px; background:#161616; border:1px solid #222; border-radius:14px; overflow:hidden; }
+.summary-header { background:#e8472a; padding:10px 14px; display:flex; align-items:center; gap:6px; }
+.summary-hdr-title { font-size:11px; font-weight:600; }
+.summary-row { display:flex; align-items:center; gap:10px; padding:8px 14px; border-bottom:1px solid #1a1a1a; }
+.summary-row:last-child { border-bottom:none; }
+.summary-icon { font-size:12px; width:18px; text-align:center; }
+.summary-key { font-size:8px; color:#666; width:60px; flex-shrink:0; font-family:'Noto Sans Devanagari',sans-serif; }
+.summary-val { font-size:9px; font-weight:500; flex:1; }
+.confirm-btn { margin:0 14px; background:#e8472a; border-radius:12px; padding:12px; text-align:center; font-size:11px; font-weight:600; cursor:pointer; }
+.edit-btn { margin:8px 14px 0; background:#1a1a1a; border:1px solid #2a2a2a; border-radius:12px; padding:8px; text-align:center; font-size:10px; color:#888; cursor:pointer; font-family:'Noto Sans Devanagari',sans-serif; }
+
+/* S7: Success */
+.success-wrap { display:flex; flex-direction:column; align-items:center; padding:30px 20px 20px; }
+.success-ring { width:70px; height:70px; border-radius:50%; background:#e8472a22; border:3px solid #e8472a; display:flex; align-items:center; justify-content:center; font-size:30px; margin-bottom:14px; animation:pulse 2s infinite; }
+@keyframes pulse { 0%,100%{box-shadow:0 0 0 0 #e8472a44} 50%{box-shadow:0 0 0 12px transparent} }
+.success-title { font-size:15px; font-weight:700; margin-bottom:4px; }
+.success-sub { font-size:9px; color:#666; text-align:center; font-family:'Noto Sans Devanagari',sans-serif; margin-bottom:16px; line-height:1.6; }
+.booking-ref { background:#161616; border:1px solid #222; border-radius:10px; padding:10px 16px; margin-bottom:14px; text-align:center; width:100%; }
+.ref-label { font-size:7px; color:#555; margin-bottom:3px; }
+.ref-val { font-size:11px; font-weight:600; color:#e8472a; letter-spacing:1px; }
+.status-timeline { width:100%; }
+.tl-item { display:flex; align-items:center; gap:8px; padding:6px 0; }
+.tl-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+.tl-dot.done { background:#4caf7d; }
+.tl-dot.pending { background:#e8c84a; }
+.tl-dot.wait { background:#2a2a2a; border:1.5px solid #333; }
+.tl-line { width:1.5px; height:16px; background:#1e1e1e; margin-left:4.5px; }
+.tl-text { font-size:8px; color:#888; font-family:'Noto Sans Devanagari',sans-serif; }
+.tl-text.done { color:#4caf7d; }
+.tl-text.active { color:#e8c84a; }
+.share-row { display:flex; gap:8px; width:100%; margin-top:8px; }
+.share-btn { flex:1; padding:8px; border-radius:10px; text-align:center; font-size:9px; font-weight:600; cursor:pointer; }
+.share-wa { background:#1a2a1a; border:1px solid #2a4a2a; color:#4caf7d; }
+.share-home { background:#e8472a; color:#fff; }
+
+</style>
+
+<div style="padding:4px 0 16px;">
+<div class="page-title">Booking Flow — Step by Step</div>
+<div class="page-sub">Customer ka poora safar — PIN se booking confirm tak</div>
+
+<!-- STEP INDICATOR -->
+<div class="steps-bar" id="stepsBar">
+  <div class="step-item" onclick="goTo(0)">
+    <div class="step-circle active" id="sc0">1</div>
+    <div class="step-lbl active" id="sl0">PIN Code</div>
+  </div>
+  <div class="step-line" id="line0"></div>
+  <div class="step-item" onclick="goTo(1)">
+    <div class="step-circle" id="sc1">2</div>
+    <div class="step-lbl" id="sl1">Salon</div>
+  </div>
+  <div class="step-line" id="line1"></div>
+  <div class="step-item" onclick="goTo(2)">
+    <div class="step-circle" id="sc2">3</div>
+    <div class="step-lbl" id="sl2">Service</div>
+  </div>
+  <div class="step-line" id="line2"></div>
+  <div class="step-item" onclick="goTo(3)">
+    <div class="step-circle" id="sc3">4</div>
+    <div class="step-lbl" id="sl3">Barber+Slot</div>
+  </div>
+  <div class="step-line" id="line3"></div>
+  <div class="step-item" onclick="goTo(4)">
+    <div class="step-circle" id="sc4">5</div>
+    <div class="step-lbl" id="sl4">Details</div>
+  </div>
+  <div class="step-line" id="line4"></div>
+  <div class="step-item" onclick="goTo(5)">
+    <div class="step-circle" id="sc5">6</div>
+    <div class="step-lbl" id="sl5">Confirm</div>
+  </div>
+  <div class="step-line" id="line5"></div>
+  <div class="step-item" onclick="goTo(6)">
+    <div class="step-circle" id="sc6">7</div>
+    <div class="step-lbl" id="sl6">Done!</div>
+  </div>
+</div>
+
+<!-- PHONE -->
+<div class="phone-wrap">
+  <div class="phone">
+    <div class="status-bar"><span>9:41</span><span>▐▐ ▋</span></div>
+    <div class="screen" id="screenArea"></div>
+    <div class="bottom-nav">
+      <div class="nav-item"><div style="font-size:13px">🏠</div><div class="nav-lbl">Home</div></div>
+      <div class="nav-item"><div style="font-size:13px">🔍</div><div class="nav-lbl">Dhundo</div></div>
+      <div class="nav-item active"><div style="font-size:13px">📅</div><div class="nav-lbl">Book</div><div class="nav-dot"></div></div>
+      <div class="nav-item"><div style="font-size:13px">👤</div><div class="nav-lbl">Profile</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- DESC + NAV -->
+<div class="step-desc" id="stepDesc"></div>
+<div class="nav-row">
+  <button class="nav-btn btn-prev" id="prevBtn" onclick="prev()">← Pehle</button>
+  <button class="nav-btn btn-next" id="nextBtn" onclick="next()">Aage →</button>
+</div>
+</div>
+
+<script>
+const screens = [
+  // S1: PIN
+  `<div class="s1-top">
+    <div class="s1-greeting">Namaste! 👋</div>
+    <div class="s1-title">Apna PIN Code<br>daalo</div>
+    <div class="pin-input-box">
+      <div class="pin-icon">📮</div>
+      <div class="pin-field">
+        <div class="pin-label">6-Digit PIN Code</div>
+        <div class="pin-val">226 0<div class="pin-cursor"></div></div>
+      </div>
+    </div>
+    <div class="pin-hint">Apne ilaake ka PIN code daalo — nearby salons dikhenge</div>
+  </div>
+  <div class="keypad">
+    <div class="key">1</div><div class="key">2</div><div class="key">3</div>
+    <div class="key">4</div><div class="key">5</div><div class="key">6</div>
+    <div class="key">7</div><div class="key">8</div><div class="key">9</div>
+    <div class="key" style="font-size:9px;color:#555">*</div>
+    <div class="key zero">0</div>
+    <div class="key del">⌫</div>
+  </div>`,
+
+  // S2: Shop list
+  `<div style="padding:12px 14px 8px;">
+    <div style="font-size:10px;color:#666;margin-bottom:2px;font-family:'Noto Sans Devanagari',sans-serif;">226001 • 3 salon mile</div>
+    <div style="font-size:13px;font-weight:700;margin-bottom:10px;">Kaun si dukan?</div>
+  </div>
+  <div class="shop-card">
+    <div class="shop-img s1bg">💈<div class="rating-pill">⭐ 4.8</div></div>
+    <div class="shop-body">
+      <div class="shop-name">Sharma Hair Studio</div>
+      <div class="shop-meta"><span class="open-dot">● Khula</span><span>0.4 km</span><span>₹80 se</span><span style="color:#4caf7d;font-size:7px">Slots available</span></div>
+    </div>
+  </div>
+  <div class="shop-card" style="border-color:#e8472a;background:#e8472a05;">
+    <div class="shop-img s2bg">✂️<div class="rating-pill">⭐ 4.5</div></div>
+    <div class="shop-body">
+      <div class="shop-name">Royal Barber Shop <span style="font-size:7px;background:#e8472a22;color:#e8472a;padding:1px 5px;border-radius:4px;margin-left:4px">Selected</span></div>
+      <div class="shop-meta"><span class="open-dot">● Khula</span><span>0.9 km</span><span>₹60 se</span></div>
+    </div>
+  </div>
+  <div class="shop-card">
+    <div class="shop-img" style="background:linear-gradient(135deg,#0d1a0a,#122010);">💇<div class="rating-pill">⭐ 4.2</div></div>
+    <div class="shop-body">
+      <div class="shop-name">New Look Salon</div>
+      <div class="shop-meta"><span style="color:#e8c84a">● Busy</span><span>1.2 km</span><span>₹70 se</span></div>
+    </div>
+  </div>`,
+
+  // S3: Service
+  `<div style="padding:10px 14px 8px;">
+    <div style="font-size:10px;color:#666;margin-bottom:2px;">Royal Barber Shop</div>
+    <div style="font-size:13px;font-weight:700;margin-bottom:10px;">Kya karwana hai?</div>
+  </div>
+  <div class="cat-row">
+    <div class="cat-card sel"><div class="cat-icon">✂️</div><div class="cat-name">Baal</div><div class="cat-count">4 services</div></div>
+    <div class="cat-card"><div class="cat-icon">🪒</div><div class="cat-name">Dadhi</div><div class="cat-count">3 services</div></div>
+    <div class="cat-card"><div class="cat-icon">🎨</div><div class="cat-name">Color</div><div class="cat-count">4 services</div></div>
+    <div class="cat-card"><div class="cat-icon">✨</div><div class="cat-name">Face</div><div class="cat-count">4 services</div></div>
+  </div>
+  <div class="svc-list">
+    <div class="svc-row sel">
+      <div class="svc-check">✓</div>
+      <div class="svc-info"><div class="svc-name">Haircut</div><div class="svc-dur">30 min</div></div>
+      <div class="svc-price">₹80</div>
+    </div>
+    <div class="svc-row">
+      <div class="svc-check"></div>
+      <div class="svc-info"><div class="svc-name">Curly Style</div><div class="svc-dur">45 min</div></div>
+      <div class="svc-price">₹150</div>
+    </div>
+    <div class="svc-row">
+      <div class="svc-check"></div>
+      <div class="svc-info"><div class="svc-name">Straightening</div><div class="svc-dur">60 min</div></div>
+      <div class="svc-price">₹300</div>
+    </div>
+  </div>
+  <div class="cart-bar">
+    <div class="cart-info">1 service • 30 min</div>
+    <div class="cart-total">₹80</div>
+  </div>`,
+
+  // S4: Barber + Date + Slot
+  `<div style="padding:10px 14px 8px;">
+    <div style="font-size:10px;color:#666;margin-bottom:2px;">Haircut • ₹80 • 30 min</div>
+    <div style="font-size:13px;font-weight:700;margin-bottom:8px;">Barber, din aur samay</div>
+  </div>
+  <div class="sec-hdr"><span class="sec-title">Barber chunein</span><span class="sec-sub">🟢 = available</span></div>
+  <div class="barbers-row">
+    <div class="barber sel"><div class="b-av">👨</div><div class="b-nm">Ramesh</div><div class="b-avail">🟢 Free</div></div>
+    <div class="barber"><div class="b-av">👦</div><div class="b-nm">Sunil</div><div class="b-avail">🟢 Free</div></div>
+    <div class="barber"><div class="b-av">🧔</div><div class="b-nm">Vikram</div><div class="b-avail" style="color:#e8c84a">🟡 Busy</div></div>
+    <div class="barber"><div class="b-av">⭐</div><div class="b-nm">Koi bhi</div><div class="b-avail">🟢 Free</div></div>
+  </div>
+  <div class="sec-hdr"><span class="sec-title">Tarikh</span></div>
+  <div class="date-row">
+    <div class="dc off"><div class="dd">Aaj</div><div class="dn">22</div></div>
+    <div class="dc a"><div class="dd">Kal</div><div class="dn">23</div></div>
+    <div class="dc"><div class="dd">Man</div><div class="dn">24</div></div>
+    <div class="dc"><div class="dd">Bud</div><div class="dn">25</div></div>
+    <div class="dc"><div class="dd">Guru</div><div class="dn">26</div></div>
+  </div>
+  <div class="sec-hdr"><span class="sec-title">Samay chunein</span><span class="sec-sub">🔴 booked</span></div>
+  <div class="slots-grid">
+    <div class="slot bk">9:00</div>
+    <div class="slot bk">9:30</div>
+    <div class="slot">10:00</div>
+    <div class="slot sl">10:30 ✓</div>
+    <div class="slot">11:00</div>
+    <div class="slot bk">11:30</div>
+  </div>`,
+
+  // S5: Name + Phone OTP
+  `<div style="padding:12px 14px 10px;">
+    <div style="font-size:10px;color:#666;margin-bottom:2px;">Last step!</div>
+    <div style="font-size:13px;font-weight:700;margin-bottom:12px;">Aapki details</div>
+  </div>
+  <div class="form-section">
+    <div class="field-box">
+      <div class="field-lbl">Aapka Naam</div>
+      <div class="field-val">Rahul Verma</div>
+    </div>
+    <div class="field-box active">
+      <div class="field-lbl">Phone Number (OTP aayega)</div>
+      <div class="field-val">+91 98765<div class="field-cursor"></div></div>
+    </div>
+    <div style="background:#161616;border:1px solid #2a2a1a;border-radius:11px;padding:10px 12px;margin-bottom:8px;">
+      <div style="font-size:7px;color:#e8c84a;margin-bottom:6px;font-family:'Noto Sans Devanagari',sans-serif;">📱 OTP bheja gaya: 98765XXXXX</div>
+      <div class="otp-row">
+        <div class="otp-box">7</div>
+        <div class="otp-box">3</div>
+        <div class="otp-box">4</div>
+        <div class="otp-box" style="border-color:#2a2a2a;background:#1a1a1a;color:#333;">_</div>
+        <div class="otp-box" style="border-color:#2a2a2a;background:#1a1a1a;color:#333;">_</div>
+        <div class="otp-box" style="border-color:#2a2a2a;background:#1a1a1a;color:#333;">_</div>
+      </div>
+    </div>
+    <div style="background:#e8472a;border-radius:11px;padding:11px;text-align:center;font-size:11px;font-weight:600;cursor:pointer;">Verify karein</div>
+  </div>`,
+
+  // S6: Summary confirm
+  `<div style="padding:10px 14px 8px;">
+    <div style="font-size:13px;font-weight:700;margin-bottom:10px;">Booking confirm karein</div>
+  </div>
+  <div class="summary-card">
+    <div class="summary-header">
+      <span style="font-size:16px;">📋</span>
+      <div class="summary-hdr-title">Booking Summary</div>
+    </div>
+    <div class="summary-row"><div class="summary-icon">🏪</div><div class="summary-key">Dukan</div><div class="summary-val">Royal Barber Shop</div></div>
+    <div class="summary-row"><div class="summary-icon">✂️</div><div class="summary-key">Service</div><div class="summary-val">Haircut (30 min)</div></div>
+    <div class="summary-row"><div class="summary-icon">👨</div><div class="summary-key">Barber</div><div class="summary-val">Ramesh • Chair #1</div></div>
+    <div class="summary-row"><div class="summary-icon">📅</div><div class="summary-key">Tarikh</div><div class="summary-val">Som, 23 Mar 2026</div></div>
+    <div class="summary-row"><div class="summary-icon">⏰</div><div class="summary-key">Samay</div><div class="summary-val">10:30 AM</div></div>
+    <div class="summary-row"><div class="summary-icon">👤</div><div class="summary-key">Naam</div><div class="summary-val">Rahul Verma</div></div>
+    <div class="summary-row"><div class="summary-icon">💰</div><div class="summary-key">Price</div><div class="summary-val" style="color:#4caf7d;font-weight:700;">₹80</div></div>
+  </div>
+  <div class="confirm-btn">✅ Book Karo</div>
+  <div class="edit-btn">✏️ Kuch badalna hai?</div>`,
+
+  // S7: Success
+  `<div class="success-wrap">
+    <div class="success-ring">✅</div>
+    <div class="success-title">Booking ho gayi!</div>
+    <div class="success-sub">Dukandaar ki manzuri ka intezaar hai.<br>Confirm hone par notification aayega.</div>
+    <div class="booking-ref">
+      <div class="ref-label">Booking ID</div>
+      <div class="ref-val">#HTB-226001-4821</div>
+    </div>
+    <div class="status-timeline">
+      <div class="tl-item"><div class="tl-dot done"></div><div class="tl-text done">✓ Booking bheji gayi</div></div>
+      <div class="tl-line"></div>
+      <div class="tl-item"><div class="tl-dot pending"></div><div class="tl-text active">⏳ Dukandaar ki manzuri baki...</div></div>
+      <div class="tl-line"></div>
+      <div class="tl-item"><div class="tl-dot wait"></div><div class="tl-text">Confirm hone par notification</div></div>
+      <div class="tl-line"></div>
+      <div class="tl-item"><div class="tl-dot wait"></div><div class="tl-text">10 min pehle reminder</div></div>
+    </div>
+    <div class="share-row">
+      <div class="share-btn share-wa">📱 WhatsApp</div>
+      <div class="share-btn share-home">🏠 Home</div>
+    </div>
+  </div>`
+];
+
+const descs = [
+  { title:"Step 1 — PIN Code daalo", body:"Customer apne ilaake ka 6-digit PIN code dalta hai. Yahi se nearby salons filter hote hain.", bot:"Bot mein: BookingStates.select_pincode" },
+  { title:"Step 2 — Salon chunein", body:"Us PIN code ke sabhi registered aur active salons dikhte hain — rating, distance, aur availability ke saath.", bot:"Bot mein: BookingStates.select_shop" },
+  { title:"Step 3 — Service chunein", body:"Pehle category (Baal/Dadhi/Color/Face) toggle karo, phir specific service select karo. Cart mein multiple services bhi add ho sakti hain.", bot:"Bot mein: BookingStates.select_category + select_service" },
+  { title:"Step 4 — Barber, din aur slot", body:"Barber chunein (green = available, yellow = busy), tarikh chunein, aur khali slot lo. Red slots booked hain — click nahi hota.", bot:"Bot mein: BookingStates.select_barber + select_time" },
+  { title:"Step 5 — Naam aur phone verify", body:"Naam dalo, phone number dalo, OTP se verify karo. Ek baar verify hone ke baad agli baar OTP nahi maangega.", bot:"Bot mein: BookingStates.customer_name + customer_phone" },
+  { title:"Step 6 — Summary confirm karo", body:"Poori booking ka summary ek jagah dikhta hai — dukan, service, barber, din, samay, price. Galti ho to edit bhi kar sakte ho.", bot:"Bot mein: BookingStates.confirm → confirm_booking()" },
+  { title:"Step 7 — Booking ho gayi! 🎉", body:"Booking request dukandaar ke paas pahunch gayi. Confirm hone par push notification aayega. 10 min pehle reminder bhi aayega.", bot:"Bot mein: schedule_reminder() + schedule_kaam_shuru_notification()" }
+];
+
+let cur = 0;
+
+function render() {
+  document.getElementById('screenArea').innerHTML = screens[cur];
+  const d = descs[cur];
+  document.getElementById('stepDesc').innerHTML =
+    `<div class="step-desc-title">${d.title}</div>
+     <div class="step-desc-body">${d.body}</div>
+     <div class="bot-equiv">🤖 ${d.bot}</div>`;
+
+  // Update step indicators
+  for(let i=0;i<7;i++){
+    const sc = document.getElementById('sc'+i);
+    const sl = document.getElementById('sl'+i);
+    sc.className = 'step-circle ' + (i<cur?'done':i===cur?'active':'');
+    sl.className = 'step-lbl ' + (i<cur?'done':i===cur?'active':'');
+    sc.textContent = i<cur ? '✓' : i+1;
+    if(i<6){
+      document.getElementById('line'+i).className = 'step-line ' + (i<cur?'done':'');
+    }
+  }
+
+  document.getElementById('prevBtn').style.display = cur===0 ? 'none' : '';
+  document.getElementById('nextBtn').textContent = cur===6 ? '🔄 Phir se dekho' : 'Aage →';
+}
+
+function next() { cur = cur===6 ? 0 : cur+1; render(); }
+function prev() { if(cur>0){ cur--; render(); } }
+function goTo(i) { cur=i; render(); }
+
+render();
+</script>

@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CutBook — Customer</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --or:#F47B20;--or2:rgba(244,123,32,0.15);--or3:rgba(244,123,32,0.08);
+  --bg:#0C0C0C;--bg2:#141414;--bg3:#1C1C1C;--bg4:#242424;
+  --bd:rgba(255,255,255,0.07);--bd2:rgba(255,255,255,0.12);
+  --tx:#F2EDE8;--tx2:#A89E96;--tx3:#5A534E;
+  --gr:#3DBB78;--re:#E05555;--am:#F4B420;
+  --dv:'Noto Sans Devanagari',sans-serif;
+}
+body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:24px 16px 48px;gap:20px;}
+
+.page-lbl{font-size:11px;color:var(--tx3);letter-spacing:0.1em;text-transform:uppercase;font-weight:500;}
+
+/* Phone frame */
+.phone{width:360px;background:var(--bg);border-radius:44px;border:2px solid rgba(255,255,255,0.08);overflow:hidden;box-shadow:0 0 0 6px rgba(0,0,0,0.5),0 0 0 7px rgba(255,255,255,0.04),0 40px 100px rgba(244,123,32,0.15),0 0 60px rgba(244,123,32,0.06);position:relative;}
+.notch{width:90px;height:24px;background:var(--bg);border:1.5px solid rgba(255,255,255,0.05);border-top:none;border-radius:0 0 16px 16px;margin:0 auto;position:relative;z-index:10;}
+.status-bar{display:flex;justify-content:space-between;align-items:center;padding:6px 20px 4px;font-size:10px;font-weight:600;color:var(--tx2);}
+.screen-wrap{height:700px;overflow:hidden;position:relative;}
+.screen{height:100%;overflow-y:auto;display:none;scrollbar-width:none;}
+.screen::-webkit-scrollbar{display:none;}
+.screen.active{display:block;}
+
+/* Bottom nav */
+.bot-nav{display:flex;background:rgba(18,18,18,0.98);border-top:1px solid var(--bd);padding:10px 0 16px;}
+.nav-i{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;}
+.nav-i svg{transition:color .2s;}
+.nav-i span{font-size:8px;color:var(--tx3);font-family:var(--dv);}
+.nav-i.on span{color:var(--or);}
+.nav-dot{width:4px;height:4px;background:var(--or);border-radius:50%;margin-top:1px;}
+.nav-badge{position:absolute;top:-4px;right:-6px;width:16px;height:16px;background:var(--re);border:2px solid var(--bg);border-radius:50%;font-size:8px;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:center;}
+
+/* Common UI */
+.sec-head{display:flex;justify-content:space-between;align-items:center;padding:0 16px;margin-bottom:10px;}
+.sec-title{font-size:12px;font-weight:600;}
+.sec-all{font-size:10px;color:var(--or);cursor:pointer;}
+.card{background:var(--bg2);border:1px solid var(--bd);border-radius:14px;}
+.pill{display:inline-flex;align-items:center;padding:4px 10px;border-radius:20px;font-size:10px;font-weight:600;cursor:pointer;}
+.pill-or{background:var(--or2);color:var(--or);border:1px solid rgba(244,123,32,0.3);}
+.pill-gr{background:rgba(61,187,120,0.12);color:var(--gr);border:1px solid rgba(61,187,120,0.25);}
+.pill-re{background:rgba(224,85,85,0.1);color:var(--re);border:1px solid rgba(224,85,85,0.2);}
+.pill-am{background:rgba(244,180,32,0.12);color:var(--am);border:1px solid rgba(244,180,32,0.25);}
+.pill-gy{background:var(--bg3);color:var(--tx3);border:1px solid var(--bd);}
+
+/* Tabs */
+.tabs{display:flex;gap:6px;padding:0 16px;margin-bottom:14px;overflow-x:auto;scrollbar-width:none;}
+.tab{padding:6px 14px;border-radius:20px;font-size:11px;font-weight:500;cursor:pointer;border:1px solid var(--bd);color:var(--tx3);white-space:nowrap;transition:all .2s;}
+.tab.on{background:var(--or);color:#fff;border-color:var(--or);}
+
+/* Toast */
+.toast{position:fixed;bottom:32px;left:50%;transform:translateX(-50%);background:var(--bg3);border:1px solid var(--bd2);color:var(--tx);font-size:12px;font-weight:500;padding:10px 20px;border-radius:20px;z-index:999;opacity:0;transition:opacity .3s;white-space:nowrap;box-shadow:0 8px 30px rgba(0,0,0,0.5);}
+.toast.show{opacity:1;}
+
+/* Modal */
+.modal{display:none;position:absolute;inset:0;background:rgba(0,0,0,0.7);z-index:100;align-items:flex-end;backdrop-filter:blur(4px);}
+.modal.open{display:flex;}
+.modal-sheet{background:var(--bg2);border:1px solid var(--bd2);border-radius:24px 24px 0 0;padding:20px 18px 32px;width:100%;}
+.modal-handle{width:36px;height:4px;background:var(--bd2);border-radius:2px;margin:0 auto 16px;}
+
+/* ─── HOME SCREEN ─── */
+.home-header{padding:8px 16px 12px;display:flex;justify-content:space-between;align-items:center;}
+.loc-wrap{display:flex;align-items:center;gap:6px;}
+.loc-icon{width:20px;height:20px;background:var(--or2);border-radius:7px;display:flex;align-items:center;justify-content:center;}
+.loc-label{font-size:9px;color:var(--tx3);font-family:var(--dv);}
+.loc-name{font-size:12px;font-weight:600;}
+.notif-btn{width:32px;height:32px;background:var(--bg3);border:1px solid var(--bd);border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;}
+.search-bar{margin:0 16px 14px;background:var(--bg3);border:1px solid var(--bd2);border-radius:14px;padding:10px 14px;display:flex;align-items:center;gap:8px;font-size:11px;color:var(--tx3);}
+
+/* Hero banner */
+.hero{margin:0 16px 16px;border-radius:18px;height:110px;position:relative;overflow:hidden;background:var(--bg2);border:1px solid rgba(244,123,32,0.2);}
+.hero-bg{position:absolute;inset:0;background:linear-gradient(135deg,#1A0A03 0%,#2C1206 40%,#1A0A03 100%);}
+.hero-lines{position:absolute;right:0;top:0;bottom:0;width:100px;opacity:0.06;background:repeating-linear-gradient(45deg,var(--or) 0,var(--or) 1px,transparent 1px,transparent 10px);}
+.hero-content{position:relative;z-index:2;padding:16px 18px;}
+.hero-badge{background:var(--or);color:#fff;font-size:8px;font-weight:600;padding:2px 8px;border-radius:4px;display:inline-block;margin-bottom:6px;font-family:var(--dv);}
+.hero-title{font-size:18px;font-weight:700;line-height:1.15;}
+.hero-title em{color:var(--or);font-style:normal;}
+.hero-sub{font-size:9px;color:var(--tx3);margin-top:3px;font-family:var(--dv);}
+.hero-cta{position:absolute;bottom:14px;right:16px;background:var(--or);color:#fff;font-size:9px;font-weight:600;padding:7px 13px;border-radius:9px;cursor:pointer;font-family:var(--dv);}
+
+/* Service chips */
+.svc-row{display:flex;gap:10px;padding:0 16px;margin-bottom:16px;overflow-x:auto;scrollbar-width:none;}
+.svc-chip{display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;flex-shrink:0;}
+.svc-icon{width:44px;height:44px;background:var(--bg3);border:1px solid var(--bd);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:20px;transition:all .2s;}
+.svc-chip.on .svc-icon{background:var(--or2);border-color:rgba(244,123,32,0.35);}
+.svc-chip span{font-size:9px;color:var(--tx2);font-family:var(--dv);}
+.svc-chip.on span{color:var(--or);}
+
+/* Salon card */
+.salon-card{margin:0 16px 10px;background:var(--bg2);border:1px solid var(--bd);border-radius:14px;overflow:hidden;cursor:pointer;transition:border-color .2s;}
+.salon-card:hover{border-color:rgba(244,123,32,0.3);}
+.salon-img{height:70px;background:linear-gradient(135deg,#181010,#281810);display:flex;align-items:center;justify-content:center;font-size:26px;position:relative;}
+.salon-img-2{background:linear-gradient(135deg,#101818,#102818);}
+.salon-open{position:absolute;top:8px;left:10px;background:rgba(61,187,120,0.2);border:1px solid rgba(61,187,120,0.3);border-radius:5px;padding:2px 7px;font-size:8px;color:var(--gr);font-weight:500;font-family:var(--dv);}
+.salon-rating{position:absolute;bottom:8px;right:10px;background:rgba(0,0,0,0.7);border-radius:6px;padding:2px 7px;font-size:9px;font-weight:600;display:flex;align-items:center;gap:3px;}
+.salon-body{padding:10px 12px;}
+.salon-name{font-size:12px;font-weight:600;margin-bottom:3px;}
+.salon-meta{display:flex;gap:10px;font-size:9px;color:var(--tx3);}
+
+/* ─── BOOKING DETAIL SCREEN ─── */
+.detail-hero{height:120px;background:linear-gradient(160deg,#1A0E06 0%,#301808 60%,#1A0E06 100%);display:flex;align-items:center;justify-content:center;font-size:40px;position:relative;overflow:hidden;}
+.detail-overlay{position:absolute;inset:0;background:linear-gradient(to bottom,transparent 40%,rgba(12,12,12,0.95) 100%);}
+.back-btn{position:absolute;top:12px;left:14px;z-index:5;width:28px;height:28px;background:rgba(0,0,0,0.55);border:1px solid rgba(255,255,255,0.1);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.fav-btn{position:absolute;top:12px;right:14px;z-index:5;width:28px;height:28px;background:rgba(0,0,0,0.55);border:1px solid rgba(255,255,255,0.1);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.detail-info{padding:14px 16px 10px;}
+.detail-name{font-size:17px;font-weight:700;margin-bottom:3px;}
+.detail-addr{font-size:10px;color:var(--tx3);font-family:var(--dv);margin-bottom:10px;}
+.detail-stats{display:flex;gap:14px;margin-bottom:12px;}
+.dstat{font-size:10px;color:var(--tx2);display:flex;align-items:center;gap:4px;}
+.dstat strong{color:var(--tx);font-weight:600;}
+.detail-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
+
+/* Barber selector */
+.barber-row{display:flex;gap:10px;padding:0 16px;overflow-x:auto;scrollbar-width:none;margin-bottom:14px;}
+.barber-item{display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;flex-shrink:0;}
+.barber-av{width:42px;height:42px;border-radius:14px;background:var(--bg3);border:2px solid var(--bd);display:flex;align-items:center;justify-content:center;font-size:18px;transition:all .2s;}
+.barber-item.on .barber-av{border-color:var(--or);background:var(--or2);}
+.barber-item span{font-size:9px;color:var(--tx2);}
+.barber-item.on span{color:var(--or);}
+
+/* Date slots */
+.dates-row{display:flex;gap:7px;padding:0 16px;overflow-x:auto;scrollbar-width:none;margin-bottom:14px;}
+.date-chip{display:flex;flex-direction:column;align-items:center;padding:7px 10px;border-radius:12px;background:var(--bg3);border:1px solid var(--bd);cursor:pointer;min-width:36px;transition:all .2s;}
+.date-chip.on{background:var(--or);border-color:var(--or);}
+.date-day{font-size:8px;color:var(--tx3);}
+.date-chip.on .date-day{color:rgba(255,255,255,0.8);}
+.date-num{font-size:14px;font-weight:600;}
+.date-chip.on .date-num{color:#fff;}
+
+/* Time slots */
+.slots-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:0 16px;margin-bottom:16px;}
+.slot{padding:7px;border-radius:10px;background:var(--bg3);border:1px solid var(--bd);text-align:center;font-size:10px;cursor:pointer;transition:all .2s;}
+.slot.booked{background:var(--bg2);border-color:transparent;color:var(--tx3);text-decoration:line-through;cursor:default;}
+.slot.on{background:var(--or2);border-color:var(--or);color:var(--or);font-weight:600;}
+.slot:not(.booked):not(.on):hover{border-color:var(--bd2);}
+
+/* Book CTA */
+.book-cta{margin:0 16px 16px;background:var(--or);border-radius:14px;padding:14px;text-align:center;font-size:13px;font-weight:600;cursor:pointer;letter-spacing:0.02em;}
+.book-cta:hover{background:#d96b15;}
+
+/* ─── MY BOOKINGS ─── */
+.booking-card{margin:0 16px 10px;background:var(--bg2);border:1px solid var(--bd);border-radius:14px;padding:12px 14px;transition:border-color .2s;}
+.bk-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;}
+.bk-shop{font-size:12px;font-weight:600;}
+.bk-svc{font-size:10px;color:var(--tx3);font-family:var(--dv);margin-bottom:2px;}
+.bk-time{font-size:10px;color:var(--tx3);}
+.bk-note{font-size:10px;margin-top:8px;padding:6px 10px;border-radius:8px;font-family:var(--dv);}
+.bk-note.pending{background:rgba(244,180,32,0.08);color:var(--am);}
+.bk-note.confirmed{background:rgba(61,187,120,0.08);color:var(--gr);}
+.bk-note.cancelled{background:rgba(224,85,85,0.08);color:var(--re);}
+.bk-note.completed{background:var(--or3);color:var(--or);}
+.bk-actions{display:flex;gap:8px;margin-top:10px;}
+.bk-btn{flex:1;padding:7px;border-radius:9px;font-size:10px;font-weight:600;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;text-align:center;}
+.bk-btn-cancel{background:rgba(224,85,85,0.1);color:var(--re);border:1px solid rgba(224,85,85,0.2);}
+.bk-btn-review{background:var(--or2);color:var(--or);border:1px solid rgba(244,123,32,0.3);}
+.bk-btn-rebook{background:var(--bg3);color:var(--tx2);border:1px solid var(--bd2);}
+
+/* ─── PROFILE ─── */
+.profile-header{padding:20px 16px 14px;display:flex;align-items:center;gap:14px;border-bottom:1px solid var(--bd);}
+.profile-av{width:56px;height:56px;background:var(--or);border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+.profile-name{font-size:16px;font-weight:700;}
+.profile-sub{font-size:10px;color:var(--tx3);font-family:var(--dv);}
+.profile-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--bd);cursor:pointer;transition:background .2s;}
+.profile-row:last-child{border-bottom:none;}
+.profile-row:hover{background:var(--bg3);}
+.pr-icon{width:32px;height:32px;border-radius:10px;background:var(--bg3);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.pr-label{font-size:12px;font-weight:500;flex:1;}
+.pr-arrow{font-size:14px;color:var(--tx3);}
+.pr-val{font-size:11px;color:var(--tx3);font-family:var(--dv);}
+
+/* ─── SEARCH SCREEN ─── */
+.search-full{margin:10px 16px 14px;background:var(--bg3);border:1.5px solid rgba(244,123,32,0.3);border-radius:14px;padding:11px 14px;display:flex;align-items:center;gap:8px;}
+.search-input{background:transparent;border:none;outline:none;color:var(--tx);font-size:12px;flex:1;font-family:'DM Sans',sans-serif;}
+.search-input::placeholder{color:var(--tx3);}
+</style>
+</head>
+<body>
+
+<div class="page-lbl">Customer App · CutBook</div>
+
+<div class="phone">
+  <div class="notch"></div>
+  <div class="status-bar">
+    <span>9:41</span>
+    <div style="display:flex;align-items:center;gap:5px;">
+      <svg width="14" height="10" viewBox="0 0 14 10" fill="#A89E96"><path d="M7 1.5C9.4 1.5 11.5 2.7 12.8 4.5L14 3.2C12.3 1.2 9.8 0 7 0S1.7 1.2 0 3.2L1.2 4.5C2.5 2.7 4.6 1.5 7 1.5Z"/><path d="M7 4C8.6 4 10 4.7 11 5.8L12.2 4.5C10.9 3.1 9 2.3 7 2.3S3.1 3.1 1.8 4.5L3 5.8C4 4.7 5.4 4 7 4Z"/><circle cx="7" cy="8" r="1.5"/></svg>
+      <svg width="22" height="10" viewBox="0 0 22 10" fill="none"><rect x="0" y="1" width="18" height="8" rx="2" stroke="#A89E96" stroke-width="1"/><rect x="19" y="3" width="2" height="4" rx="1" fill="#A89E96"/><rect x="1.5" y="2.5" width="13" height="5" rx="1" fill="#F47B20"/></svg>
+    </div>
+  </div>
+
+  <div class="screen-wrap">
+
+    <!-- ══ HOME ══ -->
+    <div id="sc-home" class="screen active">
+      <div class="home-header">
+        <div class="loc-wrap">
+          <div class="loc-icon"><svg width="10" height="12" viewBox="0 0 10 12" fill="none"><path d="M5 0C2.8 0 1 1.8 1 4c0 3 4 8 4 8s4-5 4-8c0-2.2-1.8-4-4-4zm0 5.5C4.2 5.5 3.5 4.8 3.5 4S4.2 2.5 5 2.5 6.5 3.2 6.5 4 5.8 5.5 5 5.5z" fill="#F47B20"/></svg></div>
+          <div>
+            <div class="loc-label">Aapki location</div>
+            <div class="loc-name">Hazratganj, Lko ▾</div>
+          </div>
+        </div>
+        <div class="notif-btn" onclick="toast('🔔 2 nayi notifications hain')">
+          <svg width="14" height="15" viewBox="0 0 14 15" fill="none"><path d="M7 0C7 0 4.5 2.2 4.5 5.5V8.5L2.5 11h9L9.5 8.5V5.5C9.5 2.2 7 0 7 0Z" stroke="#A89E96" stroke-width="1.2" fill="none"/><path d="M5.5 11.5C5.5 12.3 6.2 13 7 13S8.5 12.3 8.5 11.5" stroke="#A89E96" stroke-width="1.2" fill="none"/></svg>
+          <div style="position:absolute;top:6px;right:6px;width:7px;height:7px;background:var(--re);border:1.5px solid var(--bg);border-radius:50%;"></div>
+        </div>
+      </div>
+
+      <div class="search-bar" onclick="goScreen('search')">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="5" cy="5" r="4" stroke="#5A534E" stroke-width="1.3"/><path d="M8.5 8.5L11 11" stroke="#5A534E" stroke-width="1.3" stroke-linecap="round"/></svg>
+        <span style="font-family:var(--dv);">Salon ya barber dhundho...</span>
+      </div>
+
+      <div class="hero">
+        <div class="hero-bg"></div>
+        <div class="hero-lines"></div>
+        <div class="hero-content">
+          <div class="hero-badge">🔥 Aaj ka offer</div>
+          <div class="hero-title">Pehli booking pe<br><em>₹50 off</em></div>
+          <div class="hero-sub">Code: FIRST50 · Sirf aaj</div>
+        </div>
+        <div class="hero-cta" onclick="toast('🎉 Code FIRST50 copy ho gaya!')">Book karo</div>
+      </div>
+
+      <div class="sec-head"><div class="sec-title">Services</div><div class="sec-all">Sab dekho</div></div>
+      <div class="svc-row">
+        <div class="svc-chip on" onclick="toggleSvc(this)"><div class="svc-icon">✂️</div><span>Haircut</span></div>
+        <div class="svc-chip" onclick="toggleSvc(this)"><div class="svc-icon">🪒</div><span>Shave</span></div>
+        <div class="svc-chip" onclick="toggleSvc(this)"><div class="svc-icon">💇</div><span>Styling</span></div>
+        <div class="svc-chip" onclick="toggleSvc(this)"><div class="svc-icon">💆</div><span>Facial</span></div>
+        <div class="svc-chip" onclick="toggleSvc(this)"><div class="svc-icon">🎨</div><span>Colour</span></div>
+        <div class="svc-chip" onclick="toast('Aur services...')"><div class="svc-icon">➕</div><span>Aur</span></div>
+      </div>
+
+      <div class="sec-head"><div class="sec-title">Paas ke Salons</div><div class="sec-all">Map dekho</div></div>
+      <div class="salon-card" onclick="goScreen('detail')">
+        <div class="salon-img">✂️<div class="salon-open">Open</div><div class="salon-rating">⭐ 4.8 <span style="color:var(--tx3);">(92)</span></div></div>
+        <div class="salon-body">
+          <div class="salon-name">Raj Hair Studio</div>
+          <div class="salon-meta"><span>📍 0.4 km</span><span>⏱ ~15 min wait</span><span style="color:var(--or);font-weight:600;">₹80 se</span></div>
+        </div>
+      </div>
+      <div class="salon-card" onclick="goScreen('detail')">
+        <div class="salon-img salon-img-2">💈<div class="salon-open">Open</div><div class="salon-rating">⭐ 4.6 <span style="color:var(--tx3);">(61)</span></div></div>
+        <div class="salon-body">
+          <div class="salon-name">Modern Cut – Aliganj</div>
+          <div class="salon-meta"><span>📍 1.1 km</span><span>⏱ ~5 min wait</span><span style="color:var(--or);font-weight:600;">₹60 se</span></div>
+        </div>
+      </div>
+      <div class="salon-card" onclick="goScreen('detail')">
+        <div class="salon-img" style="background:linear-gradient(135deg,#181818,#282818);">💇<div class="salon-open">Open</div><div class="salon-rating">⭐ 4.9 <span style="color:var(--tx3);">(144)</span></div></div>
+        <div class="salon-body">
+          <div class="salon-name">Star Salon – Gomti Nagar</div>
+          <div class="salon-meta"><span>📍 2.0 km</span><span>⏱ ~30 min wait</span><span style="color:var(--or);font-weight:600;">₹120 se</span></div>
+        </div>
+      </div>
+      <div style="height:20px;"></div>
+    </div>
+
+    <!-- ══ SEARCH ══ -->
+    <div id="sc-search" class="screen">
+      <div class="search-full">
+        <svg width="14" height="14" viewBox="0 0 12 12" fill="none"><circle cx="5" cy="5" r="4" stroke="#F47B20" stroke-width="1.3"/><path d="M8.5 8.5L11 11" stroke="#F47B20" stroke-width="1.3" stroke-linecap="round"/></svg>
+        <input class="search-input" placeholder="Salon ya barber dhundho..." autofocus oninput="filterSearch(this.value)">
+      </div>
+      <div id="search-results" class="sec-title" style="padding:0 16px;margin-bottom:10px;font-size:11px;color:var(--tx3);">Paas ke sabhi salons</div>
+      <div id="search-list">
+        <div class="salon-card" onclick="goScreen('detail')"><div class="salon-img">✂️<div class="salon-open">Open</div><div class="salon-rating">⭐ 4.8</div></div><div class="salon-body"><div class="salon-name">Raj Hair Studio</div><div class="salon-meta"><span>📍 0.4 km</span><span style="color:var(--or);">₹80 se</span></div></div></div>
+        <div class="salon-card" onclick="goScreen('detail')"><div class="salon-img salon-img-2">💈<div class="salon-open">Open</div><div class="salon-rating">⭐ 4.6</div></div><div class="salon-body"><div class="salon-name">Modern Cut</div><div class="salon-meta"><span>📍 1.1 km</span><span style="color:var(--or);">₹60 se</span></div></div></div>
+        <div class="salon-card" onclick="goScreen('detail')"><div class="salon-img">💇<div class="salon-open">Open</div><div class="salon-rating">⭐ 4.9</div></div><div class="salon-body"><div class="salon-name">Star Salon</div><div class="salon-meta"><span>📍 2.0 km</span><span style="color:var(--or);">₹120 se</span></div></div></div>
+        <div class="salon-card" onclick="goScreen('detail')"><div class="salon-img" style="background:linear-gradient(135deg,#101020,#101828);">👨‍🦲<div class="salon-rating">⭐ 4.5</div></div><div class="salon-body"><div class="salon-name">Classic Barber</div><div class="salon-meta"><span>📍 3.2 km</span><span style="color:var(--or);">₹70 se</span></div></div></div>
+      </div>
+      <div style="height:20px;"></div>
+    </div>
+
+    <!-- ══ SALON DETAIL / BOOKING ══ -->
+    <div id="sc-detail" class="screen">
+      <div style="position:relative;">
+        <div class="detail-hero">✂️ 💈<div class="detail-overlay"></div>
+          <div class="back-btn" onclick="goScreen('home')"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M7 1L3 5L7 9" stroke="#F2EDE8" stroke-width="1.4" stroke-linecap="round"/></svg></div>
+          <div class="fav-btn" onclick="toast('❤️ Favourites mein add ho gaya!')"><svg width="12" height="11" viewBox="0 0 12 11" fill="none"><path d="M6 10L1.5 5.5C0.7 4.7.7 3.5 1.5 2.7 2.3 1.9 3.5 1.9 4.3 2.7L6 4.4l1.7-1.7C8.5 1.9 9.7 1.9 10.5 2.7 11.3 3.5 11.3 4.7 10.5 5.5L6 10Z" stroke="#F2EDE8" stroke-width="1.2" fill="none"/></svg></div>
+        </div>
+      </div>
+      <div class="detail-info">
+        <div class="detail-name">Raj Hair Studio</div>
+        <div class="detail-addr">📍 12, Sapru Marg, Hazratganj, Lucknow</div>
+        <div class="detail-stats">
+          <div class="dstat">⭐ <strong>4.8</strong> (92)</div>
+          <div class="dstat">🟢 <strong style="color:var(--gr)">Open</strong> 9am–9pm</div>
+          <div class="dstat">⏱ <strong>~15 min</strong> wait</div>
+        </div>
+        <div class="detail-tags">
+          <span class="pill pill-or">✂️ Haircut</span>
+          <span class="pill pill-or">🪒 Shave</span>
+          <span class="pill pill-gy">💇 Styling</span>
+          <span class="pill pill-gy">🎨 Colour</span>
+        </div>
+      </div>
+
+      <div class="sec-head"><div class="sec-title">Barber chunao</div></div>
+      <div class="barber-row">
+        <div class="barber-item on" onclick="pickBarber(this)"><div class="barber-av">👨‍🦱</div><span>Ramu bhai</span></div>
+        <div class="barber-item" onclick="pickBarber(this)"><div class="barber-av">👨</div><span>Sonu</span></div>
+        <div class="barber-item" onclick="pickBarber(this)"><div class="barber-av">👴</div><span>Ustad ji</span></div>
+        <div class="barber-item" onclick="pickBarber(this)"><div class="barber-av" style="font-size:11px;color:var(--tx3);">Any</div><span>Koi bhi</span></div>
+      </div>
+
+      <div class="sec-head"><div class="sec-title">Date chunao</div></div>
+      <div class="dates-row">
+        <div class="date-chip" onclick="pickDate(this)"><div class="date-day">Aaj</div><div class="date-num">25</div></div>
+        <div class="date-chip on" onclick="pickDate(this)"><div class="date-day">Kal</div><div class="date-num">26</div></div>
+        <div class="date-chip" onclick="pickDate(this)"><div class="date-day">Bud</div><div class="date-num">27</div></div>
+        <div class="date-chip" onclick="pickDate(this)"><div class="date-day">Gu</div><div class="date-num">28</div></div>
+        <div class="date-chip" onclick="pickDate(this)"><div class="date-day">Shu</div><div class="date-num">29</div></div>
+        <div class="date-chip" onclick="pickDate(this)"><div class="date-day">Sha</div><div class="date-num">30</div></div>
+      </div>
+
+      <div class="sec-head"><div class="sec-title">Time slot chunao</div></div>
+      <div class="slots-grid">
+        <div class="slot booked">9:00 AM</div>
+        <div class="slot booked">9:30 AM</div>
+        <div class="slot" onclick="pickSlot(this)">10:00 AM</div>
+        <div class="slot on" onclick="pickSlot(this)">10:30 AM</div>
+        <div class="slot" onclick="pickSlot(this)">11:00 AM</div>
+        <div class="slot booked">11:30 AM</div>
+        <div class="slot" onclick="pickSlot(this)">12:00 PM</div>
+        <div class="slot" onclick="pickSlot(this)">12:30 PM</div>
+        <div class="slot" onclick="pickSlot(this)">1:00 PM</div>
+      </div>
+
+      <div class="book-cta" onclick="openBookModal()">Confirm Booking — ₹80</div>
+      <div style="height:20px;"></div>
+    </div>
+
+    <!-- ══ MY BOOKINGS ══ -->
+    <div id="sc-bookings" class="screen">
+      <div style="padding:14px 16px 10px;font-size:16px;font-weight:700;">Meri Bookings</div>
+      <div class="tabs">
+        <div class="tab on" onclick="filterBk(this,'all')">Sab</div>
+        <div class="tab" onclick="filterBk(this,'pending')">Pending</div>
+        <div class="tab" onclick="filterBk(this,'confirmed')">Confirmed</div>
+        <div class="tab" onclick="filterBk(this,'completed')">Completed</div>
+        <div class="tab" onclick="filterBk(this,'cancelled')">Cancelled</div>
+      </div>
+      <div id="bk-list"></div>
+      <div style="height:20px;"></div>
+    </div>
+
+    <!-- ══ PROFILE ══ -->
+    <div id="sc-profile" class="screen">
+      <div class="profile-header">
+        <div class="profile-av">RK</div>
+        <div>
+          <div class="profile-name">Rahul Kumar</div>
+          <div class="profile-sub">+91 98765 43210 · Hazratganj, Lko</div>
+          <div style="margin-top:6px;display:flex;gap:8px;">
+            <span class="pill pill-or" style="font-size:9px;">12 bookings</span>
+            <span class="pill pill-gr" style="font-size:9px;">4.9★ rating</span>
+          </div>
+        </div>
+      </div>
+      <div class="card" style="margin:14px 16px;border-radius:14px;">
+        <div class="profile-row" onclick="toast('📋 Booking history khul gayi')"><div class="pr-icon">📅</div><div class="pr-label">Booking History</div><div class="pr-arrow">›</div></div>
+        <div class="profile-row" onclick="toast('❤️ Favourite salons')"><div class="pr-icon">❤️</div><div class="pr-label">Favourite Salons</div><div class="pr-val">3 saved</div><div class="pr-arrow">›</div></div>
+        <div class="profile-row" onclick="toast('💳 Payment methods')"><div class="pr-icon">💳</div><div class="pr-label">Payment Methods</div><div class="pr-val">UPI added</div><div class="pr-arrow">›</div></div>
+        <div class="profile-row" onclick="toast('🎁 Refer karo ₹50 pao!')"><div class="pr-icon">🎁</div><div class="pr-label">Refer &amp; Earn</div><div class="pr-val" style="color:var(--or);">₹50/referral</div><div class="pr-arrow">›</div></div>
+        <div class="profile-row" onclick="toast('🔔 Notifications setting')"><div class="pr-icon">🔔</div><div class="pr-label">Notifications</div><div class="pr-arrow">›</div></div>
+        <div class="profile-row" onclick="toast('🔒 Privacy &amp; Security')"><div class="pr-icon">🔒</div><div class="pr-label">Privacy &amp; Security</div><div class="pr-arrow">›</div></div>
+        <div class="profile-row" onclick="window.location.href='../index.html'"><div class="pr-icon">🚪</div><div class="pr-label" style="color:var(--re);">Log Out</div><div class="pr-arrow">›</div></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Bottom Nav -->
+  <div class="bot-nav">
+    <div class="nav-i on" id="ni-0" onclick="goScreen('home')">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 10L10 3L17 10V17H13V13H7V17H3V10Z" stroke="#F47B20" stroke-width="1.5" fill="none" stroke-linejoin="round"/></svg>
+      <span style="color:var(--or)">Home</span><div class="nav-dot"></div>
+    </div>
+    <div class="nav-i" id="ni-1" onclick="goScreen('search')">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="9" cy="9" r="6" stroke="#5A534E" stroke-width="1.5"/><path d="M14 14L18 18" stroke="#5A534E" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <span>Khojo</span>
+    </div>
+    <div class="nav-i" id="ni-2" onclick="goScreen('bookings')" style="position:relative;">
+      <div style="position:relative;">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="3" y="4" width="14" height="13" rx="3" stroke="#5A534E" stroke-width="1.5"/><path d="M7 3V5M13 3V5M3 9h14" stroke="#5A534E" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <div class="nav-badge" id="bk-badge">2</div>
+      </div>
+      <span>Bookings</span>
+    </div>
+    <div class="nav-i" id="ni-3" onclick="goScreen('profile')">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="8" r="4" stroke="#5A534E" stroke-width="1.5"/><path d="M3 18c0-4 3.1-7 7-7s7 3 7 7" stroke="#5A534E" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <span>Profile</span>
+    </div>
+  </div>
+
+  <!-- Book Confirmation Modal -->
+  <div class="modal" id="book-modal">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div style="text-align:center;margin-bottom:16px;">
+        <div style="width:48px;height:48px;background:var(--or2);border:1px solid rgba(244,123,32,0.3);border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;font-size:20px;">✂️</div>
+        <div style="font-size:15px;font-weight:700;margin-bottom:3px;">Booking confirm karein?</div>
+        <div style="font-size:11px;color:var(--tx3);font-family:var(--dv);">Raj Hair Studio · Ramu bhai · 26 Mar · 10:30 AM</div>
+      </div>
+      <div style="background:var(--bg3);border-radius:12px;padding:12px 14px;margin-bottom:14px;">
+        <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px;"><span style="color:var(--tx3);">✂️ Haircut</span><span style="font-weight:600;">₹80</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px;"><span style="color:var(--tx3);">Discount (FIRST50)</span><span style="color:var(--gr);font-weight:600;">-₹50</span></div>
+        <div style="height:1px;background:var(--bd);margin:8px 0;"></div>
+        <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700;"><span>Total</span><span style="color:var(--or);">₹30</span></div>
+      </div>
+      <div style="display:flex;gap:10px;">
+        <button onclick="closeBookModal()" style="flex:1;background:var(--bg3);border:1px solid var(--bd2);color:var(--tx2);padding:12px;border-radius:12px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">Wapas jao</button>
+        <button onclick="confirmBook()" style="flex:2;background:var(--or);border:none;color:#fff;padding:12px;border-radius:12px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">Haan, Book karo!</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+const allBookings = [
+  {shop:'Raj Hair Studio',svc:'✂️ Haircut',time:'Kal · 10:30 AM',status:'pending'},
+  {shop:'Raj Hair Studio',svc:'✂️ Haircut + Shave',time:'Aaj · 11:30 AM',status:'confirmed'},
+  {shop:'Star Salon',svc:'💇 Hair Styling',time:'22 Mar · 12:00 PM',status:'completed'},
+  {shop:'Modern Cut',svc:'🪒 Shaving',time:'15 Mar · 9:30 AM',status:'cancelled'},
+];
+const noteMap = {
+  pending:{cls:'pending',txt:'⏳ Shopkeeper ka jawab aa raha hai...'},
+  confirmed:{cls:'confirmed',txt:'✅ Booking confirmed! Time pe aa jaana.'},
+  completed:{cls:'completed',txt:'🏁 Service ho gayi. Review do!'},
+  cancelled:{cls:'cancelled',txt:'❌ Cancel ho gayi. Naya slot lo.'},
+};
+const pillMap = {
+  pending:'pill-am',confirmed:'pill-gr',completed:'pill-or',cancelled:'pill-re',
+};
+const pillLbl = {
+  pending:'⏳ Pending',confirmed:'✅ Confirmed',completed:'🏁 Completed',cancelled:'❌ Cancelled',
+};
+
+function renderBookings(filter){
+  const list = document.getElementById('bk-list');
+  const data = filter==='all' ? allBookings : allBookings.filter(b=>b.status===filter);
+  if(!data.length){list.innerHTML='<div style="text-align:center;padding:40px 16px;color:var(--tx3);font-family:var(--dv);">Koi booking nahi</div>';return;}
+  list.innerHTML = data.map((b,i)=>{
+    const n = noteMap[b.status];
+    const actions = b.status==='pending'
+      ? `<div class="bk-actions"><button class="bk-btn bk-btn-cancel" onclick="cancelBk(${i})">✕ Cancel</button><button class="bk-btn" style="background:var(--bg3);color:var(--tx2);border:1px solid var(--bd2);" onclick="toast('💬 Chat khul gaya')">💬 Chat</button></div>`
+      : b.status==='completed'
+      ? `<div class="bk-actions"><button class="bk-btn bk-btn-review" onclick="toast('⭐ Review page khul gaya')">⭐ Review do</button><button class="bk-btn bk-btn-rebook" onclick="goScreen('detail')">↻ Rebook</button></div>`
+      : b.status==='cancelled'
+      ? `<div class="bk-actions"><button class="bk-btn bk-btn-rebook" onclick="goScreen('detail')">↻ Naya book karo</button></div>`
+      : '';
+    return `<div class="booking-card">
+      <div class="bk-top">
+        <div><div class="bk-shop">${b.shop}</div><div class="bk-svc">${b.svc}</div><div class="bk-time">⏰ ${b.time}</div></div>
+        <span class="pill ${pillMap[b.status]}" style="font-size:9px;">${pillLbl[b.status]}</span>
+      </div>
+      <div class="bk-note ${n.cls}">${n.txt}</div>
+      ${actions}
+    </div>`;
+  }).join('');
+}
+
+function cancelBk(i){
+  allBookings[i].status='cancelled';
+  renderBookings('all');
+  toast('❌ Booking cancel ho gayi');
+}
+
+function filterBk(el,filter){
+  document.querySelectorAll('#sc-bookings .tab').forEach(t=>t.classList.remove('on'));
+  el.classList.add('on');
+  renderBookings(filter);
+}
+
+const navMap = {home:0,search:1,bookings:2,profile:3};
+const screenIds = ['home','search','detail','bookings','profile'];
+
+function goScreen(id){
+  screenIds.forEach(s=>document.getElementById('sc-'+s).classList.remove('active'));
+  document.getElementById('sc-'+id).classList.add('active');
+  for(let i=0;i<4;i++){
+    const ni = document.getElementById('ni-'+i);
+    if(!ni) continue;
+    ni.classList.remove('on');
+    ni.querySelectorAll('span').forEach(s=>s.style.color='');
+    ni.querySelectorAll('.nav-dot').forEach(d=>d.remove());
+  }
+  if(navMap[id]!==undefined){
+    const ni = document.getElementById('ni-'+navMap[id]);
+    ni.classList.add('on');
+    const span = ni.querySelector('span');
+    if(span) span.style.color='var(--or)';
+    const dot = document.createElement('div');
+    dot.className='nav-dot';
+    ni.appendChild(dot);
+  }
+  if(id==='bookings'){
+    document.getElementById('bk-badge').style.display='none';
+    renderBookings('all');
+  }
+}
+
+function toggleSvc(el){ el.classList.toggle('on'); }
+function pickBarber(el){ document.querySelectorAll('.barber-item').forEach(b=>b.classList.remove('on')); el.classList.add('on'); }
+function pickDate(el){ document.querySelectorAll('.date-chip').forEach(d=>d.classList.remove('on')); el.classList.add('on'); }
+function pickSlot(el){ if(el.classList.contains('booked')) return; document.querySelectorAll('.slot').forEach(s=>s.classList.remove('on')); el.classList.add('on'); }
+function openBookModal(){ document.getElementById('book-modal').classList.add('open'); }
+function closeBookModal(){ document.getElementById('book-modal').classList.remove('open'); }
+function confirmBook(){
+  closeBookModal();
+  allBookings.unshift({shop:'Raj Hair Studio',svc:'✂️ Haircut',time:'Kal · 10:30 AM',status:'pending'});
+  toast('📤 Booking request bheji! Shopkeeper confirm karega.');
+  document.getElementById('bk-badge').style.display='flex';
+}
+function filterSearch(q){
+  document.getElementById('search-results').textContent = q ? `"${q}" ke results` : 'Paas ke sabhi salons';
+}
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+renderBookings('all');
+</script>
+</body>
+</html>
