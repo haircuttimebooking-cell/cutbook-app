@@ -592,7 +592,12 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
 @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.5;}}
 </style>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+const SUPABASE_URL = 'https://kovpsqdkrlgwyfrqlhry.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtvdnBzcWRrcmxnd3lmcnFsaHJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1MTg3MDAsImV4cCI6MjA5MDA5NDcwMH0.poZR0KcozCyL1xSo3mFi_yle5bRNhM4TWe1nWfvVx30';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
 // ─── STATE ───────────────────────────────────────────
 let cancelCount = 0;
 let doneTarget = null;
@@ -600,19 +605,14 @@ let rejectTarget = null;
 let assignTarget = null;
 let isOnline = true;
 let autoAccept = true;
-let schedOffset = 0; // days from today
+let schedOffset = 0;
 let curView = 'timeline';
 
 const barbers = ['Raju','Deepak'];
 const chairs = ['Chair 1','Chair 2'];
 
-const bookings = [
-  {id:1, name:'Rahul Kumar',  phone:'9876543210', svc:'✂️ Haircut',         time:'10:30 AM', price:80,  status:'pending',   barber:'Raju', chair:'Chair 1'},
-  {id:2, name:'Aman Singh',   phone:'9812345678', svc:'🪒 Shaving',         time:'11:00 AM', price:60,  status:'pending',   barber:'Deepak', chair:'Chair 2'},
-  {id:3, name:'Rohit Verma',  phone:'9834567890', svc:'✂️ Haircut + Shave', time:'11:30 AM', price:120, status:'accepted',  barber:'Raju', chair:'Chair 1'},
-  {id:4, name:'Vikash Gupta', phone:'9856789012', svc:'💇 Hair Styling',    time:'12:00 PM', price:150, status:'completed', barber:'Deepak', chair:'Chair 2'},
-  {id:5, name:'Suresh Yadav', phone:'9878901234', svc:'🪒 Shaving',         time:'09:30 AM', price:60,  status:'cancelled', barber:'', chair:''},
-];
+// bookings array — Supabase se load hoga
+let bookings = [];
 
 const statusCfg = {
   pending:   {label:'⏳ Pending',    cls:'pill-am'},
@@ -620,6 +620,76 @@ const statusCfg = {
   completed: {label:'🏁 Completed',  cls:'pill-or'},
   cancelled: {label:'❌ Cancelled',  cls:'pill-re'},
 };
+
+// ─── SUPABASE: LOAD BOOKINGS ─────────────────────────
+async function loadBookingsFromDB(){
+  const {data, error} = await sb.from('bookings').select('*').order('created_at',{ascending:false});
+  if(error){ console.error(error); return; }
+  // Map Supabase fields to local format
+  bookings = (data||[]).map(b=>({
+    id: b.id,
+    name: b.customer_name || 'Customer',
+    phone: b.customer_phone || '',
+    svc: b.service || 'Service',
+    time: b.booking_time || '',
+    price: b.price || 0,
+    status: b.status || 'pending',
+    barber: b.barber_name || '',
+    chair: b.chair || '',
+    booking_date: b.booking_date || '',
+  }));
+  // Auto accept pending if autoAccept ON
+  if(autoAccept){
+    for(const b of bookings.filter(x=>x.status==='pending')){
+      await sb.from('bookings').update({status:'accepted'}).eq('id',b.id);
+      b.status = 'accepted';
+    }
+  }
+  renderBk(getCurFilter());
+  updateStats();
+}
+
+// ─── SUPABASE: REALTIME ──────────────────────────────
+function subscribeBookings(){
+  sb.channel('bookings-shop')
+    .on('postgres_changes',{event:'*',schema:'public',table:'bookings'},()=>loadBookingsFromDB())
+    .subscribe();
+}
+
+// ─── SUPABASE: ACCEPT ────────────────────────────────
+async function acceptBk(id){
+  await sb.from('bookings').update({status:'accepted'}).eq('id',id);
+  const b = bookings.find(x=>x.id===id);
+  if(b){ b.status='accepted'; }
+  renderBk(getCurFilter());
+  updateStats();
+  toast(`✅ Booking confirm! 👨‍🔧 ${b?.barber||''}`);
+}
+
+// ─── SUPABASE: REJECT/CANCEL ─────────────────────────
+async function confirmReject(){
+  if(!rejectTarget) return;
+  await sb.from('bookings').update({status:'cancelled'}).eq('id',rejectTarget);
+  const b = bookings.find(x=>x.id===rejectTarget);
+  if(b){ b.status='cancelled'; cancelCount++; }
+  closeRejectModal();
+  renderBk(getCurFilter());
+  updateStats();
+  toast(`❌ Booking reject ho gayi`);
+  if(cancelCount>=3){ document.getElementById('cancel-warn').style.display='flex'; }
+}
+
+// ─── SUPABASE: DONE ──────────────────────────────────
+async function confirmDone(){
+  if(!doneTarget) return;
+  await sb.from('bookings').update({status:'completed'}).eq('id',doneTarget);
+  const b = bookings.find(x=>x.id===doneTarget);
+  if(b){ b.status='completed'; }
+  closeDoneModal();
+  renderBk(getCurFilter());
+  updateStats();
+  toast(`🏁 Kaam pura! ₹${b?.price||0} earned`);
+}
 
 // ─── TIME HELPERS ────────────────────────────────────
 function getTimeDiff(timeStr){
@@ -745,19 +815,6 @@ function rejectPrompt(id){
 
 function closeRejectModal(){ document.getElementById('reject-modal').classList.remove('open'); rejectTarget=null; }
 
-function confirmReject(){
-  if(!rejectTarget) return;
-  const b = bookings.find(x=>x.id===rejectTarget);
-  if(!b) return;
-  b.status = 'cancelled';
-  cancelCount++;
-  closeRejectModal();
-  renderBk(getCurFilter());
-  updateStats();
-  toast(`❌ ${b.name} ki booking reject ho gayi`);
-  if(cancelCount>=3){ const w=document.getElementById('cancel-warn'); w.style.display='flex'; }
-}
-
 function donePrompt(id){
   const b = bookings.find(x=>x.id===id);
   if(!b) return;
@@ -767,17 +824,6 @@ function donePrompt(id){
 }
 
 function closeDoneModal(){ document.getElementById('done-modal').classList.remove('open'); doneTarget=null; }
-
-function confirmDone(){
-  if(!doneTarget) return;
-  const b = bookings.find(x=>x.id===doneTarget);
-  if(!b) return;
-  b.status = 'completed';
-  closeDoneModal();
-  renderBk(getCurFilter());
-  updateStats();
-  toast(`🏁 ${b.name} — kaam pura! ₹${b.price} earned`);
-}
 
 // ─── BARBER ASSIGN ───────────────────────────────────
 function assignBarber(name, chair){
@@ -1045,8 +1091,8 @@ function toast(msg){
 function init(){
   const now = new Date();
   document.getElementById('today-date').textContent = `${now.getDate()} ${monthNames[now.getMonth()]} ${now.getFullYear()} · ${dayNames[now.getDay()]}`;
-  renderBk('all');
-  updateStats();
+  loadBookingsFromDB();
+  subscribeBookings();
   renderBarberSlots(0);
   renderBarberSlots(1);
 }

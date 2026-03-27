@@ -426,54 +426,88 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
 
 <div id="toast" class="toast"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const allBookings = [
-  {shop:'Raj Hair Studio',svc:'✂️ Haircut',time:'Kal · 10:30 AM',status:'pending'},
-  {shop:'Raj Hair Studio',svc:'✂️ Haircut + Shave',time:'Aaj · 11:30 AM',status:'confirmed'},
-  {shop:'Star Salon',svc:'💇 Hair Styling',time:'22 Mar · 12:00 PM',status:'completed'},
-  {shop:'Modern Cut',svc:'🪒 Shaving',time:'15 Mar · 9:30 AM',status:'cancelled'},
-];
+const SUPABASE_URL = 'https://kovpsqdkrlgwyfrqlhry.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtvdnBzcWRrcmxnd3lmcnFsaHJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1MTg3MDAsImV4cCI6MjA5MDA5NDcwMH0.poZR0KcozCyL1xSo3mFi_yle5bRNhM4TWe1nWfvVx30';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
 const noteMap = {
   pending:{cls:'pending',txt:'⏳ Shopkeeper ka jawab aa raha hai...'},
-  confirmed:{cls:'confirmed',txt:'✅ Booking confirmed! Time pe aa jaana.'},
+  accepted:{cls:'confirmed',txt:'✅ Booking confirmed! Time pe aa jaana.'},
   completed:{cls:'completed',txt:'🏁 Service ho gayi. Review do!'},
   cancelled:{cls:'cancelled',txt:'❌ Cancel ho gayi. Naya slot lo.'},
 };
-const pillMap = {
-  pending:'pill-am',confirmed:'pill-gr',completed:'pill-or',cancelled:'pill-re',
-};
-const pillLbl = {
-  pending:'⏳ Pending',confirmed:'✅ Confirmed',completed:'🏁 Completed',cancelled:'❌ Cancelled',
-};
+const pillMap = {pending:'pill-am',accepted:'pill-gr',completed:'pill-or',cancelled:'pill-re'};
+const pillLbl = {pending:'⏳ Pending',accepted:'✅ Confirmed',completed:'🏁 Completed',cancelled:'❌ Cancelled'};
 
+let currentUser = null;
+let allBookings = [];
+let curFilter = 'all';
+
+// ─── INIT ───────────────────────────────────────────
+async function init(){
+  const {data:{user}} = await sb.auth.getUser();
+  if(!user){ window.location.href='../index.html'; return; }
+  currentUser = user;
+  await loadBookings();
+  subscribeBookings();
+}
+
+// ─── LOAD BOOKINGS FROM SUPABASE ────────────────────
+async function loadBookings(){
+  const {data, error} = await sb.from('bookings')
+    .select('*')
+    .eq('customer_id', currentUser.id)
+    .order('created_at', {ascending:false});
+  if(error){ console.error(error); return; }
+  allBookings = data || [];
+  renderBookings(curFilter);
+  const pending = allBookings.filter(b=>b.status==='pending').length;
+  const badge = document.getElementById('bk-badge');
+  if(pending>0){ badge.textContent=pending; badge.style.display='flex'; }
+  else { badge.style.display='none'; }
+}
+
+// ─── REAL TIME ──────────────────────────────────────
+function subscribeBookings(){
+  sb.channel('bookings-customer')
+    .on('postgres_changes',{event:'*',schema:'public',table:'bookings'},()=>loadBookings())
+    .subscribe();
+}
+
+// ─── RENDER ─────────────────────────────────────────
 function renderBookings(filter){
+  curFilter = filter;
   const list = document.getElementById('bk-list');
   const data = filter==='all' ? allBookings : allBookings.filter(b=>b.status===filter);
-  if(!data.length){list.innerHTML='<div style="text-align:center;padding:40px 16px;color:var(--tx3);font-family:var(--dv);">Koi booking nahi</div>';return;}
-  list.innerHTML = data.map((b,i)=>{
-    const n = noteMap[b.status];
-    const actions = b.status==='pending'
-      ? `<div class="bk-actions"><button class="bk-btn bk-btn-cancel" onclick="cancelBk(${i})">✕ Cancel</button><button class="bk-btn" style="background:var(--bg3);color:var(--tx2);border:1px solid var(--bd2);" onclick="toast('💬 Chat khul gaya')">💬 Chat</button></div>`
-      : b.status==='completed'
-      ? `<div class="bk-actions"><button class="bk-btn bk-btn-review" onclick="toast('⭐ Review page khul gaya')">⭐ Review do</button><button class="bk-btn bk-btn-rebook" onclick="goScreen('detail')">↻ Rebook</button></div>`
-      : b.status==='cancelled'
+  if(!data.length){
+    list.innerHTML='<div style="text-align:center;padding:40px 16px;color:var(--tx3);font-family:var(--dv);">Koi booking nahi</div>';
+    return;
+  }
+  list.innerHTML = data.map(b=>{
+    const st = b.status || 'pending';
+    const n = noteMap[st] || noteMap.pending;
+    const actions = st==='pending'
+      ? `<div class="bk-actions"><button class="bk-btn bk-btn-cancel" onclick="cancelBk('${b.id}')">✕ Cancel</button></div>`
+      : st==='completed'
+      ? `<div class="bk-actions"><button class="bk-btn bk-btn-review" onclick="toast('⭐ Review page khul gaya')">⭐ Review do</button></div>`
+      : st==='cancelled'
       ? `<div class="bk-actions"><button class="bk-btn bk-btn-rebook" onclick="goScreen('detail')">↻ Naya book karo</button></div>`
       : '';
     return `<div class="booking-card">
       <div class="bk-top">
-        <div><div class="bk-shop">${b.shop}</div><div class="bk-svc">${b.svc}</div><div class="bk-time">⏰ ${b.time}</div></div>
-        <span class="pill ${pillMap[b.status]}" style="font-size:9px;">${pillLbl[b.status]}</span>
+        <div>
+          <div class="bk-shop">${b.shop_name||'My Haircut Booking'}</div>
+          <div class="bk-svc">${b.service||'Service'}</div>
+          <div class="bk-time">⏰ ${b.booking_date||''} · ${b.booking_time||''}</div>
+        </div>
+        <span class="pill ${pillMap[st]||'pill-gy'}" style="font-size:9px;">${pillLbl[st]||st}</span>
       </div>
       <div class="bk-note ${n.cls}">${n.txt}</div>
       ${actions}
     </div>`;
   }).join('');
-}
-
-function cancelBk(i){
-  allBookings[i].status='cancelled';
-  renderBookings('all');
-  toast('❌ Booking cancel ho gayi');
 }
 
 function filterBk(el,filter){
@@ -482,6 +516,34 @@ function filterBk(el,filter){
   renderBookings(filter);
 }
 
+// ─── CANCEL BOOKING ─────────────────────────────────
+async function cancelBk(id){
+  await sb.from('bookings').update({status:'cancelled'}).eq('id',id);
+  toast('❌ Booking cancel ho gayi');
+}
+
+// ─── CONFIRM BOOKING (real insert) ──────────────────
+async function confirmBook(){
+  if(!currentUser){ toast('❌ Pehle login karo'); return; }
+  const slot = document.querySelector('.slot.on');
+  const date = document.querySelector('.date-chip.on');
+  const barber = document.querySelector('.barber-item.on span');
+  const {error} = await sb.from('bookings').insert([{
+    customer_id: currentUser.id,
+    shop_name: 'Raj Hair Studio',
+    service: '✂️ Haircut',
+    booking_date: date ? date.closest('.date-chip').querySelector('.date-num').textContent+' Mar' : 'Today',
+    booking_time: slot ? slot.textContent : '10:30 AM',
+    barber_name: barber ? barber.textContent : 'Any',
+    status: 'pending'
+  }]);
+  closeBookModal();
+  if(error){ toast('❌ Booking fail — '+error.message); return; }
+  toast('📤 Booking bheji! Shopkeeper confirm karega.');
+  await loadBookings();
+}
+
+// ─── NAV ────────────────────────────────────────────
 const navMap = {home:0,search:1,bookings:2,profile:3};
 const screenIds = ['home','search','detail','bookings','profile'];
 
@@ -489,25 +551,20 @@ function goScreen(id){
   screenIds.forEach(s=>document.getElementById('sc-'+s).classList.remove('active'));
   document.getElementById('sc-'+id).classList.add('active');
   for(let i=0;i<4;i++){
-    const ni = document.getElementById('ni-'+i);
+    const ni=document.getElementById('ni-'+i);
     if(!ni) continue;
     ni.classList.remove('on');
     ni.querySelectorAll('span').forEach(s=>s.style.color='');
     ni.querySelectorAll('.nav-dot').forEach(d=>d.remove());
   }
   if(navMap[id]!==undefined){
-    const ni = document.getElementById('ni-'+navMap[id]);
+    const ni=document.getElementById('ni-'+navMap[id]);
     ni.classList.add('on');
-    const span = ni.querySelector('span');
-    if(span) span.style.color='var(--or)';
-    const dot = document.createElement('div');
-    dot.className='nav-dot';
-    ni.appendChild(dot);
+    const sp=ni.querySelector('span');
+    if(sp) sp.style.color='var(--or)';
+    const dot=document.createElement('div');dot.className='nav-dot';ni.appendChild(dot);
   }
-  if(id==='bookings'){
-    document.getElementById('bk-badge').style.display='none';
-    renderBookings('all');
-  }
+  if(id==='bookings'){ document.getElementById('bk-badge').style.display='none'; renderBookings('all'); }
 }
 
 function toggleSvc(el){ el.classList.toggle('on'); }
@@ -516,22 +573,10 @@ function pickDate(el){ document.querySelectorAll('.date-chip').forEach(d=>d.clas
 function pickSlot(el){ if(el.classList.contains('booked')) return; document.querySelectorAll('.slot').forEach(s=>s.classList.remove('on')); el.classList.add('on'); }
 function openBookModal(){ document.getElementById('book-modal').classList.add('open'); }
 function closeBookModal(){ document.getElementById('book-modal').classList.remove('open'); }
-function confirmBook(){
-  closeBookModal();
-  allBookings.unshift({shop:'Raj Hair Studio',svc:'✂️ Haircut',time:'Kal · 10:30 AM',status:'pending'});
-  toast('📤 Booking request bheji! Shopkeeper confirm karega.');
-  document.getElementById('bk-badge').style.display='flex';
-}
-function filterSearch(q){
-  document.getElementById('search-results').textContent = q ? `"${q}" ke results` : 'Paas ke sabhi salons';
-}
-function toast(msg){
-  const t=document.getElementById('toast');
-  t.textContent=msg;t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),3000);
-}
+function filterSearch(q){ document.getElementById('search-results').textContent = q?`"${q}" ke results`:'Paas ke sabhi salons'; }
+function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3000); }
 
-renderBookings('all');
+init();
 </script>
 </body>
 </html>
