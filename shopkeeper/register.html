@@ -246,20 +246,13 @@ option{background:var(--bg3);}
     <div class="step-sub">दुकान कितने बजे खुलती और बंद होती है</div>
     <div class="field">
       <div class="field-label">खुलने का समय *</div>
-      <select class="field-input" id="open-time">
-        <option value="06:00">6:00 AM</option><option value="07:00">7:00 AM</option>
-        <option value="08:00">8:00 AM</option><option value="09:00" selected>9:00 AM</option>
-        <option value="10:00">10:00 AM</option><option value="11:00">11:00 AM</option>
-      </select>
+      <select class="field-input" id="open-time" onchange="validateTiming()"></select>
     </div>
     <div class="field">
       <div class="field-label">बंद होने का समय *</div>
-      <select class="field-input" id="close-time">
-        <option value="18:00">6:00 PM</option><option value="19:00">7:00 PM</option>
-        <option value="20:00">8:00 PM</option><option value="21:00" selected>9:00 PM</option>
-        <option value="22:00">10:00 PM</option>
-      </select>
+      <select class="field-input" id="close-time" onchange="validateTiming()"></select>
     </div>
+    <div id="timing-msg" class="msg"></div>
     <div class="field">
       <div class="field-label">बंद दिन (अगर कोई हो)</div>
       <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;">
@@ -274,7 +267,7 @@ option{background:var(--bg3);}
     </div>
     <div class="btn-wrap">
       <button class="btn-prev" onclick="goStep(3)">← Wapas</button>
-      <button class="btn-next" onclick="goStep(5)">आगे →</button>
+      <button class="btn-next" onclick="handleTimingNext()">आगे →</button>
     </div>
   </div>
 
@@ -282,10 +275,8 @@ option{background:var(--bg3);}
   <div class="step" id="step-5">
     <div class="step-icon">✂️</div>
     <div class="step-title">सेवाएं जोड़ें</div>
-    <div class="step-sub">कौन-कौन सी services देते हो aur kitne mein — baad mein bhi change kar sakte ho</div>
-
+    <div class="step-sub">आप सेवा का नाम, कीमत और समय बदल सकते हैं — बाद में भी change कर सकते हो</div>
     <div id="services-container"></div>
-
     <div id="svc-msg" class="msg"></div>
     <div class="btn-wrap">
       <button class="btn-prev" onclick="goStep(4)">← Wapas</button>
@@ -298,28 +289,17 @@ option{background:var(--bg3);}
   <div class="step" id="step-6">
     <div class="step-icon">📷</div>
     <div class="step-title">दुकान की फोटो</div>
-    <div class="step-sub">Approval jaldi milegi agar photos clear hongi</div>
-    <div class="field">
-      <div class="field-label">दुकान के बाहर की फोटो</div>
-      <div class="photo-box" id="front-box">
-        <input type="file" accept="image/*" onchange="previewPhoto(this,'front-box','front-preview')">
-        <img id="front-preview" class="photo-preview" style="display:none;">
-        <div class="photo-icon">🏪</div>
-        <div class="photo-lbl">Tap karke photo chunein</div>
-      </div>
+    <div class="step-sub">कम से कम 1 फोटो ज़रूरी है — approval जल्दी मिलेगी</div>
+    <div class="info-box" style="margin-bottom:16px;">📷 Camera या 🖼️ Gallery — दोनों से फोटो चुन सकते हो<br>अधिकतम 5 फोटो · JPG/PNG · हर फोटो max 5MB</div>
+    <div id="photo-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;"></div>
+    <div id="add-photo-btn" style="display:flex;align-items:center;justify-content:center;gap:8px;background:var(--bg3);border:2px dashed var(--bd2);border-radius:14px;padding:18px;cursor:pointer;font-size:13px;color:var(--tx2);font-family:var(--dv);position:relative;" onclick="document.getElementById('photo-input').click()">
+      <input type="file" id="photo-input" accept="image/jpeg,image/png" multiple style="display:none;" onchange="handlePhotoUpload(this)">
+      📷 फोटो जोड़ें
     </div>
-    <div class="field">
-      <div class="field-label">अंदर की फोटो (Optional)</div>
-      <div class="photo-box" id="interior-box">
-        <input type="file" accept="image/*" onchange="previewPhoto(this,'interior-box','interior-preview')">
-        <img id="interior-preview" class="photo-preview" style="display:none;">
-        <div class="photo-icon">💈</div>
-        <div class="photo-lbl">Tap karke photo chunein</div>
-      </div>
-    </div>
+    <div id="photo-msg" class="msg" style="margin-top:10px;"></div>
     <div class="btn-wrap">
       <button class="btn-prev" onclick="goStep(5)">← Wapas</button>
-      <button class="btn-next" onclick="goStep(7)">आगे →</button>
+      <button class="btn-next" onclick="handlePhotoNext()">आगे →</button>
     </div>
     <button class="btn-skip" onclick="goStep(7)">Photos baad mein add karunga</button>
   </div>
@@ -358,6 +338,15 @@ option{background:var(--bg3);}
 <style>
 .day-chip{padding:6px 12px;background:var(--bg3);border:1px solid var(--bd);border-radius:20px;font-size:11px;cursor:pointer;font-family:var(--dv);transition:all .2s;}
 .day-chip.off{background:rgba(224,85,85,0.1);border-color:rgba(224,85,85,0.3);color:var(--re);}
+.svc-saved-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--bd);}
+.svc-saved-row:last-child{border-bottom:none;}
+.svc-edit-row{display:flex;gap:6px;margin-bottom:8px;align-items:center;flex-wrap:wrap;}
+.svc-name-input{flex:2;min-width:100px;background:var(--bg3);border:1px solid var(--bd);border-radius:8px;padding:8px 10px;font-size:11px;color:var(--tx);font-family:'DM Sans',sans-serif;outline:none;}
+.svc-name-input:focus{border-color:var(--or);}
+.svc-price-input{flex:1;min-width:70px;background:var(--bg3);border:1px solid var(--bd);border-radius:8px;padding:8px 10px;font-size:11px;color:var(--tx);font-family:'DM Sans',sans-serif;outline:none;text-align:center;}
+.svc-price-input:focus{border-color:var(--or);}
+.svc-dur-input{flex:1;min-width:70px;background:var(--bg3);border:1px solid var(--bd);border-radius:8px;padding:8px 10px;font-size:11px;color:var(--tx);font-family:'DM Sans',sans-serif;outline:none;text-align:center;}
+.svc-dur-input:focus{border-color:var(--or);}
 </style>
 
 <script>
@@ -396,6 +385,9 @@ function goStep(n){
   if(n===7) renderReview();
   window.scrollTo(0,0);
 }
+
+// Build time dropdowns on load
+buildTimeOptions();
 
 // ─── OTP ─────────────────────────────────────────────
 async function sendRegOTP(){
@@ -446,8 +438,42 @@ function handleShopNext(){
   goStep(4);
 }
 
-// ─── DAYS ────────────────────────────────────────────
-function toggleDay(i){
+// ─── TIMING SLOTS (30 min intervals) ────────────────
+function buildTimeOptions(){
+  const slots = [];
+  for(let h=6;h<24;h++){
+    for(let m=0;m<60;m+=30){
+      const hh = h%12===0?12:h%12;
+      const ampm = h<12?'AM':'PM';
+      const mm = m===0?'00':'30';
+      const val = String(h).padStart(2,'0')+':'+mm;
+      const lbl = `${hh}:${mm} ${ampm}`;
+      slots.push({val,lbl});
+    }
+  }
+  // Open default: 9:00 AM (index 6), Close default: 9:00 PM (index 30)
+  const openSel = document.getElementById('open-time');
+  const closeSel = document.getElementById('close-time');
+  slots.forEach((s,i)=>{
+    openSel.innerHTML += `<option value="${s.val}"${s.val==='09:00'?' selected':''}>${s.lbl}</option>`;
+    closeSel.innerHTML += `<option value="${s.val}"${s.val==='21:00'?' selected':''}>${s.lbl}</option>`;
+  });
+}
+
+function validateTiming(){
+  const o = document.getElementById('open-time').value;
+  const c = document.getElementById('close-time').value;
+  const oMin = parseInt(o.split(':')[0])*60+parseInt(o.split(':')[1]);
+  const cMin = parseInt(c.split(':')[0])*60+parseInt(c.split(':')[1]);
+  if(cMin<=oMin){setMsg('timing-msg','❌ बंद होने का समय, खुलने के समय से बाद होना चाहिए','error');return false;}
+  if(cMin-oMin<60){setMsg('timing-msg','❌ कम से कम 1 घंटे का अंतर होना चाहिए','error');return false;}
+  setMsg('timing-msg','','');
+  return true;
+}
+
+function handleTimingNext(){
+  if(validateTiming()) goStep(5);
+}
   const el = document.getElementById('day-'+i);
   if(closedDays.includes(i)){
     closedDays = closedDays.filter(d=>d!==i);
@@ -458,31 +484,36 @@ function toggleDay(i){
   }
 }
 
-// ─── SERVICES ────────────────────────────────────────
+// ─── SERVICES — Save/Edit/Delete flow ───────────────
 function renderServices(){
   const container = document.getElementById('services-container');
   container.innerHTML = servicesData.map((cat,ci)=>`
     <div class="cat-section">
       <div class="cat-header">
         <span>${cat.icon} ${cat.name}</span>
-        <span class="cat-toggle" onclick="addService(${ci})">+ जोड़ें</span>
+        <span onclick="addService(${ci})" style="background:var(--gr);color:#fff;padding:5px 12px;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;font-family:var(--dv);">➕ सेवा जोड़ें</span>
       </div>
       <div class="cat-body" id="cat-body-${ci}">
         ${cat.items.length===0
-          ? `<div style="font-size:11px;color:var(--tx3);font-family:var(--dv);padding:4px 0;">कोई service नहीं — "+ जोड़ें" dabao</div>`
-          : `<div class="svc-header-row">
-              <div class="svc-col-lbl" style="flex:2;">Service</div>
-              <div class="svc-col-lbl" style="flex:1;text-align:center;">₹ Price</div>
-              <div class="svc-col-lbl" style="flex:1;text-align:center;">Min</div>
-              <div style="width:24px;"></div>
-            </div>
-            ${cat.items.map((item,ii)=>`
-            <div class="svc-item">
-              <input class="svc-name-input" value="${item.n}" onchange="updateSvc(${ci},${ii},'n',this.value)" placeholder="Service naam">
-              <input class="svc-price-input" value="${item.p}" onchange="updateSvc(${ci},${ii},'p',this.value)" type="number" placeholder="₹">
-              <input class="svc-dur-input" value="${item.d}" onchange="updateSvc(${ci},${ii},'d',this.value)" type="number" placeholder="Min">
-              <div class="svc-del" onclick="delService(${ci},${ii})">✕</div>
-            </div>`).join('')}`
+          ? `<div style="font-size:11px;color:var(--tx3);font-family:var(--dv);padding:6px 0;">कोई service नहीं — "➕ सेवा जोड़ें" dabao</div>`
+          : cat.items.map((item,ii)=>item.saved
+            ? `<div class="svc-saved-row">
+                <div style="flex:1;">
+                  <div style="font-size:12px;font-weight:600;">${item.n}</div>
+                  <div style="font-size:10px;color:var(--tx3);">₹${item.p} · ${item.d} मिनट</div>
+                </div>
+                <div style="display:flex;gap:6px;">
+                  <div onclick="editService(${ci},${ii})" style="padding:5px 10px;background:var(--bg4);border:1px solid var(--bd2);border-radius:7px;font-size:10px;cursor:pointer;">✏️ Edit</div>
+                  <div onclick="delService(${ci},${ii})" style="padding:5px 10px;background:rgba(224,85,85,0.1);border:1px solid rgba(224,85,85,0.2);border-radius:7px;font-size:10px;color:var(--re);cursor:pointer;">❌</div>
+                </div>
+              </div>`
+            : `<div class="svc-edit-row">
+                <input class="svc-name-input" id="svc-n-${ci}-${ii}" value="${item.n}" placeholder="सेवा का नाम लिखें">
+                <input class="svc-price-input" id="svc-p-${ci}-${ii}" value="${item.p}" type="number" placeholder="₹ में कीमत दर्ज करें">
+                <input class="svc-dur-input" id="svc-d-${ci}-${ii}" value="${item.d}" type="number" placeholder="मिनट में समय दर्ज करें">
+                <div onclick="saveService(${ci},${ii})" style="padding:6px 12px;background:var(--gr);border-radius:8px;font-size:11px;color:#fff;cursor:pointer;white-space:nowrap;font-family:var(--dv);">✔ सेव</div>
+              </div>`
+          ).join('')
         }
       </div>
     </div>`).join('');
@@ -490,7 +521,21 @@ function renderServices(){
 
 function addService(ci){
   const sugg = categories[ci].suggestions[servicesData[ci].items.length % categories[ci].suggestions.length];
-  servicesData[ci].items.push({...sugg});
+  servicesData[ci].items.push({...sugg, saved:false});
+  renderServices();
+}
+
+function saveService(ci,ii){
+  const n = document.getElementById(`svc-n-${ci}-${ii}`).value.trim();
+  const p = document.getElementById(`svc-p-${ci}-${ii}`).value;
+  const d = document.getElementById(`svc-d-${ci}-${ii}`).value;
+  if(!n){alert('सेवा का नाम लिखें');return;}
+  servicesData[ci].items[ii] = {n,p:Number(p),d:Number(d),saved:true};
+  renderServices();
+}
+
+function editService(ci,ii){
+  servicesData[ci].items[ii].saved = false;
   renderServices();
 }
 
@@ -499,24 +544,53 @@ function delService(ci,ii){
   renderServices();
 }
 
-function updateSvc(ci,ii,key,val){
-  servicesData[ci].items[ii][key] = key==='n' ? val : Number(val);
+// ─── PHOTOS — Multi upload, preview, remove ──────────
+let uploadedPhotos = []; // array of {dataUrl, file}
+
+function handlePhotoUpload(input){
+  const files = Array.from(input.files);
+  const remaining = 5 - uploadedPhotos.length;
+  if(remaining<=0){setMsg('photo-msg','❌ अधिकतम 5 फोटो ही अपलोड हो सकती हैं','error');return;}
+  const toAdd = files.slice(0,remaining);
+  let invalid = false;
+  toAdd.forEach(file=>{
+    if(!['image/jpeg','image/png'].includes(file.type)){invalid=true;return;}
+    if(file.size>5*1024*1024){invalid=true;return;}
+    const reader = new FileReader();
+    reader.onload = e=>{
+      uploadedPhotos.push({dataUrl:e.target.result,file});
+      renderPhotoGrid();
+    };
+    reader.readAsDataURL(file);
+  });
+  if(invalid) setMsg('photo-msg','⚠️ कुछ फोटो skip हुईं — सिर्फ JPG/PNG, max 5MB','error');
+  input.value='';
 }
 
-// ─── PHOTO PREVIEW ───────────────────────────────────
-function previewPhoto(input,boxId,previewId){
-  const file = input.files[0];
-  if(!file) return;
-  const reader = new FileReader();
-  reader.onload = e=>{
-    const img = document.getElementById(previewId);
-    img.src = e.target.result;
-    img.style.display = 'block';
-    document.getElementById(boxId).classList.add('has-img');
-    document.getElementById(boxId).querySelector('.photo-icon').style.display='none';
-    document.getElementById(boxId).querySelector('.photo-lbl').style.display='none';
-  };
-  reader.readAsDataURL(file);
+function removePhoto(i){
+  uploadedPhotos.splice(i,1);
+  renderPhotoGrid();
+}
+
+function renderPhotoGrid(){
+  const grid = document.getElementById('photo-grid');
+  grid.innerHTML = uploadedPhotos.map((p,i)=>`
+    <div style="position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;border:1px solid var(--bd);">
+      <img src="${p.dataUrl}" style="width:100%;height:100%;object-fit:cover;">
+      <div onclick="removePhoto(${i})" style="position:absolute;top:4px;right:4px;width:22px;height:22px;background:rgba(0,0,0,0.7);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:11px;color:#fff;">✕</div>
+      ${i===0?'<div style="position:absolute;bottom:0;left:0;right:0;background:rgba(244,123,32,0.85);font-size:9px;text-align:center;padding:2px;font-family:var(--dv);">मुख्य फोटो</div>':''}
+    </div>`).join('');
+  const addBtn = document.getElementById('add-photo-btn');
+  addBtn.style.display = uploadedPhotos.length>=5 ? 'none' : 'flex';
+  if(uploadedPhotos.length>0) setMsg('photo-msg','','');
+}
+
+function handlePhotoNext(){
+  if(uploadedPhotos.length===0){
+    setMsg('photo-msg','❌ कृपया दुकान की कम से कम 1 फोटो अपलोड करें','error');
+    return;
+  }
+  goStep(7);
 }
 
 // ─── REVIEW ──────────────────────────────────────────
@@ -545,6 +619,12 @@ function renderReview(){
       ${allSvcs.length===0
         ? '<div class="review-row"><div class="review-key" style="color:var(--am);">कोई service नहीं जोड़ी</div></div>'
         : allSvcs.map(s=>`<div class="review-row"><div class="review-val">${s}</div></div>`).join('')}
+    </div>
+    <div class="review-card">
+      <div class="review-card-head">📷 फोटो (${uploadedPhotos.length})</div>
+      ${uploadedPhotos.length===0
+        ? '<div class="review-row"><div class="review-key" style="color:var(--am);">कोई फोटो नहीं</div></div>'
+        : `<div style="display:flex;gap:8px;padding:10px 14px;flex-wrap:wrap;">${uploadedPhotos.map(p=>`<img src="${p.dataUrl}" style="width:64px;height:64px;object-fit:cover;border-radius:8px;border:1px solid var(--bd);">`).join('')}</div>`}
     </div>`;
 }
 
