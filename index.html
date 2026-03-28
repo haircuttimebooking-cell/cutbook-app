@@ -108,12 +108,7 @@ body{background:#0d0d0d;font-family:'Segoe UI',sans-serif;color:#fff;min-height:
     <div style="font-size:20px;font-weight:600;margin-bottom:4px;">OTP verify karo</div>
     <div style="font-size:12px;color:#666;margin-bottom:24px;" id="otp-sent-to"></div>
     <div class="otp-inputs">
-      <input class="otp-box" id="otp0" maxlength="1" type="tel" oninput="otpNext(0)">
-      <input class="otp-box" id="otp1" maxlength="1" type="tel" oninput="otpNext(1)">
-      <input class="otp-box" id="otp2" maxlength="1" type="tel" oninput="otpNext(2)">
-      <input class="otp-box" id="otp3" maxlength="1" type="tel" oninput="otpNext(3)">
-      <input class="otp-box" id="otp4" maxlength="1" type="tel" oninput="otpNext(4)">
-      <input class="otp-box" id="otp5" maxlength="1" type="tel" oninput="otpNext(5)">
+      <input class="field-input" id="otp-single" type="tel" maxlength="6" placeholder="6 अंकों का OTP डालें" style="letter-spacing:8px;font-size:20px;font-weight:600;text-align:center;width:100%;background:var(--bg3,#1e1e1e);border:1px solid #2a2a2a;border-radius:10px;padding:14px;color:#fff;outline:none;font-family:inherit;">
     </div>
     <div id="otp-msg" class="msg"></div>
     <button class="cta-btn" onclick="verifyOTP()">Verify karo</button>
@@ -156,11 +151,11 @@ async function sendOTP(){
   if(error){setMsg('phone-msg','❌ '+error.message,'error');return;}
   document.getElementById('otp-sent-to').textContent = phoneNumber+' pe OTP bheja gaya';
   showScreen('otp');
-  document.getElementById('otp0').focus();
+  document.getElementById('otp-single').focus();
 }
 
 async function verifyOTP(){
-  const otp=[0,1,2,3,4,5].map(i=>document.getElementById('otp'+i).value).join('');
+  const otp = document.getElementById('otp-single').value.trim();
   if(otp.length!==6){setMsg('otp-msg','❌ 6 digit OTP daalo','error');return;}
   setMsg('otp-msg','<span class="spinner"></span> Verify ho raha hai...','');
   const {data,error} = await sb.auth.verifyOtp({phone:phoneNumber,token:otp,type:'sms'});

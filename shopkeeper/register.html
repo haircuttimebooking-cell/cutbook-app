@@ -163,7 +163,7 @@ option{background:var(--bg3);}
     <div class="step-icon">🏪</div>
     <div class="step-title">अपनी दुकान रजिस्टर करें</div>
     <div class="step-sub">My Haircut Booking pe apni dukan add karo aur rozana nayi bookings pao. Sirf 7 simple steps lagenge.</div>
-    <div class="info-box">✅ Registration bilkul free hai<br>⏱ Sirf 5 minute lagenge<br>🛡️ Admin approval ke baad dukan live hogi</div>
+    <div class="info-box">✅ Registration bilkul free hai<br>⏱ Sirf 5 minute lagenge</div>
     <div class="btn-wrap">
       <button class="btn-next" onclick="goStep(2)">शुरू करें →</button>
     </div>
@@ -187,15 +187,8 @@ option{background:var(--bg3);}
     </div>
     <div id="otp-section" style="display:none;">
       <div class="field-label" style="margin-bottom:8px;">OTP डालें *</div>
-      <div class="otp-row">
-        <input class="otp-box" id="rotp0" maxlength="1" type="tel" oninput="rotpNext(0)">
-        <input class="otp-box" id="rotp1" maxlength="1" type="tel" oninput="rotpNext(1)">
-        <input class="otp-box" id="rotp2" maxlength="1" type="tel" oninput="rotpNext(2)">
-        <input class="otp-box" id="rotp3" maxlength="1" type="tel" oninput="rotpNext(3)">
-        <input class="otp-box" id="rotp4" maxlength="1" type="tel" oninput="rotpNext(4)">
-        <input class="otp-box" id="rotp5" maxlength="1" type="tel" oninput="rotpNext(5)">
-      </div>
-      <div style="font-size:11px;color:var(--tx3);margin-bottom:12px;font-family:var(--dv);">OTP nahi aaya? <span style="color:var(--or);cursor:pointer;" onclick="sendRegOTP()">Dobara bhejo</span></div>
+      <input class="field-input" id="rotp-single" type="tel" maxlength="6" placeholder="6 अंकों का OTP" style="letter-spacing:8px;font-size:20px;font-weight:600;text-align:center;">
+      <div style="font-size:11px;color:var(--tx3);margin-top:8px;margin-bottom:12px;font-family:var(--dv);">OTP nahi aaya? <span style="color:var(--or);cursor:pointer;" onclick="sendRegOTP()">Dobara bhejo</span></div>
     </div>
     <div id="owner-msg" class="msg"></div>
     <div class="btn-wrap">
@@ -218,9 +211,38 @@ option{background:var(--bg3);}
         <div class="field-label">शहर *</div>
         <input class="field-input" id="shop-city" type="text" placeholder="लखनऊ" list="city-list">
         <datalist id="city-list">
-          <option>लखनऊ</option><option>कानपुर</option><option>वाराणसी</option>
-          <option>आगरा</option><option>प्रयागराज</option><option>मेरठ</option>
-          <option>दिल्ली</option><option>मुंबई</option><option>जयपुर</option>
+          <option>अंबेडकर नगर</option><option>अमेठी</option><option>अमरोहा</option>
+          <option>अलीगढ़</option><option>अररिया</option><option>अरवल</option>
+          <option>औरंगाबाद</option><option>आगरा</option><option>आज़मगढ़</option>
+          <option>इटावा</option><option>कटिहार</option><option>कानपुर देहात</option>
+          <option>कानपुर नगर</option><option>कासगंज</option><option>किशनगंज</option>
+          <option>कुशीनगर</option><option>कैमूर</option><option>कौशांबी</option>
+          <option>खगड़िया</option><option>खीरी</option><option>गाज़ियाबाद</option>
+          <option>गाज़ीपुर</option><option>गोंडा</option><option>गोपालगंज</option>
+          <option>गोरखपुर</option><option>चंदौली</option><option>चित्रकूट</option>
+          <option>जालौन</option><option>जौनपुर</option><option>झांसी</option>
+          <option>दरभंगा</option><option>देवरिया</option><option>नालंदा</option>
+          <option>नवादा</option><option>पटना</option><option>पूर्णिया</option>
+          <option>पूर्वी चंपारण</option><option>प्रतापगढ़</option><option>प्रयागराज</option>
+          <option>फतेहपुर</option><option>फर्रुखाबाद</option><option>फिरोज़ाबाद</option>
+          <option>बक्सर</option><option>बदायूं</option><option>बरेली</option>
+          <option>बलिया</option><option>बलरामपुर</option><option>बस्ती</option>
+          <option>बहराइच</option><option>बांदा</option><option>बागपत</option>
+          <option>बाराबंकी</option><option>बिजनौर</option><option>बेगूसराय</option>
+          <option>भागलपुर</option><option>भोजपुर</option><option>मऊ</option>
+          <option>मथुरा</option><option>मधुबनी</option><option>मधेपुरा</option>
+          <option>मुज़फ्फरनगर</option><option>मुज़फ्फरपुर</option><option>मुरादाबाद</option>
+          <option>मेरठ</option><option>मैनपुरी</option><option>महाराजगंज</option>
+          <option>महोबा</option><option>मिर्जापुर</option><option>मुंगेर</option>
+          <option>रायबरेली</option><option>रामपुर</option><option>रोहतास</option>
+          <option>लखनऊ</option><option>लखीमपुर खीरी</option><option>लखीसराय</option>
+          <option>वाराणसी</option><option>शाहजहांपुर</option><option>शामली</option>
+          <option>शिवहर</option><option>श्रावस्ती</option><option>संत कबीर नगर</option>
+          <option>संत रविदास नगर</option><option>संभल</option><option>सहारनपुर</option>
+          <option>सहरसा</option><option>सीतापुर</option><option>सीवान</option>
+          <option>सुपौल</option><option>सुलतानपुर</option><option>सोनभद्र</option>
+          <option>हमीरपुर</option><option>हरदोई</option><option>हाथरस</option>
+          <option>हापुड़</option>
         </datalist>
       </div>
       <div class="field">
@@ -402,11 +424,11 @@ async function sendRegOTP(){
   document.getElementById('owner-btn').onclick = verifyRegOTP;
   otpSent = true;
   setMsg('owner-msg','✅ OTP bheja gaya — '+regPhone,'success');
-  document.getElementById('rotp0').focus();
+  document.getElementById('rotp-single').focus();
 }
 
 async function verifyRegOTP(){
-  const otp=[0,1,2,3,4,5].map(i=>document.getElementById('rotp'+i).value).join('');
+  const otp = document.getElementById('rotp-single').value.trim();
   if(otp.length!==6){setMsg('owner-msg','❌ 6 digit OTP daalo','error');return;}
   setMsg('owner-msg','<span class="spinner"></span> Verify ho raha hai...','');
   const {data,error} = await sb.auth.verifyOtp({phone:regPhone,token:otp,type:'sms'});
@@ -633,11 +655,20 @@ async function submitRegistration(){
   if(!otpVerified){setMsg('submit-msg','❌ Pehle phone verify karo (Step 2)','error');return;}
   setMsg('submit-msg','<span class="spinner"></span> Submit ho raha hai...','');
 
+  // Pehle user save karo
+  const {error:userErr} = await sb.from('users').upsert({
+    id: regUserId,
+    phone: regPhone,
+    role: 'shopkeeper',
+    name: document.getElementById('owner-name').value.trim()
+  },{onConflict:'id'});
+  if(userErr) console.warn('User upsert:', userErr.message);
+
   const allSvcs = servicesData.flatMap(c=>
-    c.items.map(i=>({name:i.n, price:i.p, duration_minutes:i.d, category:c.name}))
+    c.items.filter(i=>i.saved).map(i=>({name:i.n, price:i.p, duration_minutes:i.d, category:c.name}))
   );
 
-  const {data:shop, error} = await sb.from('shops').insert([{
+  const {error} = await sb.from('shops').insert([{
     owner_id: regUserId,
     owner_name: document.getElementById('owner-name').value.trim(),
     name: document.getElementById('shop-name').value.trim(),
@@ -650,13 +681,9 @@ async function submitRegistration(){
     phone: regPhone,
     status: 'pending',
     services: allSvcs,
-  }]).select().single();
+  }]);
 
   if(error){setMsg('submit-msg','❌ Error: '+error.message,'error');return;}
-
-  // Save user role
-  await sb.from('users').upsert({id:regUserId, phone:regPhone, role:'shopkeeper', name:document.getElementById('owner-name').value.trim()},{onConflict:'id'});
-
   setMsg('submit-msg','','');
   goStep(8);
 }
