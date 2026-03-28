@@ -409,7 +409,7 @@ function goStep(n){
 }
 
 // Build time dropdowns on load
-buildTimeOptions();
+document.addEventListener('DOMContentLoaded', buildTimeOptions);
 
 // ─── OTP ─────────────────────────────────────────────
 async function sendRegOTP(){
