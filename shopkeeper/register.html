@@ -201,7 +201,8 @@ option{background:var(--bg3);}
     </div>
     <div class="field">
       <div class="field-label">दुकान मालिक का ईमेल (अगर है तो / जरूरी नहीं है)</div>
-      <input class="field-input" id="owner-email" type="email" placeholder="example@gmail.com">
+      <input class="field-input" id="owner-email" type="email" placeholder="example@gmail.com" oninput="validateEmail(this)">
+      <div id="email-msg" class="msg"></div>
     </div>
     <div id="otp-section" style="display:none;">
       <div class="field-label" style="margin-bottom:8px;">OTP डालें *</div>
@@ -507,6 +508,14 @@ function goStep(n){
 // Build time dropdowns on load
 document.addEventListener('DOMContentLoaded', buildTimeOptions);
 
+function validateEmail(el){
+  const val = el.value.trim();
+  if(!val){ setMsg('email-msg','',''); return; }
+  const ok = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(val);
+  if(!ok) setMsg('email-msg','❌ सही ईमेल डालें — जैसे: name@gmail.com','error');
+  else setMsg('email-msg','✅ ईमेल सही है','success');
+}
+
 // ─── OTP ─────────────────────────────────────────────
 async function sendRegOTP(){
   const ph = document.getElementById('owner-phone').value.trim();
@@ -538,6 +547,11 @@ async function verifyRegOTP(){
 function handleOwnerNext(){
   const name = document.getElementById('owner-name').value.trim();
   if(!name){setMsg('owner-msg','❌ Naam daalna zaroori hai','error');return;}
+  const email = document.getElementById('owner-email').value.trim();
+  if(email && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)){
+    setMsg('email-msg','❌ सही ईमेल डालें — जैसे: name@gmail.com','error');
+    return;
+  }
   if(!otpSent){ sendRegOTP(); return; }
   if(!otpVerified){ verifyRegOTP(); return; }
   goStep(3);
