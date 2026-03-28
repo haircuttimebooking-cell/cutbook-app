@@ -777,10 +777,10 @@ function delService(ci,ii){
 }
 
 function handleServicesNext(){
-  // Check karo koi unsaved service to nahi hai
-  const unsaved = servicesData.some(cat => cat.items.some(i => !i.saved));
+  const unsaved = servicesData.some(cat => cat.items.some(i => i.saved === false));
   if(unsaved){
     setMsg('svc-msg','❌ पहले सभी services को "✔ सेव" करें — फिर आगे जाएं','error');
+    window.scrollTo(0, document.getElementById('svc-msg').offsetTop - 100);
     return;
   }
   setMsg('svc-msg','','');
