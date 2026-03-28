@@ -496,6 +496,8 @@ function validateTiming(){
 function handleTimingNext(){
   if(validateTiming()) goStep(5);
 }
+
+function toggleDay(i){
   const el = document.getElementById('day-'+i);
   if(closedDays.includes(i)){
     closedDays = closedDays.filter(d=>d!==i);
