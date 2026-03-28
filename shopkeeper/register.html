@@ -547,6 +547,11 @@ function openMap(){
       const pos = leafletPin.getLatLng();
       reverseGeocode(pos.lat, pos.lng);
     });
+    // Map click se bhi pin move ho
+    leafletMap.on('click', e=>{
+      leafletPin.setLatLng(e.latlng);
+      reverseGeocode(e.latlng.lat, e.latlng.lng);
+    });
   }
 
   getCurrentLocation();
@@ -563,10 +568,10 @@ function getCurrentLocation(){
       leafletPin.setLatLng([lat,lng]);
       reverseGeocode(lat,lng);
     }, err=>{
-      setMsg('loc-msg','⚠️ GPS नहीं मिला — Map पर pin drag करें','error');
+      setMsg('loc-msg','⚠️ कृपया GPS Location ON करें','error');
     },{enableHighAccuracy:true,timeout:10000});
   } else {
-    setMsg('loc-msg','⚠️ GPS support नहीं — Map पर pin drag करें','error');
+    setMsg('loc-msg','⚠️ कृपया GPS Location ON करें','error');
   }
 }
 
@@ -660,7 +665,13 @@ function renderServices(){
       <div class="cat-body" id="cat-body-${ci}">
         ${cat.items.length===0
           ? `<div style="font-size:11px;color:var(--tx3);font-family:var(--dv);padding:6px 0;">कोई service नहीं — "➕ सेवा जोड़ें" dabao</div>`
-          : cat.items.map((item,ii)=>item.saved
+          : `<div style="display:flex;gap:6px;padding:4px 0 8px;border-bottom:1px solid var(--bd);margin-bottom:6px;">
+              <div style="flex:2;font-size:10px;color:var(--tx3);font-family:var(--dv);">सेवा काम नाम</div>
+              <div style="flex:1;font-size:10px;color:var(--tx3);font-family:var(--dv);text-align:center;">मूल्य/रेट</div>
+              <div style="flex:1;font-size:10px;color:var(--tx3);font-family:var(--dv);text-align:center;">समय/Time</div>
+              <div style="width:52px;"></div>
+            </div>
+            ${cat.items.map((item,ii)=>item.saved
             ? `<div class="svc-saved-row">
                 <div style="flex:1;">
                   <div style="font-size:12px;font-weight:600;">${item.n}</div>
@@ -677,7 +688,7 @@ function renderServices(){
                 <input class="svc-dur-input" id="svc-d-${ci}-${ii}" value="${item.d}" type="number" placeholder="मिनट में समय दर्ज करें">
                 <div onclick="saveService(${ci},${ii})" style="padding:6px 12px;background:var(--gr);border-radius:8px;font-size:11px;color:#fff;cursor:pointer;white-space:nowrap;font-family:var(--dv);">✔ सेव</div>
               </div>`
-          ).join('')
+          ).join('')}`
         }
       </div>
     </div>`).join('');
