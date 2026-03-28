@@ -277,6 +277,10 @@ option{background:var(--bg3);}
       </button>
       <div id="map-wrap">
         <div id="map"></div>
+        <div style="display:flex;gap:8px;padding:8px 10px;background:var(--bg3);border-top:1px solid var(--bd);">
+          <button onclick="getCurrentLocation()" style="flex:1;background:var(--or);border:none;color:#fff;padding:8px;border-radius:8px;font-size:11px;cursor:pointer;font-family:var(--dv);">📡 Live Location</button>
+          <button onclick="skipLocation()" style="flex:1;background:var(--bg4);border:1px solid var(--bd2);color:var(--tx3);padding:8px;border-radius:8px;font-size:11px;cursor:pointer;font-family:var(--dv);">Skip करें</button>
+        </div>
         <div class="map-hint">📌 Pin को drag करके सही जगह पर रखें</div>
       </div>
       <div id="loc-info" style="display:none;background:var(--bg3);border:1px solid var(--bd2);border-radius:10px;padding:10px 12px;margin-top:4px;">
@@ -526,18 +530,17 @@ function handleShopNext(){
 // ─── LOCATION / MAP ──────────────────────────────────
 function openMap(){
   const wrap = document.getElementById('map-wrap');
-  const btn = document.getElementById('loc-btn');
   if(wrap.style.display==='block'){
     wrap.style.display='none'; return;
   }
   wrap.style.display='block';
   setMsg('loc-msg','<span class="spinner"></span> लोकेशन ढूंढ रहे हैं...','');
 
-  // Init map only once
   if(!leafletMap){
     leafletMap = L.map('map').setView([26.8, 80.9], 13);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
-      attribution:'© OpenStreetMap'
+    // Satellite layer (Esri — free, no API key)
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{
+      attribution:'© Esri © OpenStreetMap'
     }).addTo(leafletMap);
     leafletPin = L.marker([26.8,80.9],{draggable:true}).addTo(leafletMap);
     leafletPin.on('dragend', ()=>{
@@ -546,22 +549,25 @@ function openMap(){
     });
   }
 
-  // GPS se current location
+  getCurrentLocation();
+  setTimeout(()=>leafletMap.invalidateSize(),300);
+}
+
+function getCurrentLocation(){
+  setMsg('loc-msg','<span class="spinner"></span> GPS से लोकेशन ले रहे हैं...','');
   if(navigator.geolocation){
     navigator.geolocation.getCurrentPosition(pos=>{
       const lat = pos.coords.latitude;
       const lng = pos.coords.longitude;
-      leafletMap.setView([lat,lng],16);
+      leafletMap.setView([lat,lng],17);
       leafletPin.setLatLng([lat,lng]);
       reverseGeocode(lat,lng);
     }, err=>{
       setMsg('loc-msg','⚠️ GPS नहीं मिला — Map पर pin drag करें','error');
-    });
+    },{enableHighAccuracy:true,timeout:10000});
   } else {
-    setMsg('loc-msg','⚠️ GPS नहीं मिला — Map पर pin drag करें','error');
+    setMsg('loc-msg','⚠️ GPS support नहीं — Map पर pin drag करें','error');
   }
-
-  setTimeout(()=>leafletMap.invalidateSize(),300);
 }
 
 async function reverseGeocode(lat,lng){
@@ -576,7 +582,6 @@ async function reverseGeocode(lat,lng){
     document.getElementById('loc-map-link').href = `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}`;
     document.getElementById('loc-btn').classList.add('active');
     document.getElementById('loc-btn').innerHTML = '✅ लोकेशन चुनी गई — बदलने के लिए tap करें';
-    // Auto-fill address if empty
     if(!document.getElementById('shop-address').value.trim()){
       document.getElementById('shop-address').value = addr;
     }
@@ -584,6 +589,15 @@ async function reverseGeocode(lat,lng){
   }catch(e){
     setMsg('loc-msg','⚠️ पता नहीं मिला — Manual भरें','error');
   }
+}
+
+function skipLocation(){
+  shopLat = null; shopLng = null;
+  document.getElementById('map-wrap').style.display='none';
+  document.getElementById('loc-info').style.display='none';
+  document.getElementById('loc-btn').classList.remove('active');
+  document.getElementById('loc-btn').innerHTML = '📍 लोकेशन चुनें — Map पर Pin करें';
+  setMsg('loc-msg','','');
 }
 
 // ─── TIMING SLOTS (30 min intervals) ────────────────
