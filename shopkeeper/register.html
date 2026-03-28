@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>My Haircut Booking — Dukan Register karo</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -136,6 +138,18 @@ option{background:var(--bg3);}
 @keyframes spin{to{transform:rotate(360deg)}}
 
 .info-box{background:rgba(244,123,32,0.07);border:1px solid rgba(244,123,32,0.2);border-radius:10px;padding:10px 14px;font-size:11px;color:var(--or);font-family:var(--dv);line-height:1.6;margin-bottom:16px;}
+
+/* Location / Map */
+.loc-btn{display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--bd2);border-radius:12px;padding:12px 14px;cursor:pointer;font-size:13px;color:var(--tx2);font-family:'DM Sans',sans-serif;width:100%;margin-bottom:10px;transition:border .2s;}
+.loc-btn:hover{border-color:var(--or);}
+.loc-btn.active{border-color:var(--gr);color:var(--gr);}
+#map-wrap{display:none;border-radius:14px;overflow:hidden;border:1px solid var(--bd2);margin-bottom:10px;}
+#map{height:220px;width:100%;}
+.map-hint{font-size:10px;color:var(--tx3);font-family:var(--dv);text-align:center;padding:6px 0 2px;}
+.loc-addr-row{display:flex;align-items:center;gap:8px;margin-bottom:4px;}
+.loc-addr-lbl{font-size:10px;color:var(--tx3);font-family:var(--dv);white-space:nowrap;}
+.loc-addr-val{font-size:11px;color:var(--tx);flex:1;font-family:var(--dv);}
+.loc-map-link{font-size:10px;color:var(--or);cursor:pointer;text-decoration:none;}
 </style>
 </head>
 <body>
@@ -253,6 +267,28 @@ option{background:var(--bg3);}
     <div class="field">
       <div class="field-label">पूरा पता *</div>
       <textarea class="field-input" id="shop-address" rows="3" placeholder="मकान नंबर, गली, मोहल्ला, लैंडमार्क..." style="resize:none;line-height:1.5;"></textarea>
+    </div>
+
+    <!-- Location -->
+    <div class="field">
+      <div class="field-label">दुकान का लोकेशन (Optional)</div>
+      <button class="loc-btn" id="loc-btn" onclick="openMap()">
+        📍 लोकेशन चुनें — Map पर Pin करें
+      </button>
+      <div id="map-wrap">
+        <div id="map"></div>
+        <div class="map-hint">📌 Pin को drag करके सही जगह पर रखें</div>
+      </div>
+      <div id="loc-info" style="display:none;background:var(--bg3);border:1px solid var(--bd2);border-radius:10px;padding:10px 12px;margin-top:4px;">
+        <div class="loc-addr-row">
+          <div class="loc-addr-lbl">📍 पता:</div>
+          <div class="loc-addr-val" id="loc-addr-txt">—</div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;margin-top:4px;">
+          <a id="loc-map-link" href="#" target="_blank" class="loc-map-link">🗺️ Map पर देखें ↗</a>
+        </div>
+      </div>
+      <div id="loc-msg" class="msg"></div>
     </div>
     <div id="shop-msg" class="msg"></div>
     <div class="btn-wrap">
@@ -383,14 +419,41 @@ let otpVerified = false;
 let regPhone = '';
 let regUserId = '';
 let closedDays = [];
+let shopLat = null;
+let shopLng = null;
+let leafletMap = null;
+let leafletPin = null;
 
 const stepNames = ['','Swagat','Owner Details','Shop Details','Timing','Services','Photos','Review','Done'];
 const categories = [
-  {name:'बाल कटिंग', icon:'✂️', suggestions:[{n:'हेयरकट',p:80,d:30},{n:'बच्चों का कट',p:50,d:20}]},
-  {name:'दाढ़ी शेव / ट्रिम', icon:'🪒', suggestions:[{n:'शेव',p:60,d:15},{n:'दाढ़ी ट्रिम',p:40,d:20}]},
-  {name:'हेयर कलर / स्टाइलिंग', icon:'🎨', suggestions:[{n:'हेयर कलर',p:200,d:60},{n:'हेयर स्टाइल',p:150,d:45}]},
-  {name:'फेशियल', icon:'🧖', suggestions:[{n:'फेशियल',p:120,d:45}]},
-  {name:'हेड मसाज / स्पा', icon:'💆', suggestions:[{n:'हेड मसाज',p:80,d:30}]},
+  {name:'बाल कटिंग', icon:'✂️', suggestions:[
+    {n:'हेयरकट',p:50,d:25},
+    {n:'बच्चों का हेयरकट',p:50,d:20},
+    {n:'स्पेशल हेयरकट',p:80,d:30},
+  ]},
+  {name:'दाढ़ी शेव / ट्रिम', icon:'🪒', suggestions:[
+    {n:'दाढ़ी शेव',p:50,d:15},
+    {n:'दाढ़ी सेट/ट्रिम',p:40,d:15},
+    {n:'स्पेशल दाढ़ी शेव',p:60,d:20},
+    {n:'दाढ़ी ट्रिम',p:40,d:20},
+  ]},
+  {name:'हेयर कलर / स्टाइलिंग', icon:'🎨', suggestions:[
+    {n:'हेयर डाई',p:50,d:10},
+    {n:'स्पेशल हेयर डाई',p:150,d:20},
+    {n:'कर्ली हेयर स्टाइल',p:150,d:45},
+    {n:'हेयर कलर',p:200,d:60},
+    {n:'हेयर स्टेट',p:1000,d:60},
+  ]},
+  {name:'फेशियल', icon:'🧖', suggestions:[
+    {n:'नॉर्मल फेशियल',p:120,d:20},
+    {n:'ब्लीच',p:200,d:30},
+    {n:'आईब्रो सेट',p:30,d:10},
+    {n:'स्पेशल फेशियल',p:180,d:45},
+  ]},
+  {name:'हेड मसाज / स्पा', icon:'💆', suggestions:[
+    {n:'हेड मसाज',p:50,d:30},
+    {n:'हेयर स्पा',p:80,d:30},
+  ]},
 ];
 let servicesData = categories.map(c=>({...c, items:[]}));
 
@@ -458,6 +521,69 @@ function handleShopNext(){
   if(document.getElementById('shop-pin').value.length!==6){setMsg('shop-msg','❌ 6 digit PIN code daalo','error');return;}
   if(!document.getElementById('shop-address').value.trim()){setMsg('shop-msg','❌ Pura pata daalo','error');return;}
   goStep(4);
+}
+
+// ─── LOCATION / MAP ──────────────────────────────────
+function openMap(){
+  const wrap = document.getElementById('map-wrap');
+  const btn = document.getElementById('loc-btn');
+  if(wrap.style.display==='block'){
+    wrap.style.display='none'; return;
+  }
+  wrap.style.display='block';
+  setMsg('loc-msg','<span class="spinner"></span> लोकेशन ढूंढ रहे हैं...','');
+
+  // Init map only once
+  if(!leafletMap){
+    leafletMap = L.map('map').setView([26.8, 80.9], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+      attribution:'© OpenStreetMap'
+    }).addTo(leafletMap);
+    leafletPin = L.marker([26.8,80.9],{draggable:true}).addTo(leafletMap);
+    leafletPin.on('dragend', ()=>{
+      const pos = leafletPin.getLatLng();
+      reverseGeocode(pos.lat, pos.lng);
+    });
+  }
+
+  // GPS se current location
+  if(navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(pos=>{
+      const lat = pos.coords.latitude;
+      const lng = pos.coords.longitude;
+      leafletMap.setView([lat,lng],16);
+      leafletPin.setLatLng([lat,lng]);
+      reverseGeocode(lat,lng);
+    }, err=>{
+      setMsg('loc-msg','⚠️ GPS नहीं मिला — Map पर pin drag करें','error');
+    });
+  } else {
+    setMsg('loc-msg','⚠️ GPS नहीं मिला — Map पर pin drag करें','error');
+  }
+
+  setTimeout(()=>leafletMap.invalidateSize(),300);
+}
+
+async function reverseGeocode(lat,lng){
+  shopLat = lat; shopLng = lng;
+  setMsg('loc-msg','<span class="spinner"></span> पता ढूंढ रहे हैं...','');
+  try{
+    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`);
+    const data = await res.json();
+    const addr = data.display_name || `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+    document.getElementById('loc-addr-txt').textContent = addr;
+    document.getElementById('loc-info').style.display='block';
+    document.getElementById('loc-map-link').href = `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}`;
+    document.getElementById('loc-btn').classList.add('active');
+    document.getElementById('loc-btn').innerHTML = '✅ लोकेशन चुनी गई — बदलने के लिए tap करें';
+    // Auto-fill address if empty
+    if(!document.getElementById('shop-address').value.trim()){
+      document.getElementById('shop-address').value = addr;
+    }
+    setMsg('loc-msg','','');
+  }catch(e){
+    setMsg('loc-msg','⚠️ पता नहीं मिला — Manual भरें','error');
+  }
 }
 
 // ─── TIMING SLOTS (30 min intervals) ────────────────
@@ -617,6 +743,15 @@ function handlePhotoNext(){
   goStep(7);
 }
 
+// ─── TIME FORMAT HELPER ──────────────────────────────
+function fmtTime(val){
+  if(!val) return '—';
+  const [h,m] = val.split(':').map(Number);
+  const hh = h%12===0?12:h%12;
+  const ampm = h<12?'AM':'PM';
+  return `${hh}:${String(m).padStart(2,'0')} ${ampm}`;
+}
+
 // ─── REVIEW ──────────────────────────────────────────
 function renderReview(){
   const allSvcs = servicesData.flatMap(c=>c.items.map(i=>i.n+' ₹'+i.p));
@@ -632,11 +767,12 @@ function renderReview(){
       <div class="review-row"><div class="review-key">शहर</div><div class="review-val">${document.getElementById('shop-city').value||'—'}</div></div>
       <div class="review-row"><div class="review-key">PIN</div><div class="review-val">${document.getElementById('shop-pin').value||'—'}</div></div>
       <div class="review-row"><div class="review-key">पता</div><div class="review-val">${document.getElementById('shop-address').value||'—'}</div></div>
+      ${shopLat ? `<div class="review-row"><div class="review-key">📍 लोकेशन</div><div class="review-val"><a href="https://www.openstreetmap.org/?mlat=${shopLat}&mlon=${shopLng}" target="_blank" style="color:var(--or);">🗺️ Map पर देखें ↗</a></div></div>` : ''}
     </div>
     <div class="review-card">
       <div class="review-card-head">⏰ समय</div>
-      <div class="review-row"><div class="review-key">खुलना</div><div class="review-val">${document.getElementById('open-time').value}</div></div>
-      <div class="review-row"><div class="review-key">बंद</div><div class="review-val">${document.getElementById('close-time').value}</div></div>
+      <div class="review-row"><div class="review-key">खुलना</div><div class="review-val">${fmtTime(document.getElementById('open-time').value)}</div></div>
+      <div class="review-row"><div class="review-key">बंद</div><div class="review-val">${fmtTime(document.getElementById('close-time').value)}</div></div>
     </div>
     <div class="review-card">
       <div class="review-card-head">✂️ Services (${allSvcs.length})</div>
@@ -683,6 +819,8 @@ async function submitRegistration(){
     phone: regPhone,
     status: 'pending',
     services: allSvcs,
+    latitude: shopLat,
+    longitude: shopLng,
   }]);
 
   if(error){setMsg('submit-msg','❌ Error: '+error.message,'error');return;}
