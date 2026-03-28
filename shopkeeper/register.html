@@ -186,10 +186,10 @@ option{background:var(--bg3);}
   <!-- Step 2: Owner + OTP -->
   <div class="step" id="step-2">
     <div class="step-icon">👤</div>
-    <div class="step-title">मालिक की जानकारी</div>
+    <div class="step-title">दुकान मालिक की जानकारी</div>
     <div class="step-sub">Aapka naam aur phone number — OTP se verify hoga</div>
     <div class="field">
-      <div class="field-label">मालिक का नाम *</div>
+      <div class="field-label">दुकान मालिक का नाम *</div>
       <input class="field-input" id="owner-name" type="text" placeholder="जैसे: राजेश कुमार">
     </div>
     <div class="field">
@@ -198,6 +198,10 @@ option{background:var(--bg3);}
         <div class="phone-prefix">+91</div>
         <input class="phone-field" id="owner-phone" type="tel" maxlength="10" placeholder="98765 43210" oninput="this.value=this.value.replace(/\D/g,'')">
       </div>
+    </div>
+    <div class="field">
+      <div class="field-label">दुकान मालिक का ईमेल (अगर है तो / जरूरी नहीं है)</div>
+      <input class="field-input" id="owner-email" type="email" placeholder="example@gmail.com">
     </div>
     <div id="otp-section" style="display:none;">
       <div class="field-label" style="margin-bottom:8px;">OTP डालें *</div>
@@ -333,6 +337,29 @@ option{background:var(--bg3);}
     </div>
   </div>
 
+  <!-- Step 5: Barbers -->
+  <div class="step" id="step-5b">
+    <div class="step-icon">💈</div>
+    <div class="step-title">दुकान के नाई</div>
+    <div class="step-sub">दुकान में कितनी कुर्सियाँ हैं और कौन काम करता है</div>
+    <div class="field">
+      <div class="field-label">दुकान में कितनी कुर्सियाँ हैं? *</div>
+      <select class="field-input" id="chair-count" onchange="renderChairInputs()">
+        <option value="1">1 कुर्सी</option>
+        <option value="2" selected>2 कुर्सियाँ</option>
+        <option value="3">3 कुर्सियाँ</option>
+        <option value="4">4 कुर्सियाँ</option>
+        <option value="5">5 कुर्सियाँ</option>
+      </select>
+    </div>
+    <div id="chair-inputs"></div>
+    <div id="barber-msg" class="msg"></div>
+    <div class="btn-wrap">
+      <button class="btn-prev" onclick="goStep(4)">← Wapas</button>
+      <button class="btn-next" onclick="handleBarberNext()">आगे →</button>
+    </div>
+  </div>
+
   <!-- Step 5: Services -->
   <div class="step" id="step-5">
     <div class="step-icon">✂️</div>
@@ -341,7 +368,7 @@ option{background:var(--bg3);}
     <div id="services-container"></div>
     <div id="svc-msg" class="msg"></div>
     <div class="btn-wrap">
-      <button class="btn-prev" onclick="goStep(4)">← Wapas</button>
+      <button class="btn-prev" onclick="goStep('5b')">← Wapas</button>
       <button class="btn-next" onclick="goStep(6)">आगे →</button>
     </div>
     <button class="btn-skip" onclick="goStep(6)">अभी छोड़ें — बाद में जोड़ूंगा</button>
@@ -466,11 +493,13 @@ function goStep(n){
   document.getElementById('step-'+currentStep).classList.remove('active');
   currentStep = n;
   document.getElementById('step-'+currentStep).classList.add('active');
-  const pct = (n/8)*100;
+  const stepNum = n==='5b' ? 5 : n;
+  const pct = (stepNum/8)*100;
   document.getElementById('progress-fill').style.width = pct+'%';
-  document.getElementById('step-lbl').textContent = n<=7 ? `Step ${n} / 7` : 'Done!';
-  document.getElementById('step-name-lbl').textContent = stepNames[n]||'';
+  document.getElementById('step-lbl').textContent = stepNum<=7 ? `Step ${stepNum} / 7` : 'Done!';
+  document.getElementById('step-name-lbl').textContent = stepNames[n]||stepNames[stepNum]||'';
   if(n===5) renderServices();
+  if(n==='5b') renderChairInputs();
   if(n===7) renderReview();
   window.scrollTo(0,0);
 }
@@ -639,7 +668,7 @@ function validateTiming(){
 }
 
 function handleTimingNext(){
-  if(validateTiming()) goStep(5);
+  if(validateTiming()) goStep('5b');
 }
 
 function toggleDay(i){
@@ -651,6 +680,34 @@ function toggleDay(i){
     closedDays.push(i);
     el.classList.add('off');
   }
+}
+
+// ─── BARBERS / CHAIRS ────────────────────────────────
+let barbersData = [];
+
+function renderChairInputs(){
+  const count = parseInt(document.getElementById('chair-count').value);
+  let html = '';
+  for(let i=1;i<=count;i++){
+    const val = barbersData[i-1] || '';
+    html += `<div class="field">
+      <div class="field-label">💺 कुर्सी ${i} पर काम करने वाले नाई का नाम *</div>
+      <input class="field-input" id="barber-${i}" type="text" placeholder="जैसे: रामू बाबू" value="${val}" oninput="barbersData[${i-1}]=this.value">
+    </div>`;
+  }
+  document.getElementById('chair-inputs').innerHTML = html;
+}
+
+function handleBarberNext(){
+  const count = parseInt(document.getElementById('chair-count').value);
+  barbersData = [];
+  for(let i=1;i<=count;i++){
+    const val = document.getElementById('barber-'+i).value.trim();
+    if(!val){setMsg('barber-msg','❌ सभी कुर्सियों के नाई का नाम भरें','error');return;}
+    barbersData.push(val);
+  }
+  setMsg('barber-msg','','');
+  goStep(5);
 }
 
 // ─── SERVICES — Save/Edit/Delete flow ───────────────
@@ -667,8 +724,8 @@ function renderServices(){
           ? `<div style="font-size:11px;color:var(--tx3);font-family:var(--dv);padding:6px 0;">कोई service नहीं — "➕ सेवा जोड़ें" dabao</div>`
           : `<div style="display:flex;gap:6px;padding:4px 0 8px;border-bottom:1px solid var(--bd);margin-bottom:6px;">
               <div style="flex:2;font-size:10px;color:var(--tx3);font-family:var(--dv);">सेवा काम नाम</div>
-              <div style="flex:1;font-size:10px;color:var(--tx3);font-family:var(--dv);text-align:center;">मूल्य/रेट</div>
-              <div style="flex:1;font-size:10px;color:var(--tx3);font-family:var(--dv);text-align:center;">समय/Time</div>
+              <div style="flex:1;font-size:10px;color:var(--tx3);font-family:var(--dv);text-align:center;">क्या मूल्य/रेट है</div>
+              <div style="flex:1;font-size:10px;color:var(--tx3);font-family:var(--dv);text-align:center;">कितने मिनट लगेंगे?</div>
               <div style="width:52px;"></div>
             </div>
             ${cat.items.map((item,ii)=>item.saved
@@ -842,10 +899,12 @@ async function submitRegistration(){
     closing_time: document.getElementById('close-time').value,
     closed_days: closedDays,
     phone: regPhone,
+    email: document.getElementById('owner-email').value.trim() || null,
     status: 'pending',
     services: allSvcs,
     latitude: shopLat,
     longitude: shopLng,
+    barbers: barbersData,
   }]);
 
   if(error){setMsg('submit-msg','❌ Error: '+error.message,'error');return;}
