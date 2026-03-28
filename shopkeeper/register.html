@@ -369,7 +369,7 @@ option{background:var(--bg3);}
     <div id="svc-msg" class="msg"></div>
     <div class="btn-wrap">
       <button class="btn-prev" onclick="goStep('5b')">← Wapas</button>
-      <button class="btn-next" onclick="goStep(6)">आगे →</button>
+      <button class="btn-next" onclick="handleServicesNext()">आगे →</button>
     </div>
     <button class="btn-skip" onclick="goStep(6)">अभी छोड़ें — बाद में जोड़ूंगा</button>
   </div>
@@ -774,6 +774,17 @@ function editService(ci,ii){
 function delService(ci,ii){
   servicesData[ci].items.splice(ii,1);
   renderServices();
+}
+
+function handleServicesNext(){
+  // Check karo koi unsaved service to nahi hai
+  const unsaved = servicesData.some(cat => cat.items.some(i => !i.saved));
+  if(unsaved){
+    setMsg('svc-msg','❌ पहले सभी services को "✔ सेव" करें — फिर आगे जाएं','error');
+    return;
+  }
+  setMsg('svc-msg','','');
+  goStep(6);
 }
 
 // ─── PHOTOS — Multi upload, preview, remove ──────────
