@@ -655,8 +655,65 @@ async function loadBookingsFromDB(){
 // ─── SUPABASE: REALTIME ──────────────────────────────
 function subscribeBookings(){
   sb.channel('bookings-shop')
-    .on('postgres_changes',{event:'*',schema:'public',table:'bookings'},()=>loadBookingsFromDB())
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'bookings'}, async (payload)=>{
+      await loadBookingsFromDB();
+      playNotifSound();
+      sendBrowserNotif(
+        '🔔 Nayi Booking!',
+        `${payload.new.customer_name||'Customer'} — ${payload.new.service||'Service'} · ${payload.new.booking_time||''}`
+      );
+    })
+    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'bookings'},()=>loadBookingsFromDB())
     .subscribe();
+
+  // Shop approval watch karo
+  sb.channel('shop-status')
+    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'shops',filter:`owner_id=eq.${currentShopOwnerId}`}, (payload)=>{
+      if(payload.new.status === 'active' && payload.old.status !== 'active'){
+        playNotifSound();
+        sendBrowserNotif('✅ Shop Approved!', 'Aapki dukan ab live hai — customers book kar sakte hain!');
+        toast('🎉 Aapki dukan APPROVE ho gayi! Ab live hai!');
+      }
+    })
+    .subscribe();
+}
+
+// ─── BROWSER NOTIFICATION ────────────────────────────
+function sendBrowserNotif(title, body){
+  if(!('Notification' in window)) return;
+  if(Notification.permission === 'granted'){
+    new Notification(title, {
+      body: body,
+      icon: '../assets/logo.png',
+      badge: '../assets/logo.png',
+      vibrate: [200, 100, 200],
+    });
+  } else if(Notification.permission !== 'denied'){
+    Notification.requestPermission().then(perm=>{
+      if(perm === 'granted'){
+        new Notification(title, { body, icon: '../assets/logo.png' });
+      }
+    });
+  }
+}
+
+// ─── NOTIFICATION SOUND ──────────────────────────────
+function playNotifSound(){
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    [880, 1100, 1320].forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.frequency.value = freq;
+      osc.type = 'sine';
+      gain.gain.setValueAtTime(0.3, ctx.currentTime + i * 0.15);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.15 + 0.3);
+      osc.start(ctx.currentTime + i * 0.15);
+      osc.stop(ctx.currentTime + i * 0.15 + 0.3);
+    });
+  } catch(e){ console.log('Sound error:', e); }
 }
 
 // ─── SUPABASE: ACCEPT ────────────────────────────────
@@ -1082,11 +1139,21 @@ function toast(msg){
 }
 
 // ─── INIT ─────────────────────────────────────────────
+let currentShopOwnerId = null;
+
 function init(){
   const now = new Date();
   document.getElementById('today-date').textContent = `${now.getDate()} ${monthNames[now.getMonth()]} ${now.getFullYear()} · ${dayNames[now.getDay()]}`;
+  // Notification permission maango
+  if('Notification' in window && Notification.permission === 'default'){
+    Notification.requestPermission();
+  }
   loadBookingsFromDB();
-  subscribeBookings();
+  // Owner ID fetch karo shop approval ke liye
+  sb.auth.getUser().then(({data})=>{
+    if(data?.user){ currentShopOwnerId = data.user.id; }
+    subscribeBookings();
+  });
   renderBarberSlots(0);
   renderBarberSlots(1);
 }
