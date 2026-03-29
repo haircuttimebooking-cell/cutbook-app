@@ -164,7 +164,7 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
 <div id="login-screen" style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;">
   <div style="width:100%;max-width:360px;">
     <div style="text-align:center;margin-bottom:32px;">
-      <img src="assets/logo.png" style="width:56px;height:56px;object-fit:contain;margin-bottom:12px;">
+      <img src="../assets/logo.png" style="width:56px;height:56px;object-fit:contain;margin-bottom:12px;">
       <div style="font-size:22px;font-weight:700;">CutBook <span style="color:var(--or);">Admin</span></div>
       <div style="font-size:12px;color:var(--tx3);margin-top:4px;font-family:var(--dv);">Superadmin panel — sirf authorized access</div>
     </div>
@@ -198,7 +198,7 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
 
 <div class="app-header">
   <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:6px;">
-    <img src="assets/logo.png" style="width:56px;height:56px;object-fit:contain;">
+    <img src="../assets/logo.png" style="width:56px;height:56px;object-fit:contain;">
     <h1>CutBook <span>Admin</span></h1>
   </div>
   <p>Platform management · Superadmin panel</p>
@@ -210,7 +210,7 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
   <div class="sidebar">
     <div class="sb-logo">
       <div class="sb-logo-icon" style="background:none;padding:0;overflow:hidden;">
-        <img src="assets/logo.png" style="width:32px;height:32px;object-fit:contain;">
+        <img src="../assets/logo.png" style="width:32px;height:32px;object-fit:contain;">
       </div>
       <div>
         <div class="sb-logo-name">CutBook</div>
@@ -339,15 +339,36 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
         <div class="card">
           <div class="card-header">
             <div class="card-title">Pending Approvals</div>
-            <span class="badge badge-pending" id="pending-count-badge">Loading...</span>
+            <span class="badge badge-pending">5 baaki</span>
           </div>
-          <div class="card-body" style="padding:0;">
-            <table class="tbl">
-              <thead><tr><th>Shop</th><th>Phone</th><th>Status</th><th>Action</th></tr></thead>
-              <tbody id="pending-approvals-list">
-                <tr><td colspan="4" style="text-align:center;padding:20px;color:var(--tx3);">Loading...</td></tr>
-              </tbody>
-            </table>
+          <div class="card-body" style="padding:12px;">
+            <div class="approval-card">
+              <div class="ac-name">Sharma Hair Salon</div>
+              <div class="ac-meta">📍 Alambagh, Lucknow · Registered: Aaj</div>
+              <div class="ac-actions">
+                <button class="btn btn-success btn-sm" onclick="approveShop(this,'Sharma Hair Salon')">✓ Approve</button>
+                <button class="btn btn-danger btn-sm" onclick="rejectShop(this,'Sharma Hair Salon')">✕ Reject</button>
+                <button class="btn btn-ghost btn-sm" onclick="toast('📋 Sharma Hair Salon ka detail khul gaya')">View</button>
+              </div>
+            </div>
+            <div class="approval-card">
+              <div class="ac-name">Classic Barber</div>
+              <div class="ac-meta">📍 Gomti Nagar, Lucknow · Registered: Kal</div>
+              <div class="ac-actions">
+                <button class="btn btn-success btn-sm" onclick="approveShop(this,'Classic Barber')">✓ Approve</button>
+                <button class="btn btn-danger btn-sm" onclick="rejectShop(this,'Classic Barber')">✕ Reject</button>
+                <button class="btn btn-ghost btn-sm" onclick="toast('📋 Classic Barber ka detail khul gaya')">View</button>
+              </div>
+            </div>
+            <div class="approval-card" style="margin-bottom:0;">
+              <div class="ac-name">Modi Cuts & Style</div>
+              <div class="ac-meta">📍 Hazratganj, Lucknow · Registered: 2 din pehle</div>
+              <div class="ac-actions">
+                <button class="btn btn-success btn-sm" onclick="approveShop(this,'Modi Cuts')">✓ Approve</button>
+                <button class="btn btn-danger btn-sm" onclick="rejectShop(this,'Modi Cuts')">✕ Reject</button>
+                <button class="btn btn-ghost btn-sm" onclick="toast('📋 Modi Cuts ka detail khul gaya')">View</button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -453,7 +474,7 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
         <div class="card-body" style="padding:0;">
           <table class="tbl">
             <thead><tr><th>Customer</th><th>Shop</th><th>Service</th><th>Time</th><th>Amount</th><th>Status</th></tr></thead>
-            <tbody id="bookings-tbody">
+            <tbody>
               <tr><td style="font-size:12px;">Rahul Kumar</td><td style="font-size:11px;color:var(--tx2);">Raj Hair Studio</td><td style="font-size:11px;">✂️ Haircut</td><td style="font-size:11px;color:var(--tx3);">10:30 AM</td><td style="color:var(--gr);font-weight:600;">₹80</td><td><span class="badge badge-completed">Completed</span></td></tr>
               <tr><td style="font-size:12px;">Aman Singh</td><td style="font-size:11px;color:var(--tx2);">Modern Cut</td><td style="font-size:11px;">🪒 Shaving</td><td style="font-size:11px;color:var(--tx3);">11:00 AM</td><td style="color:var(--gr);font-weight:600;">₹60</td><td><span class="badge badge-active">Confirmed</span></td></tr>
               <tr><td style="font-size:12px;">Priya Sharma</td><td style="font-size:11px;color:var(--tx2);">Star Salon</td><td style="font-size:11px;">💇 Styling</td><td style="font-size:11px;color:var(--tx3);">11:30 AM</td><td style="color:var(--gr);font-weight:600;">₹150</td><td><span class="badge badge-pending">Pending</span></td></tr>
@@ -549,199 +570,82 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
 
 <div id="toast" class="toast"></div>
 
-<script>
-const SUPABASE_URL = 'https://kovpsqdkrlgwyfrqlhry.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtvdnBzcWRrcmxnd3lmcnFsaHJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1MTg3MDAsImV4cCI6MjA5MDA5NDcwMH0.poZR0KcozCyL1xSo3mFi_yle5bRNhM4TWe1nWfvVx30';
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+// Shops data
+const shopsData = [
+  {name:'Raj Hair Studio',loc:'Hazratganj, Lko',rating:'4.8',bookings:284,status:'active'},
+  {name:'Modern Cut',loc:'Alambagh, Lko',rating:'4.6',bookings:192,status:'active'},
+  {name:'Classic Barber',loc:'Gomti Nagar, Lko',rating:'4.4',bookings:87,status:'pending'},
+  {name:'Star Salon',loc:'Aminabad, Lko',rating:'4.9',bookings:341,status:'active'},
+  {name:'Sharma Hair',loc:'Aliganj, Lko',rating:'—',bookings:0,status:'pending'},
+  {name:'Royal Cutz',loc:'Kanpur',rating:'4.5',bookings:156,status:'active'},
+  {name:'Urban Barber',loc:'Agra',rating:'4.3',bookings:98,status:'suspended'},
+];
 
-let adminPhone = '';
-
-// ─── TOAST ────────────────────────────────────────────
-function toast(msg){
-  let t = document.getElementById('toast');
-  t.textContent = msg; t.style.opacity = '1';
-  setTimeout(()=>{ t.style.opacity='0'; }, 3000);
-}
-
-// ─── LOGIN MSG ───────────────────────────────────────
-function setLoginMsg(id, msg, color){
-  const el = document.getElementById(id);
-  if(el){ el.textContent = msg; el.style.color = color || 'var(--re)'; }
-}
-
-// ─── PANEL SWITCH ────────────────────────────────────
-function showPanel(id, el){
-  document.querySelectorAll('.screen-panel').forEach(p => p.classList.remove('active'));
-  document.getElementById('panel-'+id).classList.add('active');
-  document.querySelectorAll('.sb-item').forEach(s => s.classList.remove('active'));
-  if(el) el.classList.add('active');
-  if(id==='shops') loadShops();
-  if(id==='bookings') loadBookings();
-  if(id==='overview') loadOverview();
-}
-
-// ─── LOAD OVERVIEW ───────────────────────────────────
-async function loadOverview(){
-  const [{data:shops},{data:users},{data:bookings}] = await Promise.all([
-    sb.from('shops').select('id,status'),
-    sb.from('users').select('id,role'),
-    sb.from('bookings').select('id,status,price,created_at'),
-  ]);
-
-  const totalShops = shops?.length || 0;
-  const pendingShops = shops?.filter(s=>s.status==='pending').length || 0;
-  const totalUsers = users?.filter(u=>u.role==='customer').length || 0;
-  const todayBkgs = bookings?.filter(b=>{
-    const d = new Date(b.created_at);
-    const today = new Date();
-    return d.getDate()===today.getDate() && d.getMonth()===today.getMonth();
-  }).length || 0;
-  const todayRevenue = bookings?.filter(b=>{
-    const d = new Date(b.created_at);
-    const today = new Date();
-    return d.getDate()===today.getDate() && d.getMonth()===today.getMonth() && b.status==='completed';
-  }).reduce((s,b)=>s+(b.price||0),0) || 0;
-
-  // Update stat cards
-  const statVals = document.querySelectorAll('.stat-val');
-  if(statVals[0]) statVals[0].textContent = totalShops;
-  if(statVals[1]) statVals[1].textContent = totalUsers;
-  if(statVals[2]) statVals[2].textContent = todayBkgs;
-  if(statVals[3]) statVals[3].textContent = '₹'+todayRevenue;
-
-  // Update pending badge in sidebar
-  const badge = document.querySelector('.sb-badge');
-  if(badge) badge.textContent = pendingShops;
-  const countBadge = document.getElementById('pending-count-badge');
-  if(countBadge) countBadge.textContent = pendingShops + ' baaki';
-
-  // Load pending approvals in overview
-  const pending = shops ? [] : [];
-  const {data: pendingShopsData} = await sb.from('shops').select('*').eq('status','pending').order('created_at',{ascending:false}).limit(5);
-  const pendingList = document.getElementById('pending-approvals-list');
-  if(pendingList && pendingShopsData){
-    if(!pendingShopsData.length){
-      pendingList.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--tx3);font-family:var(--dv);padding:20px;">Koi pending shop nahi ✅</td></tr>';
-    } else {
-      pendingList.innerHTML = pendingShopsData.map(s=>`
-        <tr>
-          <td><div class="user-name">${s.name}</div><div class="user-meta">${s.owner_name||''} · ${s.city||''}</div></td>
-          <td style="font-size:11px;color:var(--tx2);">${s.phone||'—'}</td>
-          <td><span class="badge badge-pending">⏳ Pending</span></td>
-          <td>
-            <button class="btn btn-success btn-sm" onclick="approveShopById('${s.id}','${s.name}',this)">✓ Approve</button>
-            <button class="btn btn-danger btn-sm" style="margin-left:4px;" onclick="rejectShopById('${s.id}','${s.name}',this)">✕ Reject</button>
-          </td>
-        </tr>`).join('');
-    }
-  }
-}
-
-// ─── LOAD SHOPS ──────────────────────────────────────
-async function loadShops(){
+function renderShops(){
   const tbody = document.getElementById('shops-tbody');
-  if(!tbody) return;
-  tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--tx3);">Loading...</td></tr>';
-
-  const {data, error} = await sb.from('shops').select('*').order('created_at',{ascending:false});
-  if(error || !data){ tbody.innerHTML = '<tr><td colspan="6" style="color:var(--re);padding:20px;">Error loading shops</td></tr>'; return; }
-
-  if(!data.length){
-    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--tx3);font-family:var(--dv);padding:20px;">Koi shop registered nahi hai abhi</td></tr>';
-    return;
-  }
-
-  tbody.innerHTML = data.map(s => {
-    const badge = s.status==='active' ? 'badge-active' : s.status==='pending' ? 'badge-pending' : 'badge-suspended';
-    const label = s.status==='active' ? '✅ Active' : s.status==='pending' ? '⏳ Pending' : '⛔ Suspended';
-    const actionBtn = s.status==='pending'
-      ? `<button class="btn btn-success btn-sm" onclick="approveShopById('${s.id}','${s.name}',this)">✓ Approve</button>
-         <button class="btn btn-danger btn-sm" style="margin-left:4px;" onclick="rejectShopById('${s.id}','${s.name}',this)">✕ Reject</button>`
-      : s.status==='active'
-      ? `<button class="btn btn-danger btn-sm" onclick="suspendShopById('${s.id}','${s.name}',this)">⛔ Suspend</button>`
-      : `<button class="btn btn-ghost btn-sm" onclick="restoreShopById('${s.id}','${s.name}',this)">↺ Restore</button>`;
+  tbody.innerHTML = shopsData.map((s,i) => {
+    const badge = s.status === 'active' ? 'badge-active' : s.status === 'pending' ? 'badge-pending' : 'badge-suspended';
+    const label = s.status === 'active' ? '✅ Active' : s.status === 'pending' ? '⏳ Pending' : '⛔ Suspended';
+    const actionBtn = s.status === 'pending'
+      ? `<button class="btn btn-success btn-sm" onclick="approveShopRow(${i})">Approve</button>`
+      : s.status === 'active'
+      ? `<button class="btn btn-danger btn-sm" onclick="suspendShop(${i})">Suspend</button>`
+      : `<button class="btn btn-ghost btn-sm" onclick="toast('✅ Shop restored')">Restore</button>`;
     return `<tr>
-      <td><div style="display:flex;align-items:center;gap:8px;"><div class="user-avatar">✂️</div><div><div class="user-name">${s.name}</div><div class="user-meta">${s.owner_name||''}</div></div></div></td>
-      <td style="font-size:11px;color:var(--tx2);">${s.city||'—'}, ${s.pincode||''}</td>
-      <td style="color:var(--am);font-weight:600;">—</td>
-      <td style="color:var(--or);font-weight:600;">0</td>
+      <td><div style="display:flex;align-items:center;gap:8px;"><div class="user-avatar">✂️</div><div><div class="user-name">${s.name}</div></div></div></td>
+      <td style="font-size:11px;color:var(--tx2);">${s.loc}</td>
+      <td style="color:var(--am);font-weight:600;">${s.rating}★</td>
+      <td style="color:var(--or);font-weight:600;">${s.bookings}</td>
       <td><span class="badge ${badge}">${label}</span></td>
       <td>${actionBtn}</td>
     </tr>`;
   }).join('');
 }
 
-// ─── SHOP ACTIONS ────────────────────────────────────
-async function approveShopById(id, name, btn){
-  btn.disabled = true; btn.textContent = '...';
-  const {error} = await sb.from('shops').update({status:'active'}).eq('id',id);
-  if(error){ toast('❌ Error: '+error.message); btn.disabled=false; btn.textContent='✓ Approve'; return; }
-  toast('✅ '+name+' approved! Ab live hai.');
-  loadShops(); loadOverview();
+function approveShopRow(i){
+  shopsData[i].status = 'active';
+  renderShops();
+  toast(`✅ ${shopsData[i].name} approved!`);
+}
+function suspendShop(i){
+  shopsData[i].status = 'suspended';
+  renderShops();
+  toast(`⛔ ${shopsData[i].name} suspended`);
 }
 
-async function rejectShopById(id, name, btn){
-  if(!confirm(name+' ko reject karna hai?')) return;
-  btn.disabled = true;
-  const {error} = await sb.from('shops').update({status:'rejected'}).eq('id',id);
-  if(error){ toast('❌ Error: '+error.message); return; }
-  toast('❌ '+name+' rejected.');
-  loadShops(); loadOverview();
+function showPanel(id, el){
+  document.querySelectorAll('.screen-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  document.querySelectorAll('.sb-item').forEach(s => s.classList.remove('active'));
+  if(el) el.classList.add('active');
 }
 
-async function suspendShopById(id, name, btn){
-  if(!confirm(name+' ko suspend karna hai?')) return;
-  btn.disabled = true;
-  const {error} = await sb.from('shops').update({status:'suspended'}).eq('id',id);
-  if(error){ toast('❌ Error: '+error.message); return; }
-  toast('⛔ '+name+' suspended.');
-  loadShops();
+function approveShop(btn, name){
+  btn.  btn.closest('tr').querySelector('.badge').textContent = '✅ Active';
+  btn.closest('tr').querySelector('.badge').className = 'badge badge-active';
+  btn.textContent = 'Suspend';
+  btn.className = 'btn btn-danger btn-sm';
+  btn.onclick = function(){ toast('⛔ '+name+' suspended'); };
+  toast('✅ '+name+' approved!');
 }
 
-async function restoreShopById(id, name, btn){
-  btn.disabled = true;
-  const {error} = await sb.from('shops').update({status:'active'}).eq('id',id);
-  if(error){ toast('❌ Error: '+error.message); return; }
-  toast('✅ '+name+' restored!');
-  loadShops();
-}
-
-// ─── LOAD BOOKINGS ───────────────────────────────────
-async function loadBookings(){
-  const tbody = document.getElementById('bookings-tbody');
-  if(!tbody) return;
-  tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--tx3);">Loading...</td></tr>';
-
-  const {data, error} = await sb.from('bookings').select('*').order('created_at',{ascending:false}).limit(50);
-  if(error || !data){ tbody.innerHTML = '<tr><td colspan="6" style="color:var(--re);padding:20px;">Error loading bookings</td></tr>'; return; }
-
-  if(!data.length){
-    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--tx3);font-family:var(--dv);padding:20px;">Koi booking nahi abhi</td></tr>';
-    return;
-  }
-
-  const statusBadge = {pending:'badge-pending',accepted:'badge-active',completed:'badge-active',cancelled:'badge-rejected'};
-  tbody.innerHTML = data.map(b=>`
-    <tr>
-      <td style="font-size:12px;">${b.customer_name||'Customer'}</td>
-      <td style="font-size:11px;color:var(--tx2);">${b.shop_name||'—'}</td>
-      <td style="font-size:11px;">${b.service||'—'}</td>
-      <td style="font-size:11px;color:var(--tx3);">${b.booking_time||'—'}</td>
-      <td style="color:var(--or);font-weight:600;">₹${b.price||0}</td>
-      <td><span class="badge ${statusBadge[b.status]||'badge-pending'}">${b.status}</span></td>
-    </tr>`).join('');
-}
-
-// ─── BROADCAST ───────────────────────────────────────
-async function sendBroadcast(){
-  const msg = document.getElementById('broadcast-msg')?.value?.trim();
-  if(!msg){ toast('❌ Message likhna zaroori hai'); return; }
-  // Future: send via WhatsApp/SMS API
-  toast('📢 Broadcast sent to all shopkeepers! ('+msg.substring(0,30)+'...)');
-  if(document.getElementById('broadcast-msg')) document.getElementById('broadcast-msg').value = '';
+function toast(msg){
+  let t = document.getElementById('toast');
+  if(!t){ t = document.createElement('div'); t.id='toast'; t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--bg3);border:1px solid var(--bd2);color:var(--tx);font-size:12px;padding:10px 20px;border-radius:20px;z-index:9999;opacity:0;transition:opacity .3s;white-space:nowrap;box-shadow:0 8px 30px rgba(0,0,0,0.5);'; document.body.appendChild(t); }
+  t.textContent = msg; t.style.opacity = '1';
+  setTimeout(()=>{ t.style.opacity='0'; }, 3000);
 }
 
 // ─── SUPABASE AUTH ───────────────────────────────────
+const SUPABASE_URL = 'https://kovpsqdkrlgwyfrqlhry.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtvdnBzcWRrcmxnd3lmcnFsaHJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1MTg3MDAsImV4cCI6MjA5MDA5NDcwMH0.poZR0KcozCyL1xSo3mFi_yle5bRNhM4TWe1nWfvVx30';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let adminPhone = '';
+
+function setLoginMsg(id, msg, color){ document.getElementById(id).textContent = msg; document.getElementById(id).style.color = color || 'var(--re)'; }
+
 async function adminSendOTP(){
   const ph = document.getElementById('admin-phone').value.trim();
   if(ph.length !== 10){ setLoginMsg('login-msg','❌ 10 digit ka number daalo'); return; }
@@ -751,7 +655,7 @@ async function adminSendOTP(){
   if(error){ setLoginMsg('login-msg','❌ ' + error.message); return; }
   document.getElementById('login-phone-section').style.display = 'none';
   document.getElementById('login-otp-section').style.display = 'block';
-  setLoginMsg('otp-msg','✅ OTP bheja gaya — '+adminPhone,'var(--gr)');
+  setLoginMsg('otp-msg', '✅ OTP bheja gaya — ' + adminPhone, 'var(--gr)');
 }
 
 async function adminVerifyOTP(){
@@ -761,30 +665,30 @@ async function adminVerifyOTP(){
   const {data, error} = await sb.auth.verifyOtp({phone: adminPhone, token: otp, type: 'sms'});
   if(error){ setLoginMsg('otp-msg','❌ Galat OTP — dobara try karo'); return; }
 
-  const {data: userData, error: userErr} = await sb.from('users').select('role,name').eq('id', data.user.id).single();
+  // Check admin role in users table
+  const {data: userData, error: userErr} = await sb.from('users').select('role').eq('id', data.user.id).single();
   if(userErr || !userData || userData.role !== 'admin'){
     setLoginMsg('otp-msg','⛔ Access denied — aap admin nahi hain');
     await sb.auth.signOut();
     return;
   }
-  showDashboard(userData.name || 'Admin');
-}
 
-function showDashboard(name){
+  // Show dashboard
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('admin-dashboard').style.display = 'block';
-  const adminNameEl = document.querySelector('.sb-logo-name + div + div');
-  loadOverview();
-  toast('✅ Welcome '+name+'!');
+  renderShops();
+  toast('✅ Welcome Admin!');
 }
 
-// ─── AUTO LOGIN CHECK ────────────────────────────────
+// On page load — check if already logged in
 (async function(){
   const {data:{session}} = await sb.auth.getSession();
   if(session){
-    const {data: userData} = await sb.from('users').select('role,name').eq('id', session.user.id).single();
+    const {data: userData} = await sb.from('users').select('role').eq('id', session.user.id).single();
     if(userData && userData.role === 'admin'){
-      showDashboard(userData.name || 'Admin');
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('admin-dashboard').style.display = 'block';
+      renderShops();
     }
   }
 })();
