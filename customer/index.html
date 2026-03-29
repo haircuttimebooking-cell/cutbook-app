@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CutBook — Customer</title>
+<title>My Haircut Booking — Customer</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
@@ -182,7 +182,7 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
 </head>
 <body>
 
-<div class="page-lbl">Customer App · CutBook</div>
+<div class="page-lbl">My Haircut Booking</div>
 
 <div class="phone">
   <div class="notch"></div>
@@ -305,15 +305,7 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
 
       <div class="sec-head"><div class="sec-title">Time slot chunao</div></div>
       <div class="slots-grid">
-        <div class="slot booked">9:00 AM</div>
-        <div class="slot booked">9:30 AM</div>
-        <div class="slot" onclick="pickSlot(this)">10:00 AM</div>
-        <div class="slot on" onclick="pickSlot(this)">10:30 AM</div>
-        <div class="slot" onclick="pickSlot(this)">11:00 AM</div>
-        <div class="slot booked">11:30 AM</div>
-        <div class="slot" onclick="pickSlot(this)">12:00 PM</div>
-        <div class="slot" onclick="pickSlot(this)">12:30 PM</div>
-        <div class="slot" onclick="pickSlot(this)">1:00 PM</div>
+        <!-- Dynamic slots loaded by buildTimeSlots() -->
       </div>
 
       <div class="book-cta" onclick="openBookModal()">Confirm Booking — ₹80</div>
@@ -513,7 +505,33 @@ function openShopDetail(i){
   // Dates update karo
   buildDateChips();
 
+  // Time slots dynamic banao
+  buildTimeSlots(selectedShop.opening_time || '09:00', selectedShop.closing_time || '21:00');
+
   goScreen('detail');
+}
+
+function buildTimeSlots(openTime, closeTime){
+  const slotsGrid = document.querySelector('.slots-grid');
+  if(!slotsGrid) return;
+  const [openH, openM] = openTime.split(':').map(Number);
+  const [closeH] = closeTime.split(':').map(Number);
+  const now = new Date();
+  const slots = [];
+  let h = openH, m = openM;
+  while(h < closeH){
+    const hh = h % 12 === 0 ? 12 : h % 12;
+    const mm = m === 0 ? '00' : '30';
+    const ampm = h < 12 ? 'AM' : 'PM';
+    const label = `${hh}:${mm} ${ampm}`;
+    const slotDate = new Date();
+    slotDate.setHours(h, m, 0, 0);
+    const isPast = slotDate < now;
+    slots.push(`<div class="slot ${isPast ? 'booked' : ''}" onclick="pickSlot(this)">${label}</div>`);
+    m += 30;
+    if(m >= 60){ m = 0; h++; }
+  }
+  slotsGrid.innerHTML = slots.join('');
 }
 
 // ─── LOAD BOOKINGS FROM SUPABASE ────────────────────

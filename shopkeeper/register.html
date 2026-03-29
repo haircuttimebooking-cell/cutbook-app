@@ -421,7 +421,7 @@ option{background:var(--bg3);}
         <div class="tl-item"><div class="tl-dot wait"></div><div class="tl-text wait">Approve hone par notification</div></div>
         <div class="tl-item"><div class="tl-dot wait"></div><div class="tl-text wait">Dukan live — customers book kar sakenge</div></div>
       </div>
-      <button class="btn-next" style="width:100%;" onclick="window.location.href='index.html'">Dashboard pe jao →</button>
+      <button class="btn-next" style="width:100%;" onclick="window.location.replace('index.html')">Dashboard pe jao →</button>
     </div>
   </div>
 
@@ -493,6 +493,11 @@ let servicesData = categories.map(c=>({...c, items:[]}));
 
 // ─── PROGRESS ────────────────────────────────────────
 function goStep(n){
+  // Step 8 (success) ke baad back navigation block karo
+  if(n === 8){
+    history.pushState(null, '', location.href);
+    window.onpopstate = function(){ history.pushState(null, '', location.href); };
+  }
   document.getElementById('step-'+currentStep).classList.remove('active');
   currentStep = n;
   document.getElementById('step-'+currentStep).classList.add('active');

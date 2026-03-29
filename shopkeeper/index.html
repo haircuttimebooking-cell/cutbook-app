@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CutBook — Shopkeeper App</title>
+<title>My Haircut Booking — Shopkeeper</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
@@ -183,7 +183,7 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
 </head>
 <body>
 
-<div class="page-lbl">Shopkeeper App · CutBook</div>
+<div class="page-lbl">My Haircut Booking</div>
 
 <div class="phone">
   <div class="notch"></div>
@@ -202,7 +202,7 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
       <!-- Header -->
       <div style="padding:10px 16px 12px;display:flex;justify-content:space-between;align-items:center;">
         <div style="display:flex;align-items:center;gap:10px;">
-          <img src="../assets/logo.png" style="width:56px;height:56px;object-fit:contain;border-radius:10px;">
+          <img src="../assets/logo.png" style="width:36px;height:36px;object-fit:contain;border-radius:10px;">
           <div>
             <div style="font-size:10px;color:var(--tx3);font-family:var(--dv);">Namaste 🙏 Aaj ka din</div>
             <div style="font-size:16px;font-weight:700;">Raj Hair Studio</div>
@@ -471,7 +471,7 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
         <div class="pr-row" onclick="toast('📷 Gallery update ho gayi')"><div class="pr-icon-wrap">📷</div><div class="pr-lbl">Photo Gallery</div><div class="pr-val">8 photos</div><span style="color:var(--tx3);margin-left:8px;">›</span></div>
         <div class="pr-row" onclick="toast('💳 Bank account update karo')"><div class="pr-icon-wrap">💳</div><div class="pr-lbl">Payment &amp; Bank</div><div class="pr-val">HDFC linked</div><span style="color:var(--tx3);margin-left:8px;">›</span></div>
         <div class="pr-row" onclick="toast('🔔 Notification settings')"><div class="pr-icon-wrap">🔔</div><div class="pr-lbl">Notifications</div><div class="pr-val">On</div><span style="color:var(--tx3);margin-left:8px;">›</span></div>
-        <div class="pr-row" onclick="toast('📞 Support se baat karo')"><div class="pr-icon-wrap">📞</div><div class="pr-lbl">CutBook Support</div><span style="color:var(--tx3);margin-left:auto;">›</span></div>
+        <div class="pr-row" onclick="toast('📞 Support se baat karo')"><div class="pr-icon-wrap">📞</div><div class="pr-lbl">My Haircut Booking Support</div><span style="color:var(--tx3);margin-left:auto;">›</span></div>
         <div class="pr-row" onclick="toast('📜 Terms & Conditions')"><div class="pr-icon-wrap">📄</div><div class="pr-lbl">Terms & Privacy</div><span style="color:var(--tx3);margin-left:auto;">›</span></div>
         <div class="pr-row" onclick="showConfirm('🚪','Log Out karein?','Kya aap sach mein log out karna chahte hain?','Haan, Log Out','var(--re)',function(){ window.location.href='../index.html'; })"><div class="pr-icon-wrap">🚪</div><div class="pr-lbl" style="color:var(--re);">Log Out</div><span style="color:var(--tx3);margin-left:auto;">›</span></div>
       </div>
@@ -626,11 +626,7 @@ const statusCfg = {
 
 // ─── SUPABASE: LOAD BOOKINGS ─────────────────────────
 async function loadBookingsFromDB(){
-  if(!currentShop) return;
-  const {data, error} = await sb.from('bookings')
-    .select('*')
-    .eq('shop_id', currentShop.id)
-    .order('created_at',{ascending:false});
+  const {data, error} = await sb.from('bookings').select('*').order('created_at',{ascending:false});
   if(error){ console.error(error); return; }
   // Map Supabase fields to local format
   bookings = (data||[]).map(b=>({
@@ -801,15 +797,6 @@ function getCurFilter(){
 }
 
 // ─── BOOKING ACTIONS ────────────────────────────────
-function acceptBk(id){
-  const b = bookings.find(x=>x.id===id);
-  if(!b) return;
-  b.status = 'accepted';
-  renderBk(getCurFilter());
-  updateStats();
-  toast(`✅ ${b.name} ki booking confirm! 👨‍🔧 ${b.barber}`);
-}
-
 function rejectPrompt(id){
   if(cancelCount>=3){ toast('🚫 Aaj 3 cancel ho gaye — aur nahi!'); return; }
   const b = bookings.find(x=>x.id===id);
@@ -1094,49 +1081,10 @@ function toast(msg){
   setTimeout(()=>t.classList.remove('show'),3000);
 }
 
-// ─── STATE ────────────────────────────────────────────
-let currentShop = null;
-let currentUser = null;
-
 // ─── INIT ─────────────────────────────────────────────
-async function init(){
+function init(){
   const now = new Date();
   document.getElementById('today-date').textContent = `${now.getDate()} ${monthNames[now.getMonth()]} ${now.getFullYear()} · ${dayNames[now.getDay()]}`;
-
-  // Check login
-  const {data:{session}} = await sb.auth.getSession();
-  if(!session){
-    window.location.href = '../index.html';
-    return;
-  }
-  currentUser = session.user;
-
-  // Load this shopkeeper's shop
-  const {data: shopData, error: shopErr} = await sb.from('shops')
-    .select('*')
-    .eq('owner_id', currentUser.id)
-    .single();
-
-  if(shopErr || !shopData){
-    // Shop nahi mili — register page pe bhejo
-    toast('❌ Pehle dukan register karo');
-    setTimeout(()=>{ window.location.href = 'register.html'; }, 2000);
-    return;
-  }
-
-  currentShop = shopData;
-
-  // Shop name update karo header mein
-  const shopNameEl = document.querySelector('[style*="font-size:16px;font-weight:700"]');
-  if(shopNameEl) shopNameEl.textContent = currentShop.name;
-
-  // Check if approved
-  if(currentShop.status === 'pending'){
-    toast('⏳ Aapki dukan admin approval ka wait kar rahi hai');
-  } else if(currentShop.status === 'suspended'){
-    toast('⛔ Aapki dukan suspend hai — admin se contact karo');
-  }
-
   loadBookingsFromDB();
   subscribeBookings();
   renderBarberSlots(0);
