@@ -571,63 +571,151 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
 <div id="toast" class="toast"></div>
 
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
-// Shops data
-const shopsData = [
-  {name:'Raj Hair Studio',loc:'Hazratganj, Lko',rating:'4.8',bookings:284,status:'active'},
-  {name:'Modern Cut',loc:'Alambagh, Lko',rating:'4.6',bookings:192,status:'active'},
-  {name:'Classic Barber',loc:'Gomti Nagar, Lko',rating:'4.4',bookings:87,status:'pending'},
-  {name:'Star Salon',loc:'Aminabad, Lko',rating:'4.9',bookings:341,status:'active'},
-  {name:'Sharma Hair',loc:'Aliganj, Lko',rating:'—',bookings:0,status:'pending'},
-  {name:'Royal Cutz',loc:'Kanpur',rating:'4.5',bookings:156,status:'active'},
-  {name:'Urban Barber',loc:'Agra',rating:'4.3',bookings:98,status:'suspended'},
-];
+// ─── PANEL SWITCH ────────────────────────────────────
+function showPanel(id, el){
+  document.querySelectorAll('.screen-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  document.querySelectorAll('.sb-item').forEach(s => s.classList.remove('active'));
+  if(el) el.classList.add('active');
+  if(id==='shops') loadShops();
+  if(id==='bookings') loadBookings();
+  if(id==='overview') loadOverview();
+}
 
-function renderShops(){
+// ─── LOAD OVERVIEW ───────────────────────────────────
+async function loadOverview(){
+  const [{data:shops},{data:users},{data:bookings}] = await Promise.all([
+    sb.from('shops').select('id,status'),
+    sb.from('users').select('id,role'),
+    sb.from('bookings').select('id,status,price,created_at'),
+  ]);
+  const totalShops = shops?.length || 0;
+  const pendingShops = shops?.filter(s=>s.status==='pending').length || 0;
+  const totalUsers = users?.filter(u=>u.role==='customer').length || 0;
+  const todayBkgs = bookings?.filter(b=>{
+    const d = new Date(b.created_at), t = new Date();
+    return d.getDate()===t.getDate() && d.getMonth()===t.getMonth();
+  }).length || 0;
+  const todayRevenue = bookings?.filter(b=>{
+    const d = new Date(b.created_at), t = new Date();
+    return d.getDate()===t.getDate() && d.getMonth()===t.getMonth() && b.status==='completed';
+  }).reduce((s,b)=>s+(b.price||0),0) || 0;
+
+  const statVals = document.querySelectorAll('.stat-val');
+  if(statVals[0]) statVals[0].textContent = totalShops;
+  if(statVals[1]) statVals[1].textContent = totalUsers;
+  if(statVals[2]) statVals[2].textContent = todayBkgs;
+  if(statVals[3]) statVals[3].textContent = '₹'+todayRevenue;
+
+  const badge = document.querySelector('.sb-badge');
+  if(badge) badge.textContent = pendingShops;
+  const countBadge = document.getElementById('pending-count-badge');
+  if(countBadge) countBadge.textContent = pendingShops + ' baaki';
+
+  const {data: pendingShopsData} = await sb.from('shops').select('*').eq('status','pending').order('created_at',{ascending:false}).limit(5);
+  const pendingList = document.getElementById('pending-approvals-list');
+  if(pendingList && pendingShopsData){
+    if(!pendingShopsData.length){
+      pendingList.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--tx3);font-family:var(--dv);padding:20px;">Koi pending shop nahi ✅</td></tr>';
+    } else {
+      pendingList.innerHTML = pendingShopsData.map(s=>`
+        <tr>
+          <td><div class="user-name">${s.name}</div><div class="user-meta">${s.owner_name||''} · ${s.city||''}</div></td>
+          <td style="font-size:11px;color:var(--tx2);">${s.phone||'—'}</td>
+          <td><span class="badge badge-pending">⏳ Pending</span></td>
+          <td>
+            <button class="btn btn-success btn-sm" onclick="approveShopById('${s.id}','${s.name}',this)">✓ Approve</button>
+            <button class="btn btn-danger btn-sm" style="margin-left:4px;" onclick="rejectShopById('${s.id}','${s.name}',this)">✕ Reject</button>
+          </td>
+        </tr>`).join('');
+    }
+  }
+}
+
+// ─── LOAD SHOPS (REAL DB) ─────────────────────────────
+async function loadShops(){
   const tbody = document.getElementById('shops-tbody');
-  tbody.innerHTML = shopsData.map((s,i) => {
-    const badge = s.status === 'active' ? 'badge-active' : s.status === 'pending' ? 'badge-pending' : 'badge-suspended';
-    const label = s.status === 'active' ? '✅ Active' : s.status === 'pending' ? '⏳ Pending' : '⛔ Suspended';
-    const actionBtn = s.status === 'pending'
-      ? `<button class="btn btn-success btn-sm" onclick="approveShopRow(${i})">Approve</button>`
-      : s.status === 'active'
-      ? `<button class="btn btn-danger btn-sm" onclick="suspendShop(${i})">Suspend</button>`
-      : `<button class="btn btn-ghost btn-sm" onclick="toast('✅ Shop restored')">Restore</button>`;
+  if(!tbody) return;
+  tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--tx3);">Loading...</td></tr>';
+  const {data, error} = await sb.from('shops').select('*').order('created_at',{ascending:false});
+  if(error || !data){ tbody.innerHTML = '<tr><td colspan="6" style="color:var(--re);padding:20px;">Error loading shops</td></tr>'; return; }
+  if(!data.length){
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--tx3);font-family:var(--dv);padding:20px;">Koi shop registered nahi hai abhi</td></tr>';
+    return;
+  }
+  tbody.innerHTML = data.map(s => {
+    const badge = s.status==='active' ? 'badge-active' : s.status==='pending' ? 'badge-pending' : 'badge-suspended';
+    const label = s.status==='active' ? '✅ Active' : s.status==='pending' ? '⏳ Pending' : '⛔ Suspended';
+    const actionBtn = s.status==='pending'
+      ? `<button class="btn btn-success btn-sm" onclick="approveShopById('${s.id}','${s.name}',this)">✓ Approve</button>
+         <button class="btn btn-danger btn-sm" style="margin-left:4px;" onclick="rejectShopById('${s.id}','${s.name}',this)">✕ Reject</button>`
+      : s.status==='active'
+      ? `<button class="btn btn-danger btn-sm" onclick="suspendShopById('${s.id}','${s.name}',this)">⛔ Suspend</button>`
+      : `<button class="btn btn-ghost btn-sm" onclick="restoreShopById('${s.id}','${s.name}',this)">↺ Restore</button>`;
     return `<tr>
-      <td><div style="display:flex;align-items:center;gap:8px;"><div class="user-avatar">✂️</div><div><div class="user-name">${s.name}</div></div></div></td>
-      <td style="font-size:11px;color:var(--tx2);">${s.loc}</td>
-      <td style="color:var(--am);font-weight:600;">${s.rating}★</td>
-      <td style="color:var(--or);font-weight:600;">${s.bookings}</td>
+      <td><div style="display:flex;align-items:center;gap:8px;"><div class="user-avatar">✂️</div><div><div class="user-name">${s.name}</div><div class="user-meta">${s.owner_name||''}</div></div></div></td>
+      <td style="font-size:11px;color:var(--tx2);">${s.city||'—'}, ${s.pincode||''}</td>
+      <td style="color:var(--am);font-weight:600;">—</td>
+      <td style="color:var(--or);font-weight:600;">0</td>
       <td><span class="badge ${badge}">${label}</span></td>
       <td>${actionBtn}</td>
     </tr>`;
   }).join('');
 }
 
-function approveShopRow(i){
-  shopsData[i].status = 'active';
-  renderShops();
-  toast(`✅ ${shopsData[i].name} approved!`);
+// ─── SHOP ACTIONS ────────────────────────────────────
+async function approveShopById(id, name, btn){
+  btn.disabled=true; btn.textContent='...';
+  const {error} = await sb.from('shops').update({status:'active'}).eq('id',id);
+  if(error){ toast('❌ Error: '+error.message); btn.disabled=false; btn.textContent='✓ Approve'; return; }
+  toast('✅ '+name+' approved! Ab live hai.');
+  loadShops(); loadOverview();
 }
-function suspendShop(i){
-  shopsData[i].status = 'suspended';
-  renderShops();
-  toast(`⛔ ${shopsData[i].name} suspended`);
+async function rejectShopById(id, name, btn){
+  if(!confirm(name+' ko reject karna hai?')) return;
+  btn.disabled=true;
+  const {error} = await sb.from('shops').update({status:'rejected'}).eq('id',id);
+  if(error){ toast('❌ Error: '+error.message); return; }
+  toast('❌ '+name+' rejected.');
+  loadShops(); loadOverview();
+}
+async function suspendShopById(id, name, btn){
+  if(!confirm(name+' ko suspend karna hai?')) return;
+  btn.disabled=true;
+  const {error} = await sb.from('shops').update({status:'suspended'}).eq('id',id);
+  if(error){ toast('❌ Error: '+error.message); return; }
+  toast('⛔ '+name+' suspended.');
+  loadShops();
+}
+async function restoreShopById(id, name, btn){
+  btn.disabled=true;
+  const {error} = await sb.from('shops').update({status:'active'}).eq('id',id);
+  if(error){ toast('❌ Error: '+error.message); return; }
+  toast('✅ '+name+' restored!');
+  loadShops();
 }
 
-function showPanel(id, el){
-  document.querySelectorAll('.screen-panel').forEach(p => p.classList.remove('active'));
-  document.getElementById('panel-'+id).classList.add('active');
-  document.querySelectorAll('.sb-item').forEach(s => s.classList.remove('active'));
-  if(el) el.classList.add('active');
-}
-
-function approveShop(btn, name){
-  btn.  btn.closest('tr').querySelector('.badge').textContent = '✅ Active';
-  btn.closest('tr').querySelector('.badge').className = 'badge badge-active';
-  btn.textContent = 'Suspend';
-  btn.className = 'btn btn-danger btn-sm';
-  btn.onclick = function(){ toast('⛔ '+name+' suspended'); };
-  toast('✅ '+name+' approved!');
+// ─── LOAD BOOKINGS ───────────────────────────────────
+async function loadBookings(){
+  const tbody = document.getElementById('bookings-tbody');
+  if(!tbody) return;
+  tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--tx3);">Loading...</td></tr>';
+  const {data, error} = await sb.from('bookings').select('*').order('created_at',{ascending:false}).limit(50);
+  if(error || !data){ tbody.innerHTML = '<tr><td colspan="6" style="color:var(--re);padding:20px;">Error loading bookings</td></tr>'; return; }
+  if(!data.length){
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--tx3);font-family:var(--dv);padding:20px;">Koi booking nahi abhi</td></tr>';
+    return;
+  }
+  const statusBadge = {pending:'badge-pending',accepted:'badge-active',completed:'badge-active',cancelled:'badge-rejected'};
+  tbody.innerHTML = data.map(b=>`
+    <tr>
+      <td style="font-size:12px;">${b.customer_name||'Customer'}</td>
+      <td style="font-size:11px;color:var(--tx2);">${b.shop_name||'—'}</td>
+      <td style="font-size:11px;">${b.service||'—'}</td>
+      <td style="font-size:11px;color:var(--tx3);">${b.booking_time||'—'}</td>
+      <td style="color:var(--or);font-weight:600;">₹${b.price||0}</td>
+      <td><span class="badge ${statusBadge[b.status]||'badge-pending'}">${b.status}</span></td>
+    </tr>`).join('');
 }
 
 function toast(msg){
@@ -676,7 +764,7 @@ async function adminVerifyOTP(){
   // Show dashboard
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('admin-dashboard').style.display = 'block';
-  renderShops();
+  loadOverview();
   toast('✅ Welcome Admin!');
 }
 
@@ -688,7 +776,7 @@ async function adminVerifyOTP(){
     if(userData && userData.role === 'admin'){
       document.getElementById('login-screen').style.display = 'none';
       document.getElementById('admin-dashboard').style.display = 'block';
-      renderShops();
+      loadOverview();
     }
   }
 })();
