@@ -626,7 +626,11 @@ const statusCfg = {
 
 // ─── SUPABASE: LOAD BOOKINGS ─────────────────────────
 async function loadBookingsFromDB(){
-  const {data, error} = await sb.from('bookings').select('*').order('created_at',{ascending:false});
+  if(!currentShop) return;
+  const {data, error} = await sb.from('bookings')
+    .select('*')
+    .eq('shop_id', currentShop.id)
+    .order('created_at',{ascending:false});
   if(error){ console.error(error); return; }
   // Map Supabase fields to local format
   bookings = (data||[]).map(b=>({
@@ -1090,10 +1094,49 @@ function toast(msg){
   setTimeout(()=>t.classList.remove('show'),3000);
 }
 
+// ─── STATE ────────────────────────────────────────────
+let currentShop = null;
+let currentUser = null;
+
 // ─── INIT ─────────────────────────────────────────────
-function init(){
+async function init(){
   const now = new Date();
   document.getElementById('today-date').textContent = `${now.getDate()} ${monthNames[now.getMonth()]} ${now.getFullYear()} · ${dayNames[now.getDay()]}`;
+
+  // Check login
+  const {data:{session}} = await sb.auth.getSession();
+  if(!session){
+    window.location.href = '../index.html';
+    return;
+  }
+  currentUser = session.user;
+
+  // Load this shopkeeper's shop
+  const {data: shopData, error: shopErr} = await sb.from('shops')
+    .select('*')
+    .eq('owner_id', currentUser.id)
+    .single();
+
+  if(shopErr || !shopData){
+    // Shop nahi mili — register page pe bhejo
+    toast('❌ Pehle dukan register karo');
+    setTimeout(()=>{ window.location.href = 'register.html'; }, 2000);
+    return;
+  }
+
+  currentShop = shopData;
+
+  // Shop name update karo header mein
+  const shopNameEl = document.querySelector('[style*="font-size:16px;font-weight:700"]');
+  if(shopNameEl) shopNameEl.textContent = currentShop.name;
+
+  // Check if approved
+  if(currentShop.status === 'pending'){
+    toast('⏳ Aapki dukan admin approval ka wait kar rahi hai');
+  } else if(currentShop.status === 'suspended'){
+    toast('⛔ Aapki dukan suspend hai — admin se contact karo');
+  }
+
   loadBookingsFromDB();
   subscribeBookings();
   renderBarberSlots(0);
