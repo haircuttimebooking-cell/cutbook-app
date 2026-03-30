@@ -381,19 +381,43 @@ option{background:var(--bg3);}
   <div class="step" id="step-6">
     <div class="step-icon">📷</div>
     <div class="step-title">दुकान की फोटो</div>
-    <div class="step-sub">कम से कम 1 फोटो ज़रूरी है — approval जल्दी मिलेगी</div>
-    <div class="info-box" style="margin-bottom:16px;">📷 Camera या 🖼️ Gallery — दोनों से फोटो चुन सकते हो<br>अधिकतम 5 फोटो · JPG/PNG · हर फोटो max 5MB</div>
-    <div id="photo-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;"></div>
-    <div id="add-photo-btn" style="display:flex;align-items:center;justify-content:center;gap:8px;background:var(--bg3);border:2px dashed var(--bd2);border-radius:14px;padding:18px;cursor:pointer;font-size:13px;color:var(--tx2);font-family:var(--dv);position:relative;" onclick="document.getElementById('photo-input').click()">
-      <input type="file" id="photo-input" accept="image/jpeg,image/png" multiple style="display:none;" onchange="handlePhotoUpload(this)">
-      📷 फोटो जोड़ें
+    <div class="step-sub">2 तरह की फोटो चाहिए — जल्दी approval मिलेगी</div>
+
+    <!-- Sub-step 1: Board photo (Mandatory) -->
+    <div id="photo-sub-1">
+      <div class="info-box" style="margin-bottom:12px;border-color:rgba(244,123,32,0.4);">
+        🪧 <strong>Step 1 / 2 — दुकान के नाम बोर्ड का फोटो</strong><br>
+        <span style="font-size:11px;color:var(--tx3);">यह ज़रूरी है · JPG/PNG · max 10MB</span>
+      </div>
+      <div id="board-photo-box" class="photo-box" onclick="document.getElementById('board-photo-input').click()" style="height:140px;margin-bottom:10px;">
+        <input type="file" id="board-photo-input" accept="image/jpeg,image/png" style="display:none;" onchange="handleBoardPhoto(this)">
+        <div class="photo-icon">🪧</div>
+        <div class="photo-lbl">नाम बोर्ड की फोटो चुनें</div>
+      </div>
+      <div id="board-photo-msg" class="msg" style="margin-bottom:10px;"></div>
+      <div class="btn-wrap">
+        <button class="btn-prev" onclick="goStep(5)">← Wapas</button>
+        <button class="btn-next" onclick="goToInteriorPhoto()">आगे →</button>
+      </div>
     </div>
-    <div id="photo-msg" class="msg" style="margin-top:10px;"></div>
-    <div class="btn-wrap">
-      <button class="btn-prev" onclick="goStep(5)">← Wapas</button>
-      <button class="btn-next" onclick="handlePhotoNext()">आगे →</button>
+
+    <!-- Sub-step 2: Interior photos (Optional, max 4) -->
+    <div id="photo-sub-2" style="display:none;">
+      <div class="info-box" style="margin-bottom:12px;">
+        🏪 <strong>Step 2 / 2 — दुकान के अंदर की फोटो</strong><br>
+        <span style="font-size:11px;color:var(--tx3);">Optional · अधिकतम 4 फोटो · JPG/PNG · हर फोटो max 10MB</span>
+      </div>
+      <div id="interior-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:10px;"></div>
+      <div id="add-interior-btn" style="display:flex;align-items:center;justify-content:center;gap:8px;background:var(--bg3);border:2px dashed var(--bd2);border-radius:14px;padding:16px;cursor:pointer;font-size:13px;color:var(--tx2);font-family:var(--dv);position:relative;" onclick="document.getElementById('interior-input').click()">
+        <input type="file" id="interior-input" accept="image/jpeg,image/png" multiple style="display:none;" onchange="handleInteriorPhotos(this)">
+        📷 अंदर की फोटो जोड़ें (Optional)
+      </div>
+      <div id="interior-msg" class="msg" style="margin-top:8px;margin-bottom:10px;"></div>
+      <div class="btn-wrap">
+        <button class="btn-prev" onclick="goToBoardPhoto()">← Wapas</button>
+        <button class="btn-next" onclick="handlePhotoNext()">आगे →</button>
+      </div>
     </div>
-    <button class="btn-skip" onclick="goStep(7)">Photos baad mein add karunga</button>
   </div>
 
   <!-- Step 7: Review & Submit -->
@@ -809,49 +833,89 @@ function handleServicesNext(){
 }
 
 // ─── PHOTOS — Multi upload, preview, remove ──────────
-let uploadedPhotos = []; // array of {dataUrl, file}
+// ─── PHOTO VARIABLES ────────────────────────────────
+let boardPhoto = null;       // {dataUrl, file} — mandatory
+let interiorPhotos = [];     // [{dataUrl, file}] — optional max 4
 
-function handlePhotoUpload(input){
+function handleBoardPhoto(input){
+  const file = input.files[0];
+  if(!file) return;
+  if(!['image/jpeg','image/png'].includes(file.type)){setMsg('board-photo-msg','❌ सिर्फ JPG/PNG','error');return;}
+  if(file.size > 10*1024*1024){setMsg('board-photo-msg','❌ फोटो 10MB से छोटी होनी चाहिए','error');return;}
+  const reader = new FileReader();
+  reader.onload = e => {
+    boardPhoto = {dataUrl: e.target.result, file};
+    const box = document.getElementById('board-photo-box');
+    box.innerHTML = `<img src="${e.target.result}" class="photo-preview"><div onclick="removeBoardPhoto(event)" style="position:absolute;top:6px;right:6px;background:var(--re);color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:12px;cursor:pointer;z-index:10;">✕</div>`;
+    box.classList.add('has-img');
+    setMsg('board-photo-msg','✅ नाम बोर्ड की फोटो add हो गई!','success');
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeBoardPhoto(e){
+  e.stopPropagation();
+  boardPhoto = null;
+  const box = document.getElementById('board-photo-box');
+  box.innerHTML = `<input type="file" id="board-photo-input" accept="image/jpeg,image/png" style="display:none;" onchange="handleBoardPhoto(this)"><div class="photo-icon">🪧</div><div class="photo-lbl">नाम बोर्ड की फोटो चुनें</div>`;
+  box.classList.remove('has-img');
+  document.getElementById('board-photo-input').onchange = function(){ handleBoardPhoto(this); };
+  setMsg('board-photo-msg','','');
+}
+
+function goToInteriorPhoto(){
+  if(!boardPhoto){ setMsg('board-photo-msg','❌ नाम बोर्ड की फोटो ज़रूरी है!','error'); return; }
+  document.getElementById('photo-sub-1').style.display='none';
+  document.getElementById('photo-sub-2').style.display='block';
+}
+
+function goToBoardPhoto(){
+  document.getElementById('photo-sub-2').style.display='none';
+  document.getElementById('photo-sub-1').style.display='block';
+}
+
+function handleInteriorPhotos(input){
   const files = Array.from(input.files);
-  const remaining = 5 - uploadedPhotos.length;
-  if(remaining<=0){setMsg('photo-msg','❌ अधिकतम 5 फोटो ही अपलोड हो सकती हैं','error');return;}
-  const toAdd = files.slice(0,remaining);
+  const remaining = 4 - interiorPhotos.length;
+  if(remaining<=0){setMsg('interior-msg','❌ अधिकतम 4 फोटो ही अपलोड हो सकती हैं','error');return;}
+  const toAdd = files.slice(0, remaining);
   let invalid = false;
   toAdd.forEach(file=>{
     if(!['image/jpeg','image/png'].includes(file.type)){invalid=true;return;}
-    if(file.size>5*1024*1024){invalid=true;return;}
+    if(file.size>10*1024*1024){invalid=true;return;}
     const reader = new FileReader();
     reader.onload = e=>{
-      uploadedPhotos.push({dataUrl:e.target.result,file});
+      interiorPhotos.push({dataUrl:e.target.result,file});
       renderPhotoGrid();
     };
     reader.readAsDataURL(file);
   });
-  if(invalid) setMsg('photo-msg','⚠️ कुछ फोटो skip हुईं — सिर्फ JPG/PNG, max 5MB','error');
+  if(invalid) setMsg('interior-msg','⚠️ कुछ फोटो skip हुईं — सिर्फ JPG/PNG, max 10MB','error');
   input.value='';
 }
 
-function removePhoto(i){
-  uploadedPhotos.splice(i,1);
+function removeInteriorPhoto(i){
+  interiorPhotos.splice(i,1);
   renderPhotoGrid();
 }
 
 function renderPhotoGrid(){
-  const grid = document.getElementById('photo-grid');
-  grid.innerHTML = uploadedPhotos.map((p,i)=>`
+  const grid = document.getElementById('interior-grid');
+  grid.innerHTML = interiorPhotos.map((p,i)=>`
     <div style="position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;border:1px solid var(--bd);">
       <img src="${p.dataUrl}" style="width:100%;height:100%;object-fit:cover;">
       <div onclick="removePhoto(${i})" style="position:absolute;top:4px;right:4px;width:22px;height:22px;background:rgba(0,0,0,0.7);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:11px;color:#fff;">✕</div>
       ${i===0?'<div style="position:absolute;bottom:0;left:0;right:0;background:rgba(244,123,32,0.85);font-size:9px;text-align:center;padding:2px;font-family:var(--dv);">मुख्य फोटो</div>':''}
     </div>`).join('');
-  const addBtn = document.getElementById('add-photo-btn');
-  addBtn.style.display = uploadedPhotos.length>=5 ? 'none' : 'flex';
-  if(uploadedPhotos.length>0) setMsg('photo-msg','','');
+  const addBtn = document.getElementById('add-interior-btn');
+  if(addBtn) addBtn.style.display = interiorPhotos.length>=4 ? 'none' : 'flex';
+  if(interiorPhotos.length>0) setMsg('interior-msg','','');
 }
 
 function handlePhotoNext(){
-  if(uploadedPhotos.length===0){
-    setMsg('photo-msg','❌ कृपया दुकान की कम से कम 1 फोटो अपलोड करें','error');
+  if(!boardPhoto){
+    setMsg('board-photo-msg','❌ नाम बोर्ड की फोटो ज़रूरी है!','error');
+    goToBoardPhoto();
     return;
   }
   goStep(7);
@@ -895,10 +959,10 @@ function renderReview(){
         : allSvcs.map(s=>`<div class="review-row"><div class="review-val">${s}</div></div>`).join('')}
     </div>
     <div class="review-card">
-      <div class="review-card-head">📷 फोटो (${uploadedPhotos.length})</div>
-      ${uploadedPhotos.length===0
+      <div class="review-card-head">📷 फोटो (${(boardPhoto?1:0)+interiorPhotos.length})</div>
+      ${!boardPhoto && interiorPhotos.length===0
         ? '<div class="review-row"><div class="review-key" style="color:var(--am);">कोई फोटो नहीं</div></div>'
-        : `<div style="display:flex;gap:8px;padding:10px 14px;flex-wrap:wrap;">${uploadedPhotos.map(p=>`<img src="${p.dataUrl}" style="width:64px;height:64px;object-fit:cover;border-radius:8px;border:1px solid var(--bd);">`).join('')}</div>`}
+        : `<div style="display:flex;gap:8px;padding:10px 14px;flex-wrap:wrap;">${[...(boardPhoto?[boardPhoto]:[]),...interiorPhotos].map(p=>`<img src="${p.dataUrl}" style="width:64px;height:64px;object-fit:cover;border-radius:8px;border:1px solid var(--bd);">`).join('')}</div>`}
     </div>`;
 }
 
@@ -922,9 +986,10 @@ async function submitRegistration(){
 
   // ── Photos Supabase Storage mein upload karo ──
   setMsg('submit-msg','<span class="spinner"></span> Photos upload ho rahi hain...','');
+  const allPhotosToUpload = boardPhoto ? [boardPhoto, ...interiorPhotos] : [...interiorPhotos];
   const photoUrls = [];
-  for(let i=0; i<uploadedPhotos.length; i++){
-    const photo = uploadedPhotos[i];
+  for(let i=0; i<allPhotosToUpload.length; i++){
+    const photo = allPhotosToUpload[i];
     const ext = photo.file.type === 'image/png' ? 'png' : 'jpg';
     const fileName = `${regUserId}_${Date.now()}_${i}.${ext}`;
     const { data: upData, error: upErr } = await sb.storage

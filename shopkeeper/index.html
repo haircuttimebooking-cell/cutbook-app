@@ -678,6 +678,55 @@ function subscribeBookings(){
     .subscribe();
 }
 
+// ─── SHOP STATUS CHECK ──────────────────────────────
+async function checkShopStatus(userId){
+  const {data: shop} = await sb.from('shops').select('id,name,owner_name,status').eq('owner_id', userId).order('created_at',{ascending:false}).limit(1).single();
+  if(!shop) return;
+
+  // Shop name dashboard mein dikhao
+  const shopNameEl = document.querySelector('.shop-name');
+  if(shopNameEl && shop.name) shopNameEl.textContent = shop.name;
+  const ownerNameEl = document.querySelector('.owner-name');
+  if(ownerNameEl && shop.owner_name) ownerNameEl.textContent = shop.owner_name;
+
+  // Agar pending hai toh waiting screen dikhao
+  if(shop.status === 'pending'){
+    showPendingScreen(shop.name);
+  }
+}
+
+function showPendingScreen(shopName){
+  // Check if pending overlay already exists
+  if(document.getElementById('pending-overlay')) return;
+  const overlay = document.createElement('div');
+  overlay.id = 'pending-overlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;';
+  overlay.innerHTML = `
+    <div style="font-size:48px;margin-bottom:16px;">⏳</div>
+    <div style="font-size:20px;font-weight:700;margin-bottom:8px;">${shopName}</div>
+    <div style="font-size:14px;color:var(--tx2);font-family:var(--dv);margin-bottom:24px;">Admin review kar raha hai...<br>Approve hone par automatically dashboard khulega!</div>
+    <div style="background:var(--bg2);border:1px solid var(--bd2);border-radius:14px;padding:16px 24px;font-size:12px;color:var(--tx3);font-family:var(--dv);">
+      🔔 Is page ko open rakho — approve hone par notification aayegi
+    </div>`;
+  document.body.appendChild(overlay);
+
+  // Poll every 10 seconds for approval
+  const pollInterval = setInterval(async ()=>{
+    const {data: shop} = await sb.from('shops').select('status').eq('owner_id', currentShopOwnerId).order('created_at',{ascending:false}).limit(1).single();
+    if(shop && shop.status === 'active'){
+      clearInterval(pollInterval);
+      playNotifSound();
+      sendBrowserNotif('🎉 Shop Approved!', 'Aapki dukan ab live hai — customers book kar sakte hain!');
+      toast('🎉 Aapki dukan APPROVE ho gayi! Ab live hai!');
+      // Overlay hatao
+      const ol = document.getElementById('pending-overlay');
+      if(ol) ol.remove();
+      // Dashboard reload karo
+      loadBookingsFromDB();
+    }
+  }, 10000);
+}
+
 // ─── BROWSER NOTIFICATION ────────────────────────────
 function sendBrowserNotif(title, body){
   if(!('Notification' in window)) return;
@@ -1149,9 +1198,12 @@ function init(){
     Notification.requestPermission();
   }
   loadBookingsFromDB();
-  // Owner ID fetch karo shop approval ke liye
-  sb.auth.getUser().then(({data})=>{
-    if(data?.user){ currentShopOwnerId = data.user.id; }
+  // Owner ID fetch karo + shop status check karo
+  sb.auth.getUser().then(async ({data})=>{
+    if(data?.user){
+      currentShopOwnerId = data.user.id;
+      await checkShopStatus(data.user.id);
+    }
     subscribeBookings();
   });
   renderBarberSlots(0);
