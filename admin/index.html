@@ -624,8 +624,20 @@ async function loadOverview(){
             <div class="user-name">${s.name}</div>
             <div class="user-meta">${s.owner_name||''} · ${s.city||''}</div>
             ${s.photos && s.photos.length ? `
-              <div style="display:flex;gap:4px;margin-top:6px;flex-wrap:wrap;">
-                ${s.photos.map(url=>`<img src="${url}" style="width:48px;height:48px;object-fit:cover;border-radius:6px;border:1px solid var(--bd2);">`).join('')}
+              <div style="margin-top:8px;">
+                <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+                  <span style="font-size:9px;color:var(--tx3);font-weight:600;">🪧 नाम बोर्ड</span>
+                  <span style="font-size:9px;color:var(--tx3);">(${s.photos.length} फोटो कुल)</span>
+                </div>
+                <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:flex-start;">
+                  ${s.photos.map((url,i)=>`
+                    <div style="position:relative;cursor:pointer;" onclick="window.open('${url}','_blank')">
+                      <img src="${url}" style="width:64px;height:64px;object-fit:cover;border-radius:8px;border:2px solid ${i===0?'rgba(244,123,32,0.6)':'var(--bd2)'};">
+                      ${i===0?'<div style="position:absolute;bottom:0;left:0;right:0;background:rgba(244,123,32,0.85);font-size:8px;text-align:center;padding:1px 2px;border-radius:0 0 6px 6px;color:#fff;font-weight:600;">बोर्ड</div>':''}
+                      ${i>0?'<div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.6);font-size:8px;text-align:center;padding:1px 2px;border-radius:0 0 6px 6px;color:var(--tx2);">अंदर</div>':''}
+                    </div>`).join('')}
+                </div>
+                <div style="font-size:9px;color:var(--tx3);margin-top:3px;font-family:var(--dv);">👆 Click karke badi photo dekhein</div>
               </div>` : '<div style="font-size:10px;color:var(--tx3);margin-top:4px;">📷 Koi photo nahi</div>'}
           </td>
           <td style="font-size:11px;color:var(--tx2);">${s.phone||'—'}</td>

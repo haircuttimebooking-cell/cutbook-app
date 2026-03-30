@@ -681,13 +681,29 @@ function subscribeBookings(){
 // ─── SHOP STATUS CHECK ──────────────────────────────
 async function checkShopStatus(userId){
   const {data: shop} = await sb.from('shops').select('id,name,owner_name,status').eq('owner_id', userId).order('created_at',{ascending:false}).limit(1).single();
-  if(!shop) return;
+  
+  // Agar koi shop nahi mili — register page pe bhejo
+  if(!shop){
+    // Session hai but shop nahi — pehle se registered nahi
+    window.location.replace('../shopkeeper/register.html');
+    return;
+  }
 
   // Shop name dashboard mein dikhao
   const shopNameEl = document.querySelector('.shop-name');
   if(shopNameEl && shop.name) shopNameEl.textContent = shop.name;
   const ownerNameEl = document.querySelector('.owner-name');
   if(ownerNameEl && shop.owner_name) ownerNameEl.textContent = shop.owner_name;
+
+  // FIX: Agar active hai toh approved flag set karo — refresh pe pending screen nahi aayegi
+  if(shop.status === 'active'){
+    sessionStorage.setItem('shop_approved_'+userId, '1');
+    return; // Dashboard dikhao, kuch nahi karna
+  }
+
+  // FIX: Pehle check karo — kya is session mein already approved ho gaya tha?
+  // Agar haan toh pending screen mat dikhao (refresh case handle)
+  if(sessionStorage.getItem('shop_approved_'+userId)) return;
 
   // Agar pending hai toh waiting screen dikhao
   if(shop.status === 'pending'){
@@ -712,17 +728,28 @@ function showPendingScreen(shopName){
 
   // Poll every 10 seconds for approval
   const pollInterval = setInterval(async ()=>{
-    const {data: shop} = await sb.from('shops').select('status').eq('owner_id', currentShopOwnerId).order('created_at',{ascending:false}).limit(1).single();
+    const {data: shop} = await sb.from('shops').select('id,name,owner_name,status').eq('owner_id', currentShopOwnerId).order('created_at',{ascending:false}).limit(1).single();
     if(shop && shop.status === 'active'){
       clearInterval(pollInterval);
       playNotifSound();
       sendBrowserNotif('🎉 Shop Approved!', 'Aapki dukan ab live hai — customers book kar sakte hain!');
       toast('🎉 Aapki dukan APPROVE ho gayi! Ab live hai!');
-      // Overlay hatao
+      // Shop name + owner name update karo
+      const shopNameEl = document.querySelector('.shop-name');
+      if(shopNameEl && shop.name) shopNameEl.textContent = shop.name;
+      const ownerNameEl = document.querySelector('.owner-name');
+      if(ownerNameEl && shop.owner_name) ownerNameEl.textContent = shop.owner_name;
+      // Approved flag set karo sessionStorage mein — refresh pe wapas pending screen nahi aayegi
+      sessionStorage.setItem('shop_approved_'+currentShopOwnerId, '1');
+      // Overlay hatao with animation
       const ol = document.getElementById('pending-overlay');
-      if(ol) ol.remove();
-      // Dashboard reload karo
-      loadBookingsFromDB();
+      if(ol){
+        ol.style.transition = 'opacity 0.5s';
+        ol.style.opacity = '0';
+        setTimeout(()=>{ if(ol.parentNode) ol.remove(); }, 500);
+      }
+      // Dashboard fully reload karo — name, bookings sab fresh aayega
+      setTimeout(()=>{ window.location.reload(); }, 800);
     }
   }, 10000);
 }
