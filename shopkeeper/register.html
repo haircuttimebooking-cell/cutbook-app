@@ -920,6 +920,23 @@ async function submitRegistration(){
     c.items.filter(i=>i.saved).map(i=>({name:i.n, price:i.p, duration_minutes:i.d, category:c.name}))
   );
 
+  // ── Photos Supabase Storage mein upload karo ──
+  setMsg('submit-msg','<span class="spinner"></span> Photos upload ho rahi hain...','');
+  const photoUrls = [];
+  for(let i=0; i<uploadedPhotos.length; i++){
+    const photo = uploadedPhotos[i];
+    const ext = photo.file.type === 'image/png' ? 'png' : 'jpg';
+    const fileName = `${regUserId}_${Date.now()}_${i}.${ext}`;
+    const { data: upData, error: upErr } = await sb.storage
+      .from('shop-photos')
+      .upload(fileName, photo.file, { contentType: photo.file.type, upsert: true });
+    if(upErr){ console.warn('Photo upload error:', upErr.message); continue; }
+    const { data: urlData } = sb.storage.from('shop-photos').getPublicUrl(fileName);
+    if(urlData?.publicUrl) photoUrls.push(urlData.publicUrl);
+  }
+
+  setMsg('submit-msg','<span class="spinner"></span> Shop save ho raha hai...','');
+
   const {error} = await sb.from('shops').insert([{
     owner_id: regUserId,
     owner_name: document.getElementById('owner-name').value.trim(),
@@ -937,6 +954,7 @@ async function submitRegistration(){
     latitude: shopLat,
     longitude: shopLng,
     barbers: barbersData,
+    photos: photoUrls,
   }]);
 
   if(error){setMsg('submit-msg','❌ Error: '+error.message,'error');return;}
