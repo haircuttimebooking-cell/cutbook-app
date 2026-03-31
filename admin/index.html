@@ -339,36 +339,22 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
         <div class="card">
           <div class="card-header">
             <div class="card-title">Pending Approvals</div>
-            <span class="badge badge-pending">5 baaki</span>
+            <span class="badge badge-pending" id="pending-count-badge">Loading...</span>
           </div>
-          <div class="card-body" style="padding:12px;">
-            <div class="approval-card">
-              <div class="ac-name">Sharma Hair Salon</div>
-              <div class="ac-meta">📍 Alambagh, Lucknow · Registered: Aaj</div>
-              <div class="ac-actions">
-                <button class="btn btn-success btn-sm" onclick="approveShop(this,'Sharma Hair Salon')">✓ Approve</button>
-                <button class="btn btn-danger btn-sm" onclick="rejectShop(this,'Sharma Hair Salon')">✕ Reject</button>
-                <button class="btn btn-ghost btn-sm" onclick="toast('📋 Sharma Hair Salon ka detail khul gaya')">View</button>
-              </div>
-            </div>
-            <div class="approval-card">
-              <div class="ac-name">Classic Barber</div>
-              <div class="ac-meta">📍 Gomti Nagar, Lucknow · Registered: Kal</div>
-              <div class="ac-actions">
-                <button class="btn btn-success btn-sm" onclick="approveShop(this,'Classic Barber')">✓ Approve</button>
-                <button class="btn btn-danger btn-sm" onclick="rejectShop(this,'Classic Barber')">✕ Reject</button>
-                <button class="btn btn-ghost btn-sm" onclick="toast('📋 Classic Barber ka detail khul gaya')">View</button>
-              </div>
-            </div>
-            <div class="approval-card" style="margin-bottom:0;">
-              <div class="ac-name">Modi Cuts & Style</div>
-              <div class="ac-meta">📍 Hazratganj, Lucknow · Registered: 2 din pehle</div>
-              <div class="ac-actions">
-                <button class="btn btn-success btn-sm" onclick="approveShop(this,'Modi Cuts')">✓ Approve</button>
-                <button class="btn btn-danger btn-sm" onclick="rejectShop(this,'Modi Cuts')">✕ Reject</button>
-                <button class="btn btn-ghost btn-sm" onclick="toast('📋 Modi Cuts ka detail khul gaya')">View</button>
-              </div>
-            </div>
+          <div class="card-body" style="padding:0;">
+            <table class="tbl">
+              <thead>
+                <tr>
+                  <th>Shop + Photos</th>
+                  <th>Phone</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="pending-approvals-list">
+                <tr><td colspan="4" style="text-align:center;padding:20px;color:var(--tx3);">Loading...</td></tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
