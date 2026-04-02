@@ -547,40 +547,40 @@ async function checkShopStatus(userId){
     const pill=document.getElementById('shop-status-pill');
     if(pill){ pill.textContent='✅ Approved'; pill.className='pill pill-gr'; }
     // Background mein verify karo (no redirect on error)
+    // .maybeSingle() — 406 error nahi aata, null return karta hai agar row nahi mili
     sb.from('shops').select('id,name,owner_name,status')
-      .eq('owner_id',userId).order('created_at',{ascending:false}).limit(1).single()
+      .eq('owner_id',userId).order('created_at',{ascending:false}).limit(1).maybeSingle()
       .then(({data:shop})=>{
         if(shop){
           document.querySelectorAll('.shop-name').forEach(el=>{ if(shop.name) el.textContent=shop.name; });
           document.querySelectorAll('.owner-name').forEach(el=>{ if(shop.owner_name) el.textContent=shop.owner_name; });
-          // Agar kisi ne DB mein revoke kiya ho tab hi flag hatao
           if(shop.status!=='active') localStorage.removeItem(approvedKey);
         }
       }).catch(()=>{});
     return;
   }
 
-  // DB se fresh check
+  // DB se fresh check — .maybeSingle() use karo, .single() 406 throw karta hai
   let shop, dbError;
   try {
     const res = await sb.from('shops')
       .select('id,name,owner_name,status')
       .eq('owner_id',userId)
       .order('created_at',{ascending:false})
-      .limit(1).single();
+      .limit(1).maybeSingle();
     shop = res.data;
     dbError = res.error;
   } catch(e){
     dbError = e;
   }
 
-  // Network error ya unexpected error — redirect mat karo, silently ignore
-  if(dbError && dbError.code !== 'PGRST116'){
+  // Koi bhi DB error aaye — redirect mat karo (network issue ho sakta hai)
+  if(dbError){
     console.warn('Shop fetch error (non-critical):', dbError);
     return;
   }
 
-  // PGRST116 = no rows found → no shop registered yet → register pe bhejo
+  // null = no shop registered yet → register pe bhejo
   if(!shop){
     window.location.replace('../shopkeeper/register.html');
     return;
@@ -624,9 +624,9 @@ function showPendingScreen(shopName, userId){
     try{
       const {data:s}=await sb.from('shops')
         .select('id,name,owner_name,status')
-        .eq('owner_id',userId) // FIX 1: parameter se
+        .eq('owner_id',userId)
         .order('created_at',{ascending:false})
-        .limit(1).single();
+        .limit(1).maybeSingle();
       const el=document.getElementById('poll-status');
       if(el) el.textContent='Last checked: '+new Date().toLocaleTimeString('hi-IN');
       if(s&&s.status==='active'){
