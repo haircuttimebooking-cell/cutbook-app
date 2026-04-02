@@ -539,38 +539,66 @@ function subscribeBookings(){
 }
 
 // ─── SHOP STATUS CHECK ───────────────────────────────
-// FIX 1 & 3: localStorage + userId direct parameter + getSession
 async function checkShopStatus(userId){
-  const {data:shop,error} = await sb.from('shops')
-    .select('id,name,owner_name,status')
-    .eq('owner_id',userId)
-    .order('created_at',{ascending:false})
-    .limit(1).single();
+  const approvedKey = 'mhb_approved_'+userId;
 
-  if(error||!shop){
+  // FAST PATH: localStorage mein approved flag hai → seedha dashboard, koi DB call nahi
+  if(localStorage.getItem(approvedKey)){
+    const pill=document.getElementById('shop-status-pill');
+    if(pill){ pill.textContent='✅ Approved'; pill.className='pill pill-gr'; }
+    // Background mein verify karo (no redirect on error)
+    sb.from('shops').select('id,name,owner_name,status')
+      .eq('owner_id',userId).order('created_at',{ascending:false}).limit(1).single()
+      .then(({data:shop})=>{
+        if(shop){
+          document.querySelectorAll('.shop-name').forEach(el=>{ if(shop.name) el.textContent=shop.name; });
+          document.querySelectorAll('.owner-name').forEach(el=>{ if(shop.owner_name) el.textContent=shop.owner_name; });
+          // Agar kisi ne DB mein revoke kiya ho tab hi flag hatao
+          if(shop.status!=='active') localStorage.removeItem(approvedKey);
+        }
+      }).catch(()=>{});
+    return;
+  }
+
+  // DB se fresh check
+  let shop, dbError;
+  try {
+    const res = await sb.from('shops')
+      .select('id,name,owner_name,status')
+      .eq('owner_id',userId)
+      .order('created_at',{ascending:false})
+      .limit(1).single();
+    shop = res.data;
+    dbError = res.error;
+  } catch(e){
+    dbError = e;
+  }
+
+  // Network error ya unexpected error — redirect mat karo, silently ignore
+  if(dbError && dbError.code !== 'PGRST116'){
+    console.warn('Shop fetch error (non-critical):', dbError);
+    return;
+  }
+
+  // PGRST116 = no rows found → no shop registered yet → register pe bhejo
+  if(!shop){
     window.location.replace('../shopkeeper/register.html');
     return;
   }
 
-  // UI mein shop name + owner name dikhao
+  // Shop mila — name dikhao
   document.querySelectorAll('.shop-name').forEach(el=>{ if(shop.name) el.textContent=shop.name; });
   document.querySelectorAll('.owner-name').forEach(el=>{ if(shop.owner_name) el.textContent=shop.owner_name; });
 
-  const approvedKey = 'mhb_approved_'+userId;
-
   if(shop.status==='active'){
-    // FIX 3: localStorage mein approved flag — browser restart ke baad bhi rehta hai
     localStorage.setItem(approvedKey,'1');
     const pill=document.getElementById('shop-status-pill');
     if(pill){ pill.textContent='✅ Approved'; pill.className='pill pill-gr'; }
     return;
   }
 
-  // FIX 3: Pehle check — agar pehle approved tha toh pending screen mat dikhao
-  if(localStorage.getItem(approvedKey)) return;
-
   if(shop.status==='pending'){
-    showPendingScreen(shop.name, userId); // FIX 1: userId direct pass
+    showPendingScreen(shop.name, userId);
   }
 }
 
@@ -603,15 +631,19 @@ function showPendingScreen(shopName, userId){
       if(el) el.textContent='Last checked: '+new Date().toLocaleTimeString('hi-IN');
       if(s&&s.status==='active'){
         clearInterval(pollInterval); pollInterval=null;
-        // FIX 3: localStorage approved flag set karo
+        // localStorage approved flag set karo — ab refresh pe bhi register redirect nahi hoga
         localStorage.setItem('mhb_approved_'+userId,'1');
         playNotifSound();
         sendBrowserNotif('🎉 Shop Approved!','Aapki dukan ab live hai — customers book kar sakte hain!');
         toast('🎉 Aapki dukan APPROVE ho gayi! Ab live hai!');
+        // Overlay smooth hatao
         const ol=document.getElementById('pending-overlay');
         if(ol){ ol.style.transition='opacity 0.6s'; ol.style.opacity='0'; setTimeout(()=>{ if(ol.parentNode) ol.remove(); },600); }
-        // FIX 1: Page reload — sab fresh aayega
-        setTimeout(()=>{ window.location.reload(); },800);
+        // Status pill update karo
+        const pill=document.getElementById('shop-status-pill');
+        if(pill){ pill.textContent='✅ Approved'; pill.className='pill pill-gr'; }
+        // Bookings load karo (dashboard ab ready hai)
+        await loadBookingsFromDB();
       }
     }catch(e){ console.log('Poll error:',e); }
   },10000);
@@ -960,19 +992,32 @@ function init(){
   const now=new Date();
   document.getElementById('today-date').textContent=`${now.getDate()} ${monthNames[now.getMonth()]} ${now.getFullYear()} · ${dayNames[now.getDay()]}`;
   if('Notification' in window && Notification.permission==='default') Notification.requestPermission();
-  loadBookingsFromDB();
 
-  // FIX: getSession use karo — faster + session cached
+  // getSession use karo — faster + session cached
   sb.auth.getSession().then(async({data:sessionData})=>{
     if(sessionData?.session?.user){
       currentShopOwnerId=sessionData.session.user.id;
       await checkShopStatus(sessionData.session.user.id);
+      // Bookings load karo SIRF agar pending-overlay nahi hai
+      if(!document.getElementById('pending-overlay')){
+        loadBookingsFromDB();
+      }
+      subscribeBookings();
     } else {
       // No session — register pe bhejo
-      window.location.replace('../shopkeeper/register.html');
-      return;
+      // Thoda wait karo — kabhi kabhi session restore hone mein time lagta hai
+      setTimeout(async()=>{
+        const { data: retrySession } = await sb.auth.getSession();
+        if(retrySession?.session?.user){
+          currentShopOwnerId=retrySession.session.user.id;
+          await checkShopStatus(retrySession.session.user.id);
+          if(!document.getElementById('pending-overlay')) loadBookingsFromDB();
+          subscribeBookings();
+        } else {
+          window.location.replace('../shopkeeper/register.html');
+        }
+      }, 1500);
     }
-    subscribeBookings();
   });
   renderBarberSlots(0);
   renderBarberSlots(1);

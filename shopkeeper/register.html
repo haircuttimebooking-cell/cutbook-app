@@ -470,6 +470,44 @@ const SUPABASE_URL = 'https://kovpsqdkrlgwyfrqlhry.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtvdnBzcWRrcmxnd3lmcnFsaHJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1MTg3MDAsImV4cCI6MjA5MDA5NDcwMH0.poZR0KcozCyL1xSo3mFi_yle5bRNhM4TWe1nWfvVx30';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+// ─── AUTH GUARD: Already logged in + shop exists → Dashboard pe bhejo ─────
+(async function authGuard(){
+  try {
+    const { data: sessionData } = await sb.auth.getSession();
+    if (!sessionData?.session?.user) return; // No session — registration page theek hai
+
+    const userId = sessionData.session.user.id;
+    const approvedKey = 'mhb_approved_' + userId;
+
+    // Pehle localStorage check — agar approved flag hai toh seedha dashboard
+    if (localStorage.getItem(approvedKey)) {
+      window.location.replace('../shopkeeper/index.html');
+      return;
+    }
+
+    // DB se shop check karo
+    const { data: shop } = await sb.from('shops')
+      .select('id, status')
+      .eq('owner_id', userId)
+      .order('created_at', { ascending: false })
+      .limit(1).single();
+
+    if (!shop) return; // No shop — registration allow karo
+
+    if (shop.status === 'active') {
+      // Approved hai — localStorage set karo aur dashboard pe bhejo
+      localStorage.setItem(approvedKey, '1');
+      window.location.replace('../shopkeeper/index.html');
+    } else if (shop.status === 'pending') {
+      // Shop registered hai but pending — dashboard pe bhejo (wahan pending screen dikhegi)
+      window.location.replace('../shopkeeper/index.html');
+    }
+  } catch(e) {
+    console.log('Auth guard check:', e);
+    // Error pe kuch mat karo — registration page dikhta rahe
+  }
+})();
+
 // ─── STATE ───────────────────────────────────────────
 let currentStep = 1;
 let otpSent = false;
