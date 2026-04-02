@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>My Haircut Booking — Customer</title>
+<title>CutBook — Customer</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
@@ -182,7 +182,7 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
 </head>
 <body>
 
-<div class="page-lbl">My Haircut Booking</div>
+<div class="page-lbl">Customer App · CutBook</div>
 
 <div class="phone">
   <div class="notch"></div>
@@ -277,11 +277,16 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
           <div class="dstat">🟢 <strong style="color:var(--gr)">Open</strong> 9am–9pm</div>
           <div class="dstat">⏱ <strong>~15 min</strong> wait</div>
         </div>
-        <div class="detail-tags">
+        <div class="detail-tags" id="detail-tags">
           <span class="pill pill-or">✂️ Haircut</span>
           <span class="pill pill-or">🪒 Shave</span>
           <span class="pill pill-gy">💇 Styling</span>
           <span class="pill pill-gy">🎨 Colour</span>
+        </div>
+        <!-- Action buttons row -->
+        <div style="display:flex;gap:8px;margin-top:2px;margin-bottom:2px;">
+          <button id="cust-photos-btn" onclick="openCustPhotoPopup()" style="flex:1;background:var(--bg3);border:1px solid var(--bd2);color:var(--tx2);padding:8px 12px;border-radius:10px;font-size:11px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;display:flex;align-items:center;justify-content:center;gap:6px;">📷 Photos dekho</button>
+          <button id="cust-addr-btn" onclick="openCustAddressPopup()" style="flex:1;background:var(--bg3);border:1px solid var(--bd2);color:var(--tx2);padding:8px 12px;border-radius:10px;font-size:11px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;display:flex;align-items:center;justify-content:center;gap:6px;">📍 Pura Pata</button>
         </div>
       </div>
 
@@ -305,7 +310,15 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
 
       <div class="sec-head"><div class="sec-title">Time slot chunao</div></div>
       <div class="slots-grid">
-        <!-- Dynamic slots loaded by buildTimeSlots() -->
+        <div class="slot booked">9:00 AM</div>
+        <div class="slot booked">9:30 AM</div>
+        <div class="slot" onclick="pickSlot(this)">10:00 AM</div>
+        <div class="slot on" onclick="pickSlot(this)">10:30 AM</div>
+        <div class="slot" onclick="pickSlot(this)">11:00 AM</div>
+        <div class="slot booked">11:30 AM</div>
+        <div class="slot" onclick="pickSlot(this)">12:00 PM</div>
+        <div class="slot" onclick="pickSlot(this)">12:30 PM</div>
+        <div class="slot" onclick="pickSlot(this)">1:00 PM</div>
       </div>
 
       <div class="book-cta" onclick="openBookModal()">Confirm Booking — ₹80</div>
@@ -483,7 +496,16 @@ function openShopDetail(i){
   const nameEl = document.querySelector('.detail-name');
   const addrEl = document.querySelector('.detail-addr');
   if(nameEl) nameEl.textContent = selectedShop.name;
-  if(addrEl) addrEl.textContent = '📍 '+( selectedShop.address||selectedShop.city||'—');
+  if(addrEl) addrEl.textContent = '📍 '+(selectedShop.address||selectedShop.city||'—');
+
+  // Photos button update
+  const photosBtn = document.getElementById('cust-photos-btn');
+  if(photosBtn){
+    const cnt = selectedShop.photos ? selectedShop.photos.length : 0;
+    photosBtn.innerHTML = cnt > 0 ? `📷 ${cnt} Photos` : '📷 Koi photo nahi';
+    photosBtn.style.opacity = cnt > 0 ? '1' : '0.5';
+    photosBtn.style.pointerEvents = cnt > 0 ? 'auto' : 'none';
+  }
 
   // Barbers load karo
   const barberRow = document.querySelector('.barber-row');
@@ -505,33 +527,7 @@ function openShopDetail(i){
   // Dates update karo
   buildDateChips();
 
-  // Time slots dynamic banao
-  buildTimeSlots(selectedShop.opening_time || '09:00', selectedShop.closing_time || '21:00');
-
   goScreen('detail');
-}
-
-function buildTimeSlots(openTime, closeTime){
-  const slotsGrid = document.querySelector('.slots-grid');
-  if(!slotsGrid) return;
-  const [openH, openM] = openTime.split(':').map(Number);
-  const [closeH] = closeTime.split(':').map(Number);
-  const now = new Date();
-  const slots = [];
-  let h = openH, m = openM;
-  while(h < closeH){
-    const hh = h % 12 === 0 ? 12 : h % 12;
-    const mm = m === 0 ? '00' : '30';
-    const ampm = h < 12 ? 'AM' : 'PM';
-    const label = `${hh}:${mm} ${ampm}`;
-    const slotDate = new Date();
-    slotDate.setHours(h, m, 0, 0);
-    const isPast = slotDate < now;
-    slots.push(`<div class="slot ${isPast ? 'booked' : ''}" onclick="pickSlot(this)">${label}</div>`);
-    m += 30;
-    if(m >= 60){ m = 0; h++; }
-  }
-  slotsGrid.innerHTML = slots.join('');
 }
 
 // ─── LOAD BOOKINGS FROM SUPABASE ────────────────────
@@ -688,7 +684,100 @@ function closeBookModal(){ document.getElementById('book-modal').classList.remov
 function filterSearch(q){ document.getElementById('search-results').textContent = q?`"${q}" ke results`:'Paas ke sabhi salons'; }
 function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3000); }
 
+// ─── CUSTOMER PHOTO POPUP ────────────────────────────
+function openCustPhotoPopup(){
+  if(!selectedShop){ toast('❌ Pehle salon chunao'); return; }
+  const photos = selectedShop.photos || [];
+  const modal = document.getElementById('cust-photo-modal');
+  const title = document.getElementById('cust-photo-title');
+  const grid = document.getElementById('cust-photo-grid');
+
+  title.textContent = selectedShop.name;
+  if(!photos.length){
+    grid.innerHTML = '<div style="text-align:center;padding:40px;color:var(--tx3);font-family:var(--dv);">📷 Koi photo nahi</div>';
+  } else {
+    grid.innerHTML = photos.map((url,i)=>`
+      <div style="border-radius:12px;overflow:hidden;cursor:pointer;position:relative;" onclick="window.open('${url}','_blank')">
+        <img src="${url}" style="width:100%;aspect-ratio:1;object-fit:cover;display:block;">
+        <div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,0.7));padding:6px 8px;">
+          <div style="font-size:9px;color:#fff;font-weight:600;">${i===0?'🪧 नाम बोर्ड':'🏪 अंदर'}</div>
+        </div>
+      </div>`).join('');
+  }
+  modal.style.display = 'flex';
+}
+
+function closeCustPhotoPopup(){
+  document.getElementById('cust-photo-modal').style.display = 'none';
+}
+
+// ─── CUSTOMER ADDRESS POPUP ───────────────────────────
+function openCustAddressPopup(){
+  if(!selectedShop){ toast('❌ Pehle salon chunao'); return; }
+  const modal = document.getElementById('cust-addr-modal');
+  document.getElementById('cust-addr-name').textContent = selectedShop.name;
+  document.getElementById('cust-addr-full').textContent =
+    [selectedShop.address, selectedShop.city, selectedShop.pincode].filter(Boolean).join(', ') || 'Address nahi hai';
+  const mapsBtn = document.getElementById('cust-maps-btn');
+  if(selectedShop.latitude && selectedShop.longitude){
+    mapsBtn.onclick = ()=>window.open(`https://www.google.com/maps?q=${selectedShop.latitude},${selectedShop.longitude}`,'_blank');
+  } else {
+    const q = encodeURIComponent([selectedShop.address,selectedShop.city].filter(Boolean).join(' '));
+    mapsBtn.onclick = ()=>window.open(`https://www.google.com/maps/search/${q}`,'_blank');
+  }
+  modal.style.display = 'flex';
+}
+
+function closeCustAddressPopup(){
+  document.getElementById('cust-addr-modal').style.display = 'none';
+}
+
 init();
 </script>
+
+<!-- ══ CUSTOMER PHOTO MODAL ══ -->
+<div id="cust-photo-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:9999;align-items:flex-end;justify-content:center;">
+  <div style="background:var(--bg2);border-radius:24px 24px 0 0;width:100%;max-width:480px;max-height:85vh;overflow:hidden;display:flex;flex-direction:column;">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--bd);">
+      <div>
+        <div id="cust-photo-title" style="font-size:14px;font-weight:700;"></div>
+        <div style="font-size:10px;color:var(--tx3);margin-top:2px;font-family:var(--dv);">📷 Dukan ki photos</div>
+      </div>
+      <button onclick="closeCustPhotoPopup()" style="width:32px;height:32px;background:var(--bg3);border:1px solid var(--bd2);border-radius:10px;color:var(--tx2);font-size:16px;cursor:pointer;">✕</button>
+    </div>
+    <div style="overflow-y:auto;padding:16px;">
+      <div id="cust-photo-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;"></div>
+      <div style="margin-top:12px;text-align:center;font-size:10px;color:var(--tx3);font-family:var(--dv);">Photo tap karke badi size mein dekhein ↗</div>
+    </div>
+    <div style="padding:12px 16px;border-top:1px solid var(--bd);">
+      <button onclick="closeCustPhotoPopup()" style="width:100%;background:var(--bg3);border:1px solid var(--bd2);color:var(--tx2);padding:12px;border-radius:12px;font-size:13px;font-weight:600;cursor:pointer;">Band karo</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ CUSTOMER ADDRESS MODAL ══ -->
+<div id="cust-addr-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:9999;align-items:flex-end;justify-content:center;">
+  <div style="background:var(--bg2);border-radius:24px 24px 0 0;width:100%;max-width:480px;">
+    <div style="padding:8px;text-align:center;"><div style="width:36px;height:4px;background:var(--bd2);border-radius:2px;margin:0 auto;"></div></div>
+    <div style="padding:0 20px 24px;">
+      <div id="cust-addr-name" style="font-size:16px;font-weight:700;margin-bottom:12px;"></div>
+      <div style="background:var(--bg3);border:1px solid var(--bd);border-radius:12px;padding:14px;margin-bottom:14px;">
+        <div style="font-size:10px;color:var(--tx3);font-family:var(--dv);margin-bottom:4px;">📍 Pura Pata:</div>
+        <div id="cust-addr-full" style="font-size:13px;line-height:1.6;font-family:var(--dv);"></div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button onclick="closeCustAddressPopup()" style="flex:1;background:var(--bg3);border:1px solid var(--bd2);color:var(--tx2);padding:12px;border-radius:12px;font-size:12px;font-weight:600;cursor:pointer;">Wapas</button>
+        <button id="cust-maps-btn" style="flex:2;background:var(--or);border:none;color:#fff;padding:12px;border-radius:12px;font-size:12px;font-weight:600;cursor:pointer;">🗺️ Google Maps pe dekho</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.getElementById('cust-photo-modal').addEventListener('click',function(e){ if(e.target===this) closeCustPhotoPopup(); });
+document.getElementById('cust-addr-modal').addEventListener('click',function(e){ if(e.target===this) closeCustAddressPopup(); });
+document.addEventListener('keydown',function(e){ if(e.key==='Escape'){ closeCustPhotoPopup(); closeCustAddressPopup(); } });
+</script>
+
 </body>
 </html>

@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="hi">
 <head>
 <meta charset="UTF-8">
@@ -16,8 +17,6 @@
 }
 body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:24px 16px 48px;gap:20px;}
 .page-lbl{font-size:11px;color:var(--tx3);letter-spacing:0.1em;text-transform:uppercase;font-weight:500;}
-
-/* Phone */
 .phone{width:360px;background:var(--bg);border-radius:44px;border:2px solid rgba(255,255,255,0.08);overflow:hidden;box-shadow:0 0 0 6px rgba(0,0,0,0.5),0 0 0 7px rgba(255,255,255,0.04),0 40px 100px rgba(244,123,32,0.12);position:relative;}
 .notch{width:90px;height:24px;background:var(--bg);border:1.5px solid rgba(255,255,255,0.05);border-top:none;border-radius:0 0 16px 16px;margin:0 auto;position:relative;z-index:10;}
 .status-bar{display:flex;justify-content:space-between;align-items:center;padding:6px 20px 4px;font-size:10px;font-weight:600;color:var(--tx2);}
@@ -25,16 +24,12 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
 .screen{height:100%;overflow-y:auto;display:none;scrollbar-width:none;}
 .screen::-webkit-scrollbar{display:none;}
 .screen.active{display:block;}
-
-/* Nav */
 .bot-nav{display:flex;background:rgba(18,18,18,0.98);border-top:1px solid var(--bd);padding:10px 0 16px;}
 .nav-i{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;position:relative;}
 .nav-i span{font-size:8px;color:var(--tx3);font-family:var(--dv);}
 .nav-i.on span{color:var(--or);}
 .nav-dot{width:4px;height:4px;background:var(--or);border-radius:50%;margin-top:1px;}
 .nav-badge{position:absolute;top:-4px;right:12px;min-width:16px;height:16px;background:var(--re);border:2px solid var(--bg);border-radius:8px;font-size:8px;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:center;padding:0 3px;}
-
-/* Common */
 .sec-head{display:flex;justify-content:space-between;align-items:center;padding:0 16px;margin-bottom:10px;}
 .sec-title{font-size:12px;font-weight:600;}
 .sec-action{font-size:10px;color:var(--or);cursor:pointer;}
@@ -53,12 +48,8 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
 .btn-or{background:var(--or);color:#fff;}
 .btn-gy{background:var(--bg3);color:var(--tx2);border:1px solid var(--bd2);}
 .btn-bl{background:rgba(74,144,226,0.15);color:var(--bl);border:1px solid rgba(74,144,226,0.3);}
-
-/* Toast */
 .toast{position:fixed;bottom:32px;left:50%;transform:translateX(-50%);background:var(--bg3);border:1px solid var(--bd2);color:var(--tx);font-size:12px;font-weight:500;padding:10px 20px;border-radius:20px;z-index:9999;opacity:0;transition:opacity .3s;white-space:nowrap;box-shadow:0 8px 30px rgba(0,0,0,0.5);}
 .toast.show{opacity:1;}
-
-/* Modal */
 .modal{display:none;position:absolute;inset:0;background:rgba(0,0,0,0.72);z-index:100;align-items:center;justify-content:center;backdrop-filter:blur(4px);border-radius:42px;}
 .modal.open{display:flex;}
 .modal-box{background:var(--bg2);border:1px solid var(--bd2);border-radius:22px;padding:22px 18px 20px;width:290px;text-align:center;}
@@ -71,8 +62,6 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
 .modal-info{font-size:11px;font-weight:600;margin-bottom:16px;}
 .modal-btns{display:flex;gap:10px;}
 .modal-btns button{flex:1;padding:11px;border-radius:12px;font-size:12px;font-weight:600;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;}
-
-/* Booking card */
 .bk-card{margin:0 16px 10px;background:var(--bg2);border:1px solid var(--bd);border-radius:14px;padding:12px 14px;transition:all .3s;}
 .bk-card[data-status="accepted"]{border-color:rgba(61,187,120,0.25);border-left:3px solid var(--gr);}
 .bk-card[data-status="cancelled"]{opacity:0.4;}
@@ -82,15 +71,11 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
 .bk-meta{font-size:10px;color:var(--tx3);font-family:var(--dv);margin-bottom:2px;}
 .bk-actions{display:flex;gap:8px;margin-top:10px;}
 .bk-lock{margin-top:10px;background:rgba(244,123,32,0.07);border:1px solid rgba(244,123,32,0.18);border-radius:9px;padding:8px 10px;display:flex;align-items:center;gap:7px;font-size:10px;color:var(--or);font-family:var(--dv);}
-.bk-contact{display:flex;gap:6px;margin-top:8px;}
-.bk-contact a{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:7px;border-radius:9px;font-size:10px;font-weight:600;text-decoration:none;border:1px solid;transition:all .2s;}
 .time-badge{display:inline-flex;align-items:center;gap:4px;font-size:9px;font-weight:600;padding:3px 8px;border-radius:20px;margin-top:4px;}
 .time-badge.running{background:rgba(61,187,120,0.15);color:var(--gr);border:1px solid rgba(61,187,120,0.3);}
 .time-badge.soon{background:rgba(244,180,32,0.12);color:var(--am);border:1px solid rgba(244,180,32,0.25);}
 .time-badge.upcoming{background:var(--bg3);color:var(--tx3);border:1px solid var(--bd);}
 .barber-chip{display:inline-flex;align-items:center;gap:4px;font-size:9px;color:var(--bl);background:rgba(74,144,226,0.1);border:1px solid rgba(74,144,226,0.2);border-radius:20px;padding:2px 8px;margin-top:3px;}
-
-/* Auto-accept toggle */
 .auto-row{margin:0 16px 12px;background:var(--bg2);border:1px solid var(--bd);border-radius:12px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;}
 .toggle-sw{position:relative;width:36px;height:20px;cursor:pointer;}
 .toggle-sw input{opacity:0;width:0;height:0;}
@@ -98,25 +83,17 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
 .toggle-slider:before{content:'';position:absolute;width:14px;height:14px;left:3px;top:50%;transform:translateY(-50%);background:var(--tx3);border-radius:50%;transition:.3s;}
 .toggle-sw input:checked+.toggle-slider{background:var(--or);border-color:rgba(244,123,32,0.4);}
 .toggle-sw input:checked+.toggle-slider:before{left:19px;background:#fff;}
-
-/* Floating button */
 .fab{position:absolute;bottom:70px;right:16px;width:44px;height:44px;background:var(--or);border-radius:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 20px rgba(244,123,32,0.4);z-index:20;font-size:20px;font-weight:300;color:#fff;}
-
-/* Mini bar */
 .bar-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
 .bar-lbl{font-size:10px;color:var(--tx2);width:70px;text-align:right;flex-shrink:0;}
 .bar-track{flex:1;height:7px;background:var(--bg4);border-radius:4px;overflow:hidden;}
 .bar-fill{height:100%;border-radius:4px;background:var(--or);}
 .bar-fill.gr{background:var(--gr);}
 .bar-val{font-size:10px;color:var(--tx3);width:30px;text-align:right;}
-
-/* Stat card */
 .stat-card{background:var(--bg2);border:1px solid var(--bd);border-radius:14px;padding:14px;text-align:center;}
 .stat-card.hl{border-color:rgba(244,123,32,0.28);background:var(--or3);}
 .stat-num{font-size:24px;font-weight:700;}
 .stat-lbl{font-size:10px;color:var(--tx3);margin-top:3px;font-family:var(--dv);}
-
-/* Schedule styles */
 .date-nav{display:flex;align-items:center;gap:8px;padding:0 16px;margin-bottom:12px;}
 .date-arrow{width:32px;height:32px;background:var(--bg3);border:1px solid var(--bd);border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;color:var(--tx2);}
 .date-label{flex:1;text-align:center;background:var(--bg2);border:1px solid var(--bd);border-radius:10px;padding:7px 12px;}
@@ -141,43 +118,34 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
 .chair-slot:last-child{border-bottom:none;}
 .chair-slot-time{color:var(--tx3);width:50px;flex-shrink:0;}
 .chair-slot-content{flex:1;}
-
-/* Slot grid */
 .slot-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:0 16px;margin-bottom:16px;}
 .slot-pill{padding:8px;border-radius:10px;background:var(--bg3);border:1px solid var(--bd);text-align:center;font-size:10px;cursor:pointer;transition:all .2s;}
 .slot-pill.off{background:rgba(224,85,85,0.08);border-color:rgba(224,85,85,0.2);color:var(--re);text-decoration:line-through;}
 .slot-pill.on{background:rgba(61,187,120,0.1);border-color:rgba(61,187,120,0.25);color:var(--gr);}
-
-/* Analytics */
 .a-week{display:flex;gap:6px;align-items:flex-end;height:70px;padding:0 16px;margin-bottom:4px;}
 .a-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;}
 .a-bar{width:100%;border-radius:4px 4px 0 0;background:var(--bg4);min-height:4px;transition:height .5s;}
 .a-bar.today{background:var(--or);}
 .a-bar.past{background:var(--bg4);border:1px solid var(--bd2);}
 .a-lbl{font-size:8px;color:var(--tx3);}
-
-/* Profile rows */
 .pr-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--bd);cursor:pointer;}
 .pr-row:last-child{border-bottom:none;}
 .pr-row:hover{background:var(--bg3);}
 .pr-icon-wrap{width:32px;height:32px;border-radius:10px;background:var(--bg3);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font-size:14px;}
 .pr-lbl{font-size:12px;font-weight:500;flex:1;}
 .pr-val{font-size:10px;color:var(--tx3);}
-
-/* Services list */
 .svc-row{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--bd);}
 .svc-row:last-child{border-bottom:none;}
 .svc-icon{font-size:16px;width:28px;text-align:center;}
 .svc-name{font-size:11px;font-weight:500;flex:1;}
 .svc-price{font-size:11px;color:var(--or);font-weight:600;margin-right:6px;}
 .svc-dur{font-size:9px;color:var(--tx3);}
-
-/* Barber performance */
 .bp-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--bd);}
 .bp-row:last-child{border-bottom:none;}
 .bp-avatar{width:30px;height:30px;border-radius:10px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:13px;}
 .bp-name{font-size:11px;font-weight:500;flex:1;}
 .bp-stat{font-size:10px;color:var(--tx3);text-align:right;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.5;}}
 </style>
 </head>
 <body>
@@ -196,15 +164,14 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
 
   <div class="screen-wrap">
 
-    <!-- ══ HOME / BOOKINGS ══ -->
+    <!-- HOME -->
     <div id="sc-home" class="screen active">
-      <!-- Header -->
       <div style="padding:10px 16px 12px;display:flex;justify-content:space-between;align-items:center;">
         <div style="display:flex;align-items:center;gap:10px;">
-          <img src="../assets/logo.png" style="width:36px;height:36px;object-fit:contain;border-radius:10px;">
+          <img src="../assets/logo.png" style="width:36px;height:36px;object-fit:contain;border-radius:10px;" onerror="this.style.display='none'">
           <div>
             <div style="font-size:10px;color:var(--tx3);font-family:var(--dv);">Namaste 🙏 Aaj ka din</div>
-            <div style="font-size:16px;font-weight:700;">Raj Hair Studio</div>
+            <div class="shop-name" style="font-size:16px;font-weight:700;">Loading...</div>
             <div style="font-size:9px;color:var(--tx3);margin-top:1px;" id="today-date"></div>
           </div>
         </div>
@@ -213,23 +180,15 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
           <span id="online-txt" style="font-size:11px;font-weight:600;color:var(--gr);">Online</span>
         </div>
       </div>
-
-      <!-- Stats -->
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:0 16px;margin-bottom:12px;">
-        <div class="stat-card hl"><div class="stat-num" id="st-count" style="color:var(--or);">5</div><div class="stat-lbl">Aaj bookings</div></div>
+        <div class="stat-card hl"><div class="stat-num" id="st-count" style="color:var(--or);">0</div><div class="stat-lbl">Aaj bookings</div></div>
         <div class="stat-card"><div class="stat-num" id="st-earn" style="font-size:18px;">₹0</div><div class="stat-lbl">Kamai</div></div>
         <div class="stat-card"><div class="stat-num" id="st-cancel" style="font-size:18px;">0<span style="font-size:11px;color:var(--tx3);">/3</span></div><div class="stat-lbl">Cancels aaj</div></div>
       </div>
-
-
-
-      <!-- Cancel limit warning -->
       <div id="cancel-warn" style="display:none;margin:0 16px 12px;background:rgba(224,85,85,0.08);border:1px solid rgba(224,85,85,0.2);border-radius:10px;padding:10px 12px;align-items:center;gap:8px;">
         <span style="font-size:16px;">🚫</span>
         <span style="font-size:11px;color:var(--re);font-family:var(--dv);">Aaj 3 cancel ho gaye — aur cancel nahi ho sakta!</span>
       </div>
-
-      <!-- Filter tabs -->
       <div class="tabs">
         <div class="tab on" onclick="filterBk(this,'all')" data-filter="all">Sab</div>
         <div class="tab" onclick="filterBk(this,'pending')" data-filter="pending">Pending</div>
@@ -237,114 +196,83 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
         <div class="tab" onclick="filterBk(this,'completed')" data-filter="completed">Completed</div>
         <div class="tab" onclick="filterBk(this,'cancelled')" data-filter="cancelled">Cancelled</div>
       </div>
-
       <div id="bk-list"></div>
       <div style="height:70px;"></div>
-
-      <!-- FAB -->
-      <div class="fab" onclick="openManualBooking()" title="Manual Booking Add karo">＋</div>
+      <div class="fab" onclick="openManualBooking()">＋</div>
     </div>
 
-    <!-- ══ SCHEDULE ══ -->
+    <!-- SCHEDULE -->
     <div id="sc-schedule" class="screen">
       <div style="padding:14px 16px 10px;font-size:16px;font-weight:700;">Schedule</div>
-
-      <!-- Date Navigator -->
       <div class="date-nav">
         <div class="date-arrow" onclick="changeDate(-1)">‹</div>
         <div class="date-label" onclick="toast('📅 Calendar picker — jald aayega!')">
-          <div class="date-label-main" id="sched-date-main">Aaj — 25 March 2026</div>
-          <div class="date-label-sub" id="sched-date-sub">Mangalwar · Click to change</div>
+          <div class="date-label-main" id="sched-date-main">Aaj</div>
+          <div class="date-label-sub" id="sched-date-sub">Click to change</div>
         </div>
         <div class="date-arrow" onclick="changeDate(1)">›</div>
       </div>
-
-      <!-- Day Summary -->
       <div class="day-summary">
         <div class="day-sum-item"><div class="day-sum-val">7</div><div class="day-sum-lbl">Bookings</div></div>
         <div class="day-sum-item"><div class="day-sum-val">5</div><div class="day-sum-lbl">Free Slots</div></div>
         <div class="day-sum-item"><div class="day-sum-val" style="color:var(--gr);">2</div><div class="day-sum-lbl">Barbers</div></div>
         <div class="day-sum-item"><div class="day-sum-val" style="color:var(--tx);">9AM–9PM</div><div class="day-sum-lbl">Timing</div></div>
       </div>
-
-      <!-- View Switch -->
       <div class="view-switch">
         <div class="view-btn on" id="vb-timeline" onclick="switchView('timeline')">⏱ Timeline</div>
         <div class="view-btn" id="vb-chair" onclick="switchView('chair')">💺 Chair View</div>
       </div>
-
-      <!-- Timeline View -->
       <div id="view-timeline">
         <div style="margin:0 16px 10px;background:var(--bg2);border:1px solid var(--bd);border-radius:14px;overflow:hidden;">
           <div style="padding:9px 14px;background:var(--bg3);border-bottom:1px solid var(--bd);font-size:10px;font-weight:600;display:flex;justify-content:space-between;">
-            <span>Aaj ki Timeline</span>
-            <span style="color:var(--or);">7 bookings</span>
+            <span>Aaj ki Timeline</span><span style="color:var(--or);">7 bookings</span>
           </div>
           <div id="timeline"></div>
         </div>
       </div>
-
-      <!-- Chair View -->
       <div id="view-chair" style="display:none;">
         <div class="chair-block">
           <div class="chair-head">💺 Chair 1 — Raju Barber</div>
           <div class="chair-slot"><span class="chair-slot-time">9:00 AM</span><div class="chair-slot-content" style="background:var(--or2);border:1px solid rgba(244,123,32,0.2);border-radius:7px;padding:4px 8px;color:var(--or);font-size:10px;">Rahul Kumar — Haircut ✂️</div></div>
           <div class="chair-slot"><span class="chair-slot-time">9:30 AM</span><div class="chair-slot-content" style="color:var(--tx3);font-style:italic;">— Available —</div></div>
           <div class="chair-slot"><span class="chair-slot-time">10:00 AM</span><div class="chair-slot-content" style="background:rgba(61,187,120,0.1);border:1px solid rgba(61,187,120,0.2);border-radius:7px;padding:4px 8px;color:var(--gr);font-size:10px;">🟢 Aman Singh — Shaving (Running)</div></div>
-          <div class="chair-slot"><span class="chair-slot-time">10:30 AM</span><div class="chair-slot-content" style="background:var(--or2);border:1px solid rgba(244,123,32,0.2);border-radius:7px;padding:4px 8px;color:var(--or);font-size:10px;">Rohit Verma — Haircut+Shave ✂️🪒</div></div>
         </div>
         <div class="chair-block">
           <div class="chair-head">💺 Chair 2 — Deepak Barber</div>
           <div class="chair-slot"><span class="chair-slot-time">9:00 AM</span><div class="chair-slot-content" style="color:var(--tx3);font-style:italic;">— Available —</div></div>
           <div class="chair-slot"><span class="chair-slot-time">9:30 AM</span><div class="chair-slot-content" style="background:var(--or2);border:1px solid rgba(244,123,32,0.2);border-radius:7px;padding:4px 8px;color:var(--or);font-size:10px;">Vikash Gupta — Hair Styling 💇</div></div>
-          <div class="chair-slot"><span class="chair-slot-time">10:00 AM</span><div class="chair-slot-content" style="color:var(--re);background:rgba(224,85,85,0.07);border:1px solid rgba(224,85,85,0.15);border-radius:7px;padding:4px 8px;font-size:10px;">🔒 Blocked — 10:00–11:00</div></div>
-          <div class="chair-slot" onclick="toast('⚠️ Double booking — Chair 2 already booked!')"><span class="chair-slot-time">11:00 AM</span><div class="chair-slot-content" style="background:var(--or2);border:1px solid rgba(244,123,32,0.2);border-radius:7px;padding:4px 8px;color:var(--or);font-size:10px;">Suresh Yadav — Haircut ✂️</div></div>
         </div>
-        <!-- Block time control -->
         <div style="margin:0 16px 10px;display:flex;gap:8px;">
-          <button class="btn btn-re" style="flex:1;font-size:10px;" onclick="toast('🔴 Time block ho gayi — 2PM-3PM')">🔒 Block Time</button>
+          <button class="btn btn-re" style="flex:1;font-size:10px;" onclick="toast('🔴 Time block ho gayi')">🔒 Block Time</button>
         </div>
       </div>
-
-      <!-- Barber Wise Slot Control -->
       <div class="sec-head" style="margin-top:4px;">
         <div class="sec-title">Slot Control</div>
         <div class="sec-action" onclick="closeAllSlots()">Sab band karo</div>
       </div>
-      <!-- Barber tabs -->
       <div style="display:flex;gap:6px;padding:0 16px;margin-bottom:10px;">
         <div id="bsc-tab-0" onclick="switchBarberSlotTab(0)" style="flex:1;padding:7px 10px;border-radius:10px;background:var(--or);border:1px solid var(--or);text-align:center;font-size:10px;font-weight:600;color:#fff;cursor:pointer;">💈 Raju</div>
         <div id="bsc-tab-1" onclick="switchBarberSlotTab(1)" style="flex:1;padding:7px 10px;border-radius:10px;background:var(--bg3);border:1px solid var(--bd);text-align:center;font-size:10px;font-weight:600;color:var(--tx3);cursor:pointer;">✂️ Deepak</div>
       </div>
-      <!-- Raju slots -->
       <div id="bsc-panel-0" class="slot-grid" style="margin-bottom:16px;"></div>
-      <!-- Deepak slots -->
       <div id="bsc-panel-1" class="slot-grid" style="display:none;margin-bottom:16px;"></div>
-
-
     </div>
 
-    <!-- ══ ANALYTICS ══ -->
+    <!-- ANALYTICS -->
     <div id="sc-analytics" class="screen">
       <div style="padding:14px 16px 10px;font-size:16px;font-weight:700;">Analytics</div>
-
-      <!-- Date Filter -->
       <div class="tabs">
         <div class="tab on" onclick="this.parentNode.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));this.classList.add('on');toast('📊 Aaj ka data')">Aaj</div>
         <div class="tab" onclick="this.parentNode.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));this.classList.add('on');toast('📊 Is hafte ka data')">Is Hafte</div>
         <div class="tab" onclick="this.parentNode.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));this.classList.add('on');toast('📊 Is mahine ka data')">Is Mahine</div>
-        <div class="tab" onclick="this.parentNode.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));this.classList.add('on');toast('📅 Custom range select karo')">Custom</div>
+        <div class="tab" onclick="this.parentNode.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));this.classList.add('on');toast('📅 Custom range')">Custom</div>
       </div>
-
-      <!-- Key Stats -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 16px;margin-bottom:14px;">
         <div class="stat-card hl"><div class="stat-num" style="color:var(--or);font-size:20px;">₹22.7k</div><div class="stat-lbl">Kamai (Mahine)</div></div>
         <div class="stat-card"><div class="stat-num" style="font-size:20px;">284</div><div class="stat-lbl">Total Bookings</div></div>
         <div class="stat-card"><div class="stat-num" style="color:var(--gr);font-size:20px;">4.8★</div><div class="stat-lbl">Avg Rating</div></div>
         <div class="stat-card"><div class="stat-num" style="color:var(--bl);font-size:20px;">89%</div><div class="stat-lbl">Completion Rate</div></div>
       </div>
-
-      <!-- Earnings Graph -->
       <div style="margin:0 16px 14px;background:var(--bg2);border:1px solid var(--bd);border-radius:14px;padding:14px;">
         <div style="font-size:12px;font-weight:600;margin-bottom:4px;">Weekly Earnings</div>
         <div style="font-size:9px;color:var(--tx3);margin-bottom:12px;font-family:var(--dv);">Aaj sabse zyada — ₹3,200</div>
@@ -358,31 +286,17 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
           <div class="a-bar-wrap"><div class="a-bar today" style="height:65px;"></div><div class="a-lbl" style="color:var(--or);">Aaj</div></div>
         </div>
       </div>
-
-      <!-- Popular Services -->
       <div style="margin:0 16px 14px;background:var(--bg2);border:1px solid var(--bd);border-radius:14px;padding:14px;">
         <div style="font-size:12px;font-weight:600;margin-bottom:12px;">Popular Services</div>
         <div class="bar-row"><div class="bar-lbl">✂️ Haircut</div><div class="bar-track"><div class="bar-fill" style="width:72%;"></div></div><div class="bar-val">72%</div></div>
         <div class="bar-row"><div class="bar-lbl">🪒 Shaving</div><div class="bar-track"><div class="bar-fill gr" style="width:20%;"></div></div><div class="bar-val">20%</div></div>
         <div class="bar-row" style="margin-bottom:0;"><div class="bar-lbl">💇 Styling</div><div class="bar-track"><div class="bar-fill" style="width:8%;background:var(--bl);"></div></div><div class="bar-val">8%</div></div>
       </div>
-
-      <!-- Barber Performance -->
       <div style="margin:0 16px 14px;background:var(--bg2);border:1px solid var(--bd);border-radius:14px;padding:14px;">
         <div style="font-size:12px;font-weight:600;margin-bottom:10px;">Barber Performance</div>
-        <div class="bp-row">
-          <div class="bp-avatar">💈</div>
-          <div><div class="bp-name">Raju Barber</div><div style="font-size:9px;color:var(--tx3);">Chair 1</div></div>
-          <div class="bp-stat"><div style="color:var(--or);font-weight:600;">₹12,400</div><div>148 bookings</div></div>
-        </div>
-        <div class="bp-row">
-          <div class="bp-avatar">✂️</div>
-          <div><div class="bp-name">Deepak Barber</div><div style="font-size:9px;color:var(--tx3);">Chair 2</div></div>
-          <div class="bp-stat"><div style="color:var(--or);font-weight:600;">₹10,300</div><div>136 bookings</div></div>
-        </div>
+        <div class="bp-row"><div class="bp-avatar">💈</div><div><div class="bp-name">Raju Barber</div><div style="font-size:9px;color:var(--tx3);">Chair 1</div></div><div class="bp-stat"><div style="color:var(--or);font-weight:600;">₹12,400</div><div>148 bookings</div></div></div>
+        <div class="bp-row"><div class="bp-avatar">✂️</div><div><div class="bp-name">Deepak Barber</div><div style="font-size:9px;color:var(--tx3);">Chair 2</div></div><div class="bp-stat"><div style="color:var(--or);font-weight:600;">₹10,300</div><div>136 bookings</div></div></div>
       </div>
-
-      <!-- Peak Time -->
       <div style="margin:0 16px 14px;background:var(--bg2);border:1px solid var(--bd);border-radius:14px;padding:14px;">
         <div style="font-size:12px;font-weight:600;margin-bottom:10px;">⏰ Peak Time Analysis</div>
         <div style="display:flex;flex-direction:column;gap:6px;">
@@ -391,51 +305,42 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
           <div style="display:flex;align-items:center;gap:8px;"><span style="font-size:10px;color:var(--tx3);width:80px;">1PM–3PM</span><div style="flex:1;height:5px;background:var(--bg4);border:1px solid var(--bd);border-radius:4px;"></div><span style="font-size:9px;color:var(--tx3);">Low</span></div>
         </div>
       </div>
-
-      <!-- Cancellation data -->
       <div style="margin:0 16px 14px;background:rgba(224,85,85,0.06);border:1px solid rgba(224,85,85,0.15);border-radius:14px;padding:14px;">
         <div style="display:flex;justify-content:space-between;align-items:center;">
           <div><div style="font-size:12px;font-weight:600;">❌ Cancellation Data</div><div style="font-size:9px;color:var(--tx3);font-family:var(--dv);margin-top:2px;">Is mahine</div></div>
           <div style="text-align:right;"><div style="font-size:20px;font-weight:700;color:var(--re);">12</div><div style="font-size:9px;color:var(--tx3);">cancels</div></div>
         </div>
       </div>
-
-      <!-- Download PDF -->
       <div style="margin:0 16px 20px;">
         <button class="btn btn-gy" style="width:100%;padding:12px;font-size:12px;" onclick="toast('📄 PDF download ho rahi hai...')">📄 Download Report (PDF)</button>
       </div>
     </div>
 
-    <!-- ══ PROFILE / SETTINGS ══ -->
+    <!-- PROFILE -->
     <div id="sc-profile" class="screen">
-      <!-- Header -->
       <div style="padding:16px 16px 14px;display:flex;align-items:center;gap:14px;border-bottom:1px solid var(--bd);">
-        <div style="width:56px;height:56px;border-radius:18px;overflow:hidden;"><img src="../assets/logo.png" style="width:56px;height:56px;object-fit:contain;"></div>
+        <div style="width:56px;height:56px;border-radius:18px;overflow:hidden;"><img src="../assets/logo.png" style="width:56px;height:56px;object-fit:contain;" onerror="this.style.display='none'"></div>
         <div>
-          <div style="font-size:16px;font-weight:700;">Raj Hair Studio</div>
-          <div style="font-size:10px;color:var(--tx3);font-family:var(--dv);">Hazratganj, Lucknow</div>
+          <div class="shop-name" style="font-size:16px;font-weight:700;">Loading...</div>
+          <div class="owner-name" style="font-size:10px;color:var(--tx3);font-family:var(--dv);">—</div>
           <div style="margin-top:6px;display:flex;gap:6px;">
             <span class="pill pill-gr" style="font-size:9px;">⭐ 4.8</span>
             <span class="pill pill-or" style="font-size:9px;">284 Bookings</span>
-            <span class="pill pill-am" style="font-size:9px;">✅ Approved</span>
+            <span class="pill pill-am" id="shop-status-pill" style="font-size:9px;">⏳ Pending</span>
           </div>
         </div>
       </div>
-
-      <!-- Services -->
       <div style="margin:12px 16px;background:var(--bg2);border:1px solid var(--bd);border-radius:14px;overflow:hidden;">
         <div style="padding:10px 14px;background:var(--bg3);border-bottom:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center;">
           <span style="font-size:11px;font-weight:600;">✂️ Services & Prices</span>
           <span style="font-size:10px;color:var(--or);cursor:pointer;" onclick="toast('➕ New service add karo')">+ Add</span>
         </div>
-        <div class="svc-row"><div class="svc-icon">✂️</div><div class="svc-name">Haircut</div><div class="svc-price">₹80</div><div class="svc-dur">30 min</div><span style="color:var(--tx3);cursor:pointer;margin-left:6px;" onclick="toast('✏️ Haircut edit karo')">✏️</span></div>
-        <div class="svc-row"><div class="svc-icon">🪒</div><div class="svc-name">Beard Shaving</div><div class="svc-price">₹60</div><div class="svc-dur">15 min</div><span style="color:var(--tx3);cursor:pointer;margin-left:6px;" onclick="toast('✏️ Shaving edit karo')">✏️</span></div>
-        <div class="svc-row"><div class="svc-icon">🧔</div><div class="svc-name">Beard Trim</div><div class="svc-price">₹40</div><div class="svc-dur">20 min</div><span style="color:var(--tx3);cursor:pointer;margin-left:6px;" onclick="toast('✏️ Trim edit karo')">✏️</span></div>
-        <div class="svc-row"><div class="svc-icon">🧖</div><div class="svc-name">Facial</div><div class="svc-price">₹120</div><div class="svc-dur">45 min</div><span style="color:var(--tx3);cursor:pointer;margin-left:6px;" onclick="toast('✏️ Facial edit karo')">✏️</span></div>
-        <div class="svc-row"><div class="svc-icon">🎨</div><div class="svc-name">Hair Color</div><div class="svc-price">₹200</div><div class="svc-dur">60 min</div><span style="color:var(--tx3);cursor:pointer;margin-left:6px;" onclick="toast('✏️ Color edit karo')">✏️</span></div>
+        <div class="svc-row"><div class="svc-icon">✂️</div><div class="svc-name">Haircut</div><div class="svc-price">₹80</div><div class="svc-dur">30 min</div><span style="color:var(--tx3);cursor:pointer;margin-left:6px;" onclick="toast('✏️ Edit')">✏️</span></div>
+        <div class="svc-row"><div class="svc-icon">🪒</div><div class="svc-name">Beard Shaving</div><div class="svc-price">₹60</div><div class="svc-dur">15 min</div><span style="color:var(--tx3);cursor:pointer;margin-left:6px;" onclick="toast('✏️ Edit')">✏️</span></div>
+        <div class="svc-row"><div class="svc-icon">🧔</div><div class="svc-name">Beard Trim</div><div class="svc-price">₹40</div><div class="svc-dur">20 min</div><span style="color:var(--tx3);cursor:pointer;margin-left:6px;" onclick="toast('✏️ Edit')">✏️</span></div>
+        <div class="svc-row"><div class="svc-icon">🧖</div><div class="svc-name">Facial</div><div class="svc-price">₹120</div><div class="svc-dur">45 min</div><span style="color:var(--tx3);cursor:pointer;margin-left:6px;" onclick="toast('✏️ Edit')">✏️</span></div>
+        <div class="svc-row"><div class="svc-icon">🎨</div><div class="svc-name">Hair Color</div><div class="svc-price">₹200</div><div class="svc-dur">60 min</div><span style="color:var(--tx3);cursor:pointer;margin-left:6px;" onclick="toast('✏️ Edit')">✏️</span></div>
       </div>
-
-      <!-- Barbers -->
       <div style="margin:0 16px 12px;background:var(--bg2);border:1px solid var(--bd);border-radius:14px;overflow:hidden;">
         <div style="padding:10px 14px;background:var(--bg3);border-bottom:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center;">
           <span style="font-size:11px;font-weight:600;">👨‍🦱 My Barbers</span>
@@ -444,48 +349,40 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
         <div class="bp-row" style="padding:10px 14px;">
           <div class="bp-avatar">💈</div>
           <div><div class="bp-name">Raju Barber</div><div style="font-size:9px;color:var(--tx3);">💺 Chair 1 · Active</div></div>
-          <span style="color:var(--tx3);cursor:pointer;" onclick="toast('✏️ Raju edit karo')">✏️</span>
+          <span style="color:var(--tx3);cursor:pointer;" onclick="toast('✏️ Edit karo')">✏️</span>
         </div>
         <div class="bp-row" style="padding:10px 14px;border-top:1px solid var(--bd);">
           <div class="bp-avatar">✂️</div>
           <div><div class="bp-name">Deepak Barber</div><div style="font-size:9px;color:var(--tx3);">💺 Chair 2 · Active</div></div>
-          <span style="color:var(--tx3);cursor:pointer;" onclick="toast('✏️ Deepak edit karo')">✏️</span>
+          <span style="color:var(--tx3);cursor:pointer;" onclick="toast('✏️ Edit karo')">✏️</span>
         </div>
       </div>
-
-      <!-- Settings rows -->
       <div style="margin:0 16px;background:var(--bg2);border:1px solid var(--bd);border-radius:14px;">
         <div class="pr-row" style="cursor:default;">
           <div class="pr-icon-wrap">⚡</div>
-          <div style="flex:1;">
-            <div class="pr-lbl">Auto Accept</div>
-            <div style="font-size:9px;color:var(--tx3);font-family:var(--dv);" id="aa-sub-lbl">ON — booking instantly confirm ho</div>
-          </div>
-          <label class="toggle-sw">
-            <input type="checkbox" id="auto-accept" checked onchange="toggleAutoAccept(this)">
-            <span class="toggle-slider"></span>
-          </label>
+          <div style="flex:1;"><div class="pr-lbl">Auto Accept</div><div style="font-size:9px;color:var(--tx3);font-family:var(--dv);" id="aa-sub-lbl">ON — booking instantly confirm ho</div></div>
+          <label class="toggle-sw"><input type="checkbox" id="auto-accept" checked onchange="toggleAutoAccept(this)"><span class="toggle-slider"></span></label>
         </div>
         <div class="pr-row" onclick="toast('🕐 Timing update karo')"><div class="pr-icon-wrap">🕐</div><div class="pr-lbl">Shop Timing</div><div class="pr-val">9am–9pm</div><span style="color:var(--tx3);margin-left:8px;">›</span></div>
         <div class="pr-row" onclick="toast('📷 Gallery update ho gayi')"><div class="pr-icon-wrap">📷</div><div class="pr-lbl">Photo Gallery</div><div class="pr-val">8 photos</div><span style="color:var(--tx3);margin-left:8px;">›</span></div>
         <div class="pr-row" onclick="toast('💳 Bank account update karo')"><div class="pr-icon-wrap">💳</div><div class="pr-lbl">Payment &amp; Bank</div><div class="pr-val">HDFC linked</div><span style="color:var(--tx3);margin-left:8px;">›</span></div>
         <div class="pr-row" onclick="toast('🔔 Notification settings')"><div class="pr-icon-wrap">🔔</div><div class="pr-lbl">Notifications</div><div class="pr-val">On</div><span style="color:var(--tx3);margin-left:8px;">›</span></div>
-        <div class="pr-row" onclick="toast('📞 Support se baat karo')"><div class="pr-icon-wrap">📞</div><div class="pr-lbl">My Haircut Booking Support</div><span style="color:var(--tx3);margin-left:auto;">›</span></div>
+        <div class="pr-row" onclick="toast('📞 Support se baat karo')"><div class="pr-icon-wrap">📞</div><div class="pr-lbl">Support</div><span style="color:var(--tx3);margin-left:auto;">›</span></div>
         <div class="pr-row" onclick="toast('📜 Terms & Conditions')"><div class="pr-icon-wrap">📄</div><div class="pr-lbl">Terms & Privacy</div><span style="color:var(--tx3);margin-left:auto;">›</span></div>
-        <div class="pr-row" onclick="showConfirm('🚪','Log Out karein?','Kya aap sach mein log out karna chahte hain?','Haan, Log Out','var(--re)',function(){ window.location.href='../index.html'; })"><div class="pr-icon-wrap">🚪</div><div class="pr-lbl" style="color:var(--re);">Log Out</div><span style="color:var(--tx3);margin-left:auto;">›</span></div>
+        <div class="pr-row" onclick="doLogout()"><div class="pr-icon-wrap">🚪</div><div class="pr-lbl" style="color:var(--re);">Log Out</div><span style="color:var(--tx3);margin-left:auto;">›</span></div>
       </div>
       <div style="height:20px;"></div>
     </div>
 
   </div>
 
-  <!-- Bottom nav -->
+  <!-- Bottom Nav -->
   <div class="bot-nav">
     <div class="nav-i on" id="ni-0" onclick="goScreen('home')" style="position:relative;">
       <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 10L10 3L17 10V17H13V13H7V17H3V10Z" stroke="#F47B20" stroke-width="1.5" fill="none" stroke-linejoin="round"/></svg>
       <span style="color:var(--or)">Bookings</span>
       <div class="nav-dot"></div>
-      <div class="nav-badge" id="pending-badge">2</div>
+      <div class="nav-badge" id="pending-badge" style="display:none;">0</div>
     </div>
     <div class="nav-i" id="ni-1" onclick="goScreen('schedule')">
       <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="3" y="4" width="14" height="13" rx="3" stroke="#5A534E" stroke-width="1.5"/><path d="M7 3V5M13 3V5M3 9h14" stroke="#5A534E" stroke-width="1.5" stroke-linecap="round"/></svg>
@@ -501,12 +398,12 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
     </div>
   </div>
 
-  <!-- Work Done Modal -->
+  <!-- Done Modal -->
   <div class="modal" id="done-modal">
     <div class="modal-box">
       <div class="modal-icon or">✔</div>
       <div class="modal-title">Work Done?</div>
-      <div class="modal-sub">Confirm karne ke baad<br>status change nahi hoga.</div>
+      <div class="modal-sub">Confirm karne ke baad status change nahi hoga.</div>
       <div class="modal-info" id="done-modal-name" style="color:var(--or);"></div>
       <div class="modal-btns">
         <button onclick="closeDoneModal()" style="background:var(--bg3);color:var(--tx2);border:1px solid var(--bd2);">Na</button>
@@ -520,7 +417,7 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
     <div class="modal-box">
       <div class="modal-icon re">✕</div>
       <div class="modal-title">Reject karna hai?</div>
-      <div class="modal-sub">Customer ko notification<br>jayegi. Slot free ho jayega.</div>
+      <div class="modal-sub">Customer ko notification jayegi. Slot free ho jayega.</div>
       <div class="modal-info" id="reject-info" style="color:var(--re);"></div>
       <div class="modal-btns">
         <button onclick="closeRejectModal()" style="background:var(--bg3);color:var(--tx2);border:1px solid var(--bd2);">Wapas</button>
@@ -545,8 +442,7 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
           <option>🧖 Facial — ₹120</option>
           <option>🎨 Hair Color — ₹200</option>
         </select>
-        <select id="mb-time" style="background:var(--bg3);border:1px solid var(--bd2);color:var(--tx);border-radius:10px;padding:9px 12px;font-size:12px;font-family:'DM Sans';width:100%;outline:none;">
-        </select>
+        <select id="mb-time" style="background:var(--bg3);border:1px solid var(--bd2);color:var(--tx);border-radius:10px;padding:9px 12px;font-size:12px;font-family:'DM Sans';width:100%;outline:none;"></select>
         <select id="mb-barber" onchange="updateMbSlots()" style="background:var(--bg3);border:1px solid var(--bd2);color:var(--tx);border-radius:10px;padding:9px 12px;font-size:12px;font-family:'DM Sans';width:100%;outline:none;">
           <option>💈 Raju — Chair 1</option>
           <option>✂️ Deepak — Chair 2</option>
@@ -559,7 +455,7 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
     </div>
   </div>
 
-  <!-- Barber Assign Modal -->
+  <!-- Assign Modal -->
   <div class="modal" id="assign-modal">
     <div class="modal-box">
       <div class="modal-icon bl">👨‍🔧</div>
@@ -573,7 +469,7 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
     </div>
   </div>
 
-  <!-- Generic Confirmation Modal -->
+  <!-- Confirm Modal -->
   <div class="modal" id="confirm-modal">
     <div class="modal-box">
       <div class="modal-icon or" id="confirm-icon">❓</div>
@@ -590,10 +486,6 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
 
 <div id="toast" class="toast"></div>
 
-<style>
-@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.5;}}
-</style>
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SUPABASE_URL = 'https://kovpsqdkrlgwyfrqlhry.supabase.co';
@@ -601,50 +493,33 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // ─── STATE ───────────────────────────────────────────
-let cancelCount = 0;
-let doneTarget = null;
-let rejectTarget = null;
-let assignTarget = null;
-let isOnline = true;
-let autoAccept = true;
-let schedOffset = 0;
-let curView = 'timeline';
-
-const barbers = ['Raju','Deepak'];
-const chairs = ['Chair 1','Chair 2'];
-
-// bookings array — Supabase se load hoga
-let bookings = [];
+let cancelCount = 0, doneTarget = null, rejectTarget = null, assignTarget = null;
+let isOnline = true, autoAccept = true, schedOffset = 0, curView = 'timeline';
+let bookings = [], currentShopOwnerId = null, pollInterval = null;
 
 const statusCfg = {
-  pending:   {label:'⏳ Pending',    cls:'pill-am'},
-  accepted:  {label:'✅ Confirmed',  cls:'pill-gr'},
-  completed: {label:'🏁 Completed',  cls:'pill-or'},
-  cancelled: {label:'❌ Cancelled',  cls:'pill-re'},
+  pending:   {label:'⏳ Pending',   cls:'pill-am'},
+  accepted:  {label:'✅ Confirmed', cls:'pill-gr'},
+  completed: {label:'🏁 Completed', cls:'pill-or'},
+  cancelled: {label:'❌ Cancelled', cls:'pill-re'},
 };
+const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const dayNames = ['Raviwar','Somwar','Mangalwar','Budhwar','Guruwar','Shukrawar','Shaniwar'];
 
 // ─── SUPABASE: LOAD BOOKINGS ─────────────────────────
 async function loadBookingsFromDB(){
-  const {data, error} = await sb.from('bookings').select('*').order('created_at',{ascending:false});
+  const {data,error} = await sb.from('bookings').select('*').order('created_at',{ascending:false});
   if(error){ console.error(error); return; }
-  // Map Supabase fields to local format
   bookings = (data||[]).map(b=>({
-    id: b.id,
-    name: b.customer_name || 'Customer',
-    phone: b.customer_phone || '',
-    svc: b.service || 'Service',
-    time: b.booking_time || '',
-    price: b.price || 0,
-    status: b.status || 'pending',
-    barber: b.barber_name || '',
-    chair: b.chair || '',
-    booking_date: b.booking_date || '',
+    id:b.id, name:b.customer_name||'Customer', phone:b.customer_phone||'',
+    svc:b.service||'Service', time:b.booking_time||'', price:b.price||0,
+    status:b.status||'pending', barber:b.barber_name||'', chair:b.chair||'',
+    booking_date:b.booking_date||'',
   }));
-  // Auto accept pending if autoAccept ON
   if(autoAccept){
     for(const b of bookings.filter(x=>x.status==='pending')){
       await sb.from('bookings').update({status:'accepted'}).eq('id',b.id);
-      b.status = 'accepted';
+      b.status='accepted';
     }
   }
   renderBk(getCurFilter());
@@ -654,208 +529,170 @@ async function loadBookingsFromDB(){
 // ─── SUPABASE: REALTIME ──────────────────────────────
 function subscribeBookings(){
   sb.channel('bookings-shop')
-    .on('postgres_changes',{event:'INSERT',schema:'public',table:'bookings'}, async (payload)=>{
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'bookings'},async(payload)=>{
       await loadBookingsFromDB();
       playNotifSound();
-      sendBrowserNotif(
-        '🔔 Nayi Booking!',
-        `${payload.new.customer_name||'Customer'} — ${payload.new.service||'Service'} · ${payload.new.booking_time||''}`
-      );
+      sendBrowserNotif('🔔 Nayi Booking!',`${payload.new.customer_name||'Customer'} — ${payload.new.service||'Service'} · ${payload.new.booking_time||''}`);
     })
     .on('postgres_changes',{event:'UPDATE',schema:'public',table:'bookings'},()=>loadBookingsFromDB())
     .subscribe();
-
-  // Shop approval watch karo
-  sb.channel('shop-status')
-    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'shops',filter:`owner_id=eq.${currentShopOwnerId}`}, (payload)=>{
-      if(payload.new.status === 'active' && payload.old.status !== 'active'){
-        playNotifSound();
-        sendBrowserNotif('✅ Shop Approved!', 'Aapki dukan ab live hai — customers book kar sakte hain!');
-        toast('🎉 Aapki dukan APPROVE ho gayi! Ab live hai!');
-      }
-    })
-    .subscribe();
 }
 
-// ─── SHOP STATUS CHECK ──────────────────────────────
+// ─── SHOP STATUS CHECK ───────────────────────────────
+// FIX 1 & 3: localStorage + userId direct parameter + getSession
 async function checkShopStatus(userId){
-  const {data: shop} = await sb.from('shops').select('id,name,owner_name,status').eq('owner_id', userId).order('created_at',{ascending:false}).limit(1).single();
-  
-  // Agar koi shop nahi mili — register page pe bhejo
-  if(!shop){
-    // Session hai but shop nahi — pehle se registered nahi
+  const {data:shop,error} = await sb.from('shops')
+    .select('id,name,owner_name,status')
+    .eq('owner_id',userId)
+    .order('created_at',{ascending:false})
+    .limit(1).single();
+
+  if(error||!shop){
     window.location.replace('../shopkeeper/register.html');
     return;
   }
 
-  // Shop name dashboard mein dikhao
-  const shopNameEl = document.querySelector('.shop-name');
-  if(shopNameEl && shop.name) shopNameEl.textContent = shop.name;
-  const ownerNameEl = document.querySelector('.owner-name');
-  if(ownerNameEl && shop.owner_name) ownerNameEl.textContent = shop.owner_name;
+  // UI mein shop name + owner name dikhao
+  document.querySelectorAll('.shop-name').forEach(el=>{ if(shop.name) el.textContent=shop.name; });
+  document.querySelectorAll('.owner-name').forEach(el=>{ if(shop.owner_name) el.textContent=shop.owner_name; });
 
-  // FIX: Agar active hai toh approved flag set karo — refresh pe pending screen nahi aayegi
-  if(shop.status === 'active'){
-    localStorage.setItem('shop_approved_'+userId, '1');
-    return; // Dashboard dikhao, kuch nahi karna
+  const approvedKey = 'mhb_approved_'+userId;
+
+  if(shop.status==='active'){
+    // FIX 3: localStorage mein approved flag — browser restart ke baad bhi rehta hai
+    localStorage.setItem(approvedKey,'1');
+    const pill=document.getElementById('shop-status-pill');
+    if(pill){ pill.textContent='✅ Approved'; pill.className='pill pill-gr'; }
+    return;
   }
 
-  // FIX: Pehle check karo — kya is session mein already approved ho gaya tha?
-  // Agar haan toh pending screen mat dikhao (refresh case handle)
-  if(localStorage.getItem('shop_approved_'+userId)) return;
+  // FIX 3: Pehle check — agar pehle approved tha toh pending screen mat dikhao
+  if(localStorage.getItem(approvedKey)) return;
 
-  // Agar pending hai toh waiting screen dikhao
-  if(shop.status === 'pending'){
-    showPendingScreen(shop.name, userId);
+  if(shop.status==='pending'){
+    showPendingScreen(shop.name, userId); // FIX 1: userId direct pass
   }
 }
 
+// FIX 1: userId parameter se — koi global null issue nahi
 function showPendingScreen(shopName, userId){
-  // Check if pending overlay already exists
   if(document.getElementById('pending-overlay')) return;
-  const overlay = document.createElement('div');
-  overlay.id = 'pending-overlay';
-  overlay.style.cssText = 'position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;';
-  overlay.innerHTML = `
-    <div style="font-size:48px;margin-bottom:16px;">⏳</div>
-    <div style="font-size:20px;font-weight:700;margin-bottom:8px;">${shopName}</div>
-    <div style="font-size:14px;color:var(--tx2);font-family:var(--dv);margin-bottom:24px;">Admin review kar raha hai...<br>Approve hone par automatically dashboard khulega!</div>
-    <div style="background:var(--bg2);border:1px solid var(--bd2);border-radius:14px;padding:16px 24px;font-size:12px;color:var(--tx3);font-family:var(--dv);">
+  const overlay=document.createElement('div');
+  overlay.id='pending-overlay';
+  overlay.style.cssText='position:fixed;inset:0;background:#0C0C0C;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;';
+  overlay.innerHTML=`
+    <div style="font-size:56px;margin-bottom:16px;">⏳</div>
+    <div style="font-size:20px;font-weight:700;margin-bottom:8px;color:#F2EDE8;">${shopName}</div>
+    <div style="font-size:14px;color:#A89E96;margin-bottom:8px;font-family:'Noto Sans Devanagari',sans-serif;">Admin review kar raha hai...</div>
+    <div style="font-size:12px;color:#5A534E;margin-bottom:24px;">Approve hone par automatically dashboard khulega!</div>
+    <div style="background:#141414;border:1px solid rgba(255,255,255,0.12);border-radius:14px;padding:16px 24px;font-size:12px;color:#5A534E;margin-bottom:12px;">
       🔔 Is page ko open rakho — approve hone par notification aayegi
-    </div>`;
+    </div>
+    <div id="poll-status" style="font-size:10px;color:#5A534E;">Checking every 10 sec...</div>`;
   document.body.appendChild(overlay);
 
-  // Poll every 10 seconds for approval
-  const pollInterval = setInterval(async ()=>{
-    const {data: shop} = await sb.from('shops').select('id,name,owner_name,status').eq('owner_id', userId).order('created_at',{ascending:false}).limit(1).single();
-    if(shop && shop.status === 'active'){
-      clearInterval(pollInterval);
-      playNotifSound();
-      sendBrowserNotif('🎉 Shop Approved!', 'Aapki dukan ab live hai — customers book kar sakte hain!');
-      toast('🎉 Aapki dukan APPROVE ho gayi! Ab live hai!');
-      // Shop name + owner name update karo
-      const shopNameEl = document.querySelector('.shop-name');
-      if(shopNameEl && shop.name) shopNameEl.textContent = shop.name;
-      const ownerNameEl = document.querySelector('.owner-name');
-      if(ownerNameEl && shop.owner_name) ownerNameEl.textContent = shop.owner_name;
-      // Approved flag set karo sessionStorage mein — refresh pe wapas pending screen nahi aayegi
-      localStorage.setItem('shop_approved_'+userId, '1');
-      // Overlay hatao with animation
-      const ol = document.getElementById('pending-overlay');
-      if(ol){
-        ol.style.transition = 'opacity 0.5s';
-        ol.style.opacity = '0';
-        setTimeout(()=>{ if(ol.parentNode) ol.remove(); }, 500);
+  if(pollInterval) clearInterval(pollInterval);
+  pollInterval=setInterval(async()=>{
+    try{
+      const {data:s}=await sb.from('shops')
+        .select('id,name,owner_name,status')
+        .eq('owner_id',userId) // FIX 1: parameter se
+        .order('created_at',{ascending:false})
+        .limit(1).single();
+      const el=document.getElementById('poll-status');
+      if(el) el.textContent='Last checked: '+new Date().toLocaleTimeString('hi-IN');
+      if(s&&s.status==='active'){
+        clearInterval(pollInterval); pollInterval=null;
+        // FIX 3: localStorage approved flag set karo
+        localStorage.setItem('mhb_approved_'+userId,'1');
+        playNotifSound();
+        sendBrowserNotif('🎉 Shop Approved!','Aapki dukan ab live hai — customers book kar sakte hain!');
+        toast('🎉 Aapki dukan APPROVE ho gayi! Ab live hai!');
+        const ol=document.getElementById('pending-overlay');
+        if(ol){ ol.style.transition='opacity 0.6s'; ol.style.opacity='0'; setTimeout(()=>{ if(ol.parentNode) ol.remove(); },600); }
+        // FIX 1: Page reload — sab fresh aayega
+        setTimeout(()=>{ window.location.reload(); },800);
       }
-      // Dashboard fully reload karo — name, bookings sab fresh aayega
-      setTimeout(()=>{ window.location.reload(); }, 800);
-    }
-  }, 10000);
+    }catch(e){ console.log('Poll error:',e); }
+  },10000);
 }
 
-// ─── BROWSER NOTIFICATION ────────────────────────────
-function sendBrowserNotif(title, body){
+// ─── NOTIFICATIONS ───────────────────────────────────
+function sendBrowserNotif(title,body){
   if(!('Notification' in window)) return;
-  if(Notification.permission === 'granted'){
-    new Notification(title, {
-      body: body,
-      icon: '../assets/logo.png',
-      badge: '../assets/logo.png',
-      vibrate: [200, 100, 200],
-    });
-  } else if(Notification.permission !== 'denied'){
-    Notification.requestPermission().then(perm=>{
-      if(perm === 'granted'){
-        new Notification(title, { body, icon: '../assets/logo.png' });
-      }
-    });
+  if(Notification.permission==='granted'){
+    new Notification(title,{body,icon:'../assets/logo.png'});
+  } else if(Notification.permission!=='denied'){
+    Notification.requestPermission().then(p=>{ if(p==='granted') new Notification(title,{body,icon:'../assets/logo.png'}); });
   }
 }
 
-// ─── NOTIFICATION SOUND ──────────────────────────────
 function playNotifSound(){
-  try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    [880, 1100, 1320].forEach((freq, i) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.frequency.value = freq;
-      osc.type = 'sine';
-      gain.gain.setValueAtTime(0.3, ctx.currentTime + i * 0.15);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.15 + 0.3);
-      osc.start(ctx.currentTime + i * 0.15);
-      osc.stop(ctx.currentTime + i * 0.15 + 0.3);
+  try{
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    [880,1100,1320].forEach((freq,i)=>{
+      const osc=ctx.createOscillator(),gain=ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.frequency.value=freq; osc.type='sine';
+      gain.gain.setValueAtTime(0.3,ctx.currentTime+i*0.15);
+      gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+i*0.15+0.3);
+      osc.start(ctx.currentTime+i*0.15); osc.stop(ctx.currentTime+i*0.15+0.3);
     });
-  } catch(e){ console.log('Sound error:', e); }
+  }catch(e){}
 }
 
-// ─── SUPABASE: ACCEPT ────────────────────────────────
+// ─── BOOKING ACTIONS ─────────────────────────────────
 async function acceptBk(id){
   await sb.from('bookings').update({status:'accepted'}).eq('id',id);
-  const b = bookings.find(x=>x.id===id);
-  if(b){ b.status='accepted'; }
-  renderBk(getCurFilter());
-  updateStats();
+  const b=bookings.find(x=>x.id===id); if(b) b.status='accepted';
+  renderBk(getCurFilter()); updateStats();
   toast(`✅ Booking confirm! 👨‍🔧 ${b?.barber||''}`);
 }
 
-// ─── SUPABASE: REJECT/CANCEL ─────────────────────────
 async function confirmReject(){
   if(!rejectTarget) return;
   await sb.from('bookings').update({status:'cancelled'}).eq('id',rejectTarget);
-  const b = bookings.find(x=>x.id===rejectTarget);
+  const b=bookings.find(x=>x.id===rejectTarget);
   if(b){ b.status='cancelled'; cancelCount++; }
-  closeRejectModal();
-  renderBk(getCurFilter());
-  updateStats();
-  toast(`❌ Booking reject ho gayi`);
-  if(cancelCount>=3){ document.getElementById('cancel-warn').style.display='flex'; }
+  closeRejectModal(); renderBk(getCurFilter()); updateStats();
+  toast('❌ Booking reject ho gayi');
+  if(cancelCount>=3) document.getElementById('cancel-warn').style.display='flex';
 }
 
-// ─── SUPABASE: DONE ──────────────────────────────────
 async function confirmDone(){
   if(!doneTarget) return;
   await sb.from('bookings').update({status:'completed'}).eq('id',doneTarget);
-  const b = bookings.find(x=>x.id===doneTarget);
-  if(b){ b.status='completed'; }
-  closeDoneModal();
-  renderBk(getCurFilter());
-  updateStats();
+  const b=bookings.find(x=>x.id===doneTarget); if(b) b.status='completed';
+  closeDoneModal(); renderBk(getCurFilter()); updateStats();
   toast(`🏁 Kaam pura! ₹${b?.price||0} earned`);
 }
 
 // ─── TIME HELPERS ────────────────────────────────────
 function getTimeDiff(timeStr){
-  const now = new Date();
-  const [time, ampm] = timeStr.split(' ');
-  let [h, m] = time.split(':').map(Number);
-  if(ampm==='PM' && h!==12) h+=12;
-  if(ampm==='AM' && h===12) h=0;
-  const bkMs = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m).getTime();
-  return bkMs - now.getTime();
+  if(!timeStr||!timeStr.includes(':')) return 999999999;
+  const now=new Date(),parts=timeStr.split(' ');
+  if(parts.length<2) return 999999999;
+  let [h,m]=parts[0].split(':').map(Number);
+  if(parts[1]==='PM'&&h!==12) h+=12;
+  if(parts[1]==='AM'&&h===12) h=0;
+  return new Date(now.getFullYear(),now.getMonth(),now.getDate(),h,m).getTime()-now.getTime();
 }
-
-function isWithin30Min(timeStr){ return getTimeDiff(timeStr) < 30*60*1000 && getTimeDiff(timeStr) > 0; }
-function isRunning(timeStr){ const d = getTimeDiff(timeStr); return d <= 0 && d > -30*60*1000; }
-
+function isWithin30Min(t){ const d=getTimeDiff(t); return d<30*60*1000&&d>0; }
+function isRunning(t){ const d=getTimeDiff(t); return d<=0&&d>-30*60*1000; }
 function getTimeBadge(b){
-  if(b.status!=='accepted' && b.status!=='pending') return '';
-  const diff = getTimeDiff(b.time);
+  if(b.status!=='accepted'&&b.status!=='pending') return '';
   if(isRunning(b.time)) return `<div class="time-badge running">🟢 Running Now</div>`;
-  if(diff <= 0) return '';
-  const min = Math.round(diff/60000);
-  if(min <= 30) return `<div class="time-badge soon">⚡ ${min} min mein</div>`;
-  if(min <= 120) return `<div class="time-badge upcoming">🔵 ${min} min baad</div>`;
+  const diff=getTimeDiff(b.time); if(diff<=0) return '';
+  const min=Math.round(diff/60000);
+  if(min<=30) return `<div class="time-badge soon">⚡ ${min} min mein</div>`;
+  if(min<=120) return `<div class="time-badge upcoming">🔵 ${min} min baad</div>`;
   return '';
 }
 
 // ─── RENDER BOOKINGS ─────────────────────────────────
 function renderBk(filter='all'){
-  const list = document.getElementById('bk-list');
-  const data = filter==='all' ? bookings : bookings.filter(b=>b.status===filter);
-
+  const list=document.getElementById('bk-list');
+  const data=filter==='all'?bookings:bookings.filter(b=>b.status===filter);
   if(!data.length){
     list.innerHTML=`<div style="text-align:center;padding:40px 16px;">
       <div style="font-size:32px;margin-bottom:12px;">📭</div>
@@ -864,349 +701,254 @@ function renderBk(filter='all'){
     </div>`;
     return;
   }
-
-  list.innerHTML = data.map(b=>{
-    const sc = statusCfg[b.status];
-    const locked = b.status==='accepted' && isWithin30Min(b.time);
-    const timeBadge = getTimeBadge(b);
-    const barberChip = b.barber ? `<div class="barber-chip">👨‍🔧 ${b.barber} · 💺 ${b.chair}</div>` : '';
-
-    let actions = '';
+  list.innerHTML=data.map(b=>{
+    const sc=statusCfg[b.status]||statusCfg.pending;
+    const locked=b.status==='accepted'&&isWithin30Min(b.time);
+    const barberChip=b.barber?`<div class="barber-chip">👨‍🔧 ${b.barber} · 💺 ${b.chair}</div>`:'';
+    let actions='';
     if(b.status==='pending'){
       if(autoAccept){
-        b.status = 'accepted';
         actions=`<div class="bk-actions">
-          <button class="btn btn-re" style="flex:1;" onclick="rejectPrompt(${b.id})">✕ Cancel</button>
-          <button class="btn btn-or" style="flex:2;" onclick="donePrompt(${b.id})">✔ Work Done</button>
+          <button class="btn btn-re" style="flex:1;" onclick="rejectPrompt('${b.id}')">✕ Cancel</button>
+          <button class="btn btn-or" style="flex:2;" onclick="donePrompt('${b.id}')">✔ Work Done</button>
         </div>`;
       } else {
-        actions=`
-          <div class="bk-actions">
-            <button class="btn btn-gr" style="flex:1;" onclick="acceptBk(${b.id})">✓ Accept</button>
-            <button class="btn btn-re" style="flex:1;" onclick="rejectPrompt(${b.id})">✕ Reject</button>
-          </div>`;
+        actions=`<div class="bk-actions">
+          <button class="btn btn-gr" style="flex:1;" onclick="acceptBk('${b.id}')">✓ Accept</button>
+          <button class="btn btn-re" style="flex:1;" onclick="rejectPrompt('${b.id}')">✕ Reject</button>
+        </div>`;
       }
     } else if(b.status==='accepted'){
       if(locked){
         actions=`<div class="bk-lock">🔒 30 min se kam — cancel band hai</div>
-        <button class="btn btn-or" style="width:100%;margin-top:8px;" onclick="donePrompt(${b.id})">✔ Work Done</button>`;
+        <button class="btn btn-or" style="width:100%;margin-top:8px;" onclick="donePrompt('${b.id}')">✔ Work Done</button>`;
       } else {
         actions=`<div class="bk-actions">
-          <button class="btn btn-re" style="flex:1;" onclick="rejectPrompt(${b.id})">✕ Cancel</button>
-          <button class="btn btn-or" style="flex:2;" onclick="donePrompt(${b.id})">✔ Work Done</button>
+          <button class="btn btn-re" style="flex:1;" onclick="rejectPrompt('${b.id}')">✕ Cancel</button>
+          <button class="btn btn-or" style="flex:2;" onclick="donePrompt('${b.id}')">✔ Work Done</button>
         </div>`;
       }
     }
-
-    const contactBtns = '';
-
     return `<div class="bk-card" data-id="${b.id}" data-status="${b.status}">
       <div class="bk-top">
         <div>
           <div class="bk-name">${b.name}</div>
           <div class="bk-meta">${b.svc}</div>
           <div class="bk-meta">⏰ ${b.time} · <span style="color:var(--or);font-weight:600;">₹${b.price}</span></div>
-          ${barberChip}
-          ${timeBadge}
+          ${barberChip}${getTimeBadge(b)}
         </div>
         <span class="pill ${sc.cls}" style="font-size:9px;white-space:nowrap;">${sc.label}</span>
-      </div>
-      ${actions}
-      ${contactBtns}
+      </div>${actions}
     </div>`;
   }).join('');
 }
 
-function filterBk(el, filter){
+function filterBk(el,filter){
   document.querySelectorAll('#sc-home .tab').forEach(t=>t.classList.remove('on'));
-  el.classList.add('on');
-  renderBk(filter);
+  el.classList.add('on'); renderBk(filter);
 }
+function getCurFilter(){ const el=document.querySelector('#sc-home .tab.on'); return el?(el.dataset.filter||'all'):'all'; }
 
-function getCurFilter(){
-  const el = document.querySelector('#sc-home .tab.on');
-  return el ? (el.dataset.filter||'all') : 'all';
-}
-
-// ─── BOOKING ACTIONS ────────────────────────────────
 function rejectPrompt(id){
   if(cancelCount>=3){ toast('🚫 Aaj 3 cancel ho gaye — aur nahi!'); return; }
-  const b = bookings.find(x=>x.id===id);
-  if(!b) return;
-  rejectTarget = id;
-  const rem = 3 - cancelCount - 1;
-  document.getElementById('reject-info').textContent = `Cancel ke baad ${rem} cancel bachenge aaj.`;
+  const b=bookings.find(x=>x.id==id); if(!b) return;
+  rejectTarget=id;
+  document.getElementById('reject-info').textContent=`Cancel ke baad ${3-cancelCount-1} cancel bachenge aaj.`;
   document.getElementById('reject-modal').classList.add('open');
 }
-
 function closeRejectModal(){ document.getElementById('reject-modal').classList.remove('open'); rejectTarget=null; }
 
 function donePrompt(id){
-  const b = bookings.find(x=>x.id===id);
-  if(!b) return;
-  doneTarget = id;
-  document.getElementById('done-modal-name').textContent = `${b.name} — ${b.svc}`;
+  const b=bookings.find(x=>x.id==id); if(!b) return;
+  doneTarget=id;
+  document.getElementById('done-modal-name').textContent=`${b.name} — ${b.svc}`;
   document.getElementById('done-modal').classList.add('open');
 }
-
 function closeDoneModal(){ document.getElementById('done-modal').classList.remove('open'); doneTarget=null; }
 
-// ─── BARBER ASSIGN ───────────────────────────────────
-function assignBarber(name, chair){
+function assignBarber(name,chair){
   if(!assignTarget) return;
-  const b = bookings.find(x=>x.id===assignTarget);
+  const b=bookings.find(x=>x.id===assignTarget);
   if(b){ b.barber=name; b.chair=chair; }
-  closeAssignModal();
-  renderBk(getCurFilter());
+  closeAssignModal(); renderBk(getCurFilter());
   toast(`👨‍🔧 ${name} assigned — ${chair}`);
 }
-
 function closeAssignModal(){ document.getElementById('assign-modal').classList.remove('open'); assignTarget=null; }
 
-// ─── MANUAL BOOKING ──────────────────────────────────
 function openManualBooking(){ document.getElementById('manual-modal').classList.add('open'); updateMbSlots(); }
 function closeManualModal(){ document.getElementById('manual-modal').classList.remove('open'); }
 
 function confirmManualBooking(){
-  const name = document.getElementById('mb-name').value.trim() || 'Walk-in Customer';
-  const phone = document.getElementById('mb-phone').value.trim() || '0000000000';
-  const svc = document.getElementById('mb-svc').value;
-  const time = document.getElementById('mb-time').value;
-  const barberSel = document.getElementById('mb-barber').value;
-  const barberName = barberSel.includes('Raju') ? 'Raju' : 'Deepak';
-  const chairName = barberSel.includes('Chair 1') ? 'Chair 1' : 'Chair 2';
-  const price = svc.includes('₹') ? parseInt(svc.split('₹')[1]) : 80;
-
-  const newId = Date.now();
-  bookings.unshift({id:newId, name, phone, svc:svc.split(' — ')[0], time, price, status:'accepted', barber:barberName, chair:chairName}); // auto accepted for manual/walk-in
-  closeManualModal();
-  renderBk(getCurFilter());
-  updateStats();
+  const name=document.getElementById('mb-name').value.trim()||'Walk-in Customer';
+  const phone=document.getElementById('mb-phone').value.trim()||'0000000000';
+  const svc=document.getElementById('mb-svc').value;
+  const time=document.getElementById('mb-time').value;
+  const barberSel=document.getElementById('mb-barber').value;
+  const barberName=barberSel.includes('Raju')?'Raju':'Deepak';
+  const chairName=barberSel.includes('Chair 1')?'Chair 1':'Chair 2';
+  const price=svc.includes('₹')?parseInt(svc.split('₹')[1]):80;
+  bookings.unshift({id:Date.now(),name,phone,svc:svc.split(' — ')[0],time,price,status:'accepted',barber:barberName,chair:chairName});
+  closeManualModal(); renderBk(getCurFilter()); updateStats();
   toast(`✅ ${name} ki booking add ho gayi!`);
 }
 
-// ─── GENERIC CONFIRM MODAL ───────────────────────────
-let confirmCallback = null;
-function showConfirm(icon, title, sub, yesLabel, yesStyle, cb){
-  confirmCallback = cb;
-  document.getElementById('confirm-icon').textContent = icon;
-  document.getElementById('confirm-title').textContent = title;
-  document.getElementById('confirm-sub').textContent = sub;
-  const btn = document.getElementById('confirm-yes-btn');
-  btn.textContent = yesLabel;
-  btn.style.background = yesStyle || 'var(--or)';
-  btn.onclick = function(){ closeConfirmModal(); if(confirmCallback) confirmCallback(); };
+let confirmCallback=null;
+function showConfirm(icon,title,sub,yesLabel,yesStyle,cb){
+  confirmCallback=cb;
+  document.getElementById('confirm-icon').textContent=icon;
+  document.getElementById('confirm-title').textContent=title;
+  document.getElementById('confirm-sub').textContent=sub;
+  const btn=document.getElementById('confirm-yes-btn');
+  btn.textContent=yesLabel; btn.style.background=yesStyle||'var(--or)';
+  btn.onclick=function(){ closeConfirmModal(); if(confirmCallback) confirmCallback(); };
   document.getElementById('confirm-modal').classList.add('open');
 }
 function closeConfirmModal(){ document.getElementById('confirm-modal').classList.remove('open'); confirmCallback=null; }
 
-// ─── AUTO ACCEPT ─────────────────────────────────────
 function toggleAutoAccept(el){
-  const goingOn = el.checked;
-  el.checked = !goingOn; // pehle wapas karo
-  const title = goingOn ? 'Auto Accept ON karein?' : 'Manual Booking ON karein?';
-  const sub = goingOn ? 'Booking aate hi turant confirm ho jayegi.' : 'क्या आप दुकान की बुकिंग मैन्युअली करना चाहते हैं?';
-  const yesLabel = goingOn ? 'Haan, Auto karo' : 'Haan';
-  const yesStyle = goingOn ? 'var(--or)' : 'var(--bl)';
-  showConfirm(goingOn ? '⚡' : '🔄', title, sub, yesLabel, yesStyle, function(){
-    autoAccept = goingOn;
-    const cb = document.getElementById('auto-accept');
-    if(cb) cb.checked = goingOn;
-    const lbl = document.getElementById('aa-sub-lbl');
-    if(lbl) lbl.textContent = autoAccept ? 'ON — booking instantly confirm ho' : 'अब बुकिंग को मैन्युअली स्वीकार करना होगा।';
-    toast(autoAccept ? '⚡ Auto Accept ON — booking instant confirm hogi' : '🔄 Ab bookings manually accept karni hongi');
-    renderBk(getCurFilter());
-    updateStats();
-  });
+  const goingOn=el.checked; el.checked=!goingOn;
+  showConfirm(goingOn?'⚡':'🔄',goingOn?'Auto Accept ON karein?':'Manual Booking ON karein?',
+    goingOn?'Booking aate hi turant confirm ho jayegi.':'क्या आप मैन्युअली accept करना चाहते हैं?',
+    goingOn?'Haan, Auto karo':'Haan',goingOn?'var(--or)':'var(--bl)',function(){
+      autoAccept=goingOn;
+      document.getElementById('auto-accept').checked=goingOn;
+      document.getElementById('aa-sub-lbl').textContent=autoAccept?'ON — booking instantly confirm ho':'अब बुकिंग को मैन्युअली स्वीकार करना होगा।';
+      toast(autoAccept?'⚡ Auto Accept ON':'🔄 Ab bookings manually accept karni hongi');
+      renderBk(getCurFilter()); updateStats();
+    });
 }
 
-// ─── STATS ───────────────────────────────────────────
 function updateStats(){
-  const active = bookings.filter(b=>b.status!=='cancelled').length;
-  const earn = bookings.filter(b=>b.status==='completed').reduce((s,b)=>s+b.price,0);
-  const pending = bookings.filter(b=>b.status==='pending').length;
-  document.getElementById('st-count').textContent = active;
-  document.getElementById('st-earn').textContent = '₹'+earn;
-  document.getElementById('st-cancel').innerHTML = cancelCount+'<span style="font-size:11px;color:var(--tx3);">/3</span>';
-  const badge = document.getElementById('pending-badge');
-  if(pending>0){ badge.textContent=pending; badge.style.display='flex'; }
-  else { badge.style.display='none'; }
+  const active=bookings.filter(b=>b.status!=='cancelled').length;
+  const earn=bookings.filter(b=>b.status==='completed').reduce((s,b)=>s+b.price,0);
+  const pending=bookings.filter(b=>b.status==='pending').length;
+  document.getElementById('st-count').textContent=active;
+  document.getElementById('st-earn').textContent='₹'+earn;
+  document.getElementById('st-cancel').innerHTML=cancelCount+'<span style="font-size:11px;color:var(--tx3);">/3</span>';
+  const badge=document.getElementById('pending-badge');
+  if(pending>0){ badge.textContent=pending; badge.style.display='flex'; } else badge.style.display='none';
 }
 
-// ─── ONLINE TOGGLE ────────────────────────────────────
 function toggleOnline(){
-  const goingOnline = !isOnline;
-  const icon = goingOnline ? '🟢' : '🔴';
-  const title = goingOnline ? 'Dukan kholen?' : 'Dukan band karen?';
-  const sub = goingOnline ? 'Online karne ke baad nayi bookings aana shuru ho jayengi.' : 'Offline karne ke baad nayi bookings nahi aayengi.';
-  const yesLabel = goingOnline ? 'Haan, Online karo' : 'Haan, Offline karo';
-  const yesStyle = goingOnline ? 'var(--gr)' : 'var(--re)';
-  showConfirm(icon, title, sub, yesLabel, yesStyle, function(){
-    isOnline = goingOnline;
-    const btn=document.getElementById('online-btn');
-    const dot=document.getElementById('online-dot');
-    const txt=document.getElementById('online-txt');
-    if(isOnline){
-      btn.style.background='rgba(61,187,120,0.1)';btn.style.borderColor='rgba(61,187,120,0.25)';
-      dot.style.background='var(--gr)';dot.style.animation='pulse 2s infinite';
-      txt.style.color='var(--gr)';txt.textContent='Online';
-      toast('🟢 Dukan khuli — bookings aa sakti hain');
-    } else {
-      btn.style.background='rgba(90,83,78,0.1)';btn.style.borderColor='rgba(90,83,78,0.2)';
-      dot.style.background='var(--tx3)';dot.style.animation='none';
-      txt.style.color='var(--tx3)';txt.textContent='Offline';
-      toast('🔴 Dukan band — nai bookings nahi aayengi');
-    }
+  const go=!isOnline;
+  showConfirm(go?'🟢':'🔴',go?'Dukan kholen?':'Dukan band karen?',
+    go?'Online karne ke baad nayi bookings aana shuru ho jayengi.':'Offline karne ke baad nayi bookings nahi aayengi.',
+    go?'Haan, Online karo':'Haan, Offline karo',go?'var(--gr)':'var(--re)',function(){
+      isOnline=go;
+      const btn=document.getElementById('online-btn'),dot=document.getElementById('online-dot'),txt=document.getElementById('online-txt');
+      if(isOnline){
+        btn.style.background='rgba(61,187,120,0.1)'; btn.style.borderColor='rgba(61,187,120,0.25)';
+        dot.style.background='var(--gr)'; dot.style.animation='pulse 2s infinite';
+        txt.style.color='var(--gr)'; txt.textContent='Online'; toast('🟢 Dukan khuli');
+      } else {
+        btn.style.background='rgba(90,83,78,0.1)'; btn.style.borderColor='rgba(90,83,78,0.2)';
+        dot.style.background='var(--tx3)'; dot.style.animation='none';
+        txt.style.color='var(--tx3)'; txt.textContent='Offline'; toast('🔴 Dukan band');
+      }
+    });
+}
+
+function doLogout(){
+  showConfirm('🚪','Log Out karein?','Kya aap sach mein log out karna chahte hain?','Haan, Log Out','var(--re)',async function(){
+    if(currentShopOwnerId) localStorage.removeItem('mhb_approved_'+currentShopOwnerId);
+    await sb.auth.signOut();
+    window.location.href='../index.html';
   });
 }
 
 // ─── SCHEDULE ─────────────────────────────────────────
 function renderTimeline(){
-  const times = ['9:00 AM','9:30 AM','10:00 AM','10:30 AM','11:00 AM','11:30 AM','12:00 PM'];
-  const events = {
-    '10:30 AM':{name:'Rahul — Haircut', type:'booked'},
-    '11:00 AM':{name:'Aman — Shaving', type:'booked'},
-    '11:30 AM':{name:'Rohit — Haircut+Shave 🟢', type:'running'},
-  };
-  const tl = document.getElementById('timeline');
-  tl.innerHTML = times.map(t=>{
-    const ev = events[t];
-    const evHtml = ev
-      ? `<div class="tl-event ${ev.type}">${ev.name}</div>`
-      : `<div class="tl-event free">— Available —</div>`;
-    return `<div class="tl-row"><span class="tl-time">${t}</span>${evHtml}</div>`;
+  const times=['9:00 AM','9:30 AM','10:00 AM','10:30 AM','11:00 AM','11:30 AM','12:00 PM'];
+  const events={'10:30 AM':{name:'Rahul — Haircut',type:'booked'},'11:00 AM':{name:'Aman — Shaving',type:'booked'},'11:30 AM':{name:'Rohit — Haircut+Shave 🟢',type:'running'}};
+  document.getElementById('timeline').innerHTML=times.map(t=>{
+    const ev=events[t];
+    return `<div class="tl-row"><span class="tl-time">${t}</span>${ev?`<div class="tl-event ${ev.type}">${ev.name}</div>`:`<div class="tl-event free">— Available —</div>`}</div>`;
   }).join('');
 }
 
 function switchView(v){
-  curView = v;
-  document.getElementById('vb-timeline').classList.toggle('on', v==='timeline');
-  document.getElementById('vb-chair').classList.toggle('on', v==='chair');
-  document.getElementById('view-timeline').style.display = v==='timeline' ? 'block' : 'none';
-  document.getElementById('view-chair').style.display = v==='chair' ? 'block' : 'none';
+  curView=v;
+  document.getElementById('vb-timeline').classList.toggle('on',v==='timeline');
+  document.getElementById('vb-chair').classList.toggle('on',v==='chair');
+  document.getElementById('view-timeline').style.display=v==='timeline'?'block':'none';
+  document.getElementById('view-chair').style.display=v==='chair'?'block':'none';
 }
 
-const dayNames = ['Raviwar','Somwar','Mangalwar','Budhwar','Guruwar','Shukrawar','Shaniwar'];
-const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-
 function changeDate(dir){
-  schedOffset += dir;
-  const d = new Date();
-  d.setDate(d.getDate() + schedOffset);
-  const dayLabel = schedOffset===0 ? 'Aaj' : schedOffset===1 ? 'Kal' : schedOffset===-1 ? 'Kal (pichla)' : `${d.getDate()} ${monthNames[d.getMonth()]}`;
-  document.getElementById('sched-date-main').textContent = `${dayLabel} — ${d.getDate()} ${monthNames[d.getMonth()]} ${d.getFullYear()}`;
-  document.getElementById('sched-date-sub').textContent = `${dayNames[d.getDay()]} · Click to change`;
-  toast(`📅 ${dayLabel} ka schedule`);
+  schedOffset+=dir;
+  const d=new Date(); d.setDate(d.getDate()+schedOffset);
+  const lbl=schedOffset===0?'Aaj':schedOffset===1?'Kal':schedOffset===-1?'Kal (pichla)':`${d.getDate()} ${monthNames[d.getMonth()]}`;
+  document.getElementById('sched-date-main').textContent=`${lbl} — ${d.getDate()} ${monthNames[d.getMonth()]} ${d.getFullYear()}`;
+  document.getElementById('sched-date-sub').textContent=`${dayNames[d.getDay()]} · Click to change`;
+  toast(`📅 ${lbl} ka schedule`);
   if(curView==='timeline') renderTimeline();
 }
 
 // ─── BARBER WISE SLOT CONTROL ─────────────────────────
-const allSlots = ['9:00 AM','9:30 AM','10:00 AM','10:30 AM','11:00 AM','11:30 AM','12:00 PM','12:30 PM','1:00 PM'];
-
-// barberSlots[barberIndex][slot] = true(open) / false(closed)
-const barberSlots = [
+const allSlots=['9:00 AM','9:30 AM','10:00 AM','10:30 AM','11:00 AM','11:30 AM','12:00 PM','12:30 PM','1:00 PM'];
+const barberSlots=[
   {'9:00 AM':true,'9:30 AM':false,'10:00 AM':true,'10:30 AM':true,'11:00 AM':true,'11:30 AM':true,'12:00 PM':true,'12:30 PM':true,'1:00 PM':true},
   {'9:00 AM':true,'9:30 AM':true,'10:00 AM':false,'10:30 AM':true,'11:00 AM':true,'11:30 AM':true,'12:00 PM':true,'12:30 PM':true,'1:00 PM':true}
 ];
-let curBarberSlotTab = 0;
+let curBarberSlotTab=0;
 
 function renderBarberSlots(bi){
-  const panel = document.getElementById('bsc-panel-'+bi);
-  if(!panel) return;
-  panel.innerHTML = allSlots.map(s=>{
-    const isOn = barberSlots[bi][s];
-    return `<div class="slot-pill ${isOn?'on':'off'}" onclick="toggleBarberSlot(${bi},'${s}',this)">${s}</div>`;
-  }).join('');
+  const panel=document.getElementById('bsc-panel-'+bi); if(!panel) return;
+  panel.innerHTML=allSlots.map(s=>`<div class="slot-pill ${barberSlots[bi][s]?'on':'off'}" onclick="toggleBarberSlot(${bi},'${s}',this)">${s}</div>`).join('');
 }
 
 function switchBarberSlotTab(bi){
-  curBarberSlotTab = bi;
+  curBarberSlotTab=bi;
   [0,1].forEach(i=>{
-    const tab = document.getElementById('bsc-tab-'+i);
-    const panel = document.getElementById('bsc-panel-'+i);
-    if(i===bi){
-      tab.style.background='var(--or)'; tab.style.borderColor='var(--or)'; tab.style.color='#fff';
-      panel.style.display='grid';
-    } else {
-      tab.style.background='var(--bg3)'; tab.style.borderColor='var(--bd)'; tab.style.color='var(--tx3)';
-      panel.style.display='none';
-    }
+    const tab=document.getElementById('bsc-tab-'+i),panel=document.getElementById('bsc-panel-'+i);
+    if(i===bi){ tab.style.background='var(--or)'; tab.style.borderColor='var(--or)'; tab.style.color='#fff'; panel.style.display='grid'; }
+    else { tab.style.background='var(--bg3)'; tab.style.borderColor='var(--bd)'; tab.style.color='var(--tx3)'; panel.style.display='none'; }
   });
 }
 
-function toggleBarberSlot(bi, slot, el){
-  const isCurrentlyOn = barberSlots[bi][slot];
-  const barberName = bi===0 ? 'Raju' : 'Deepak';
-  if(isCurrentlyOn){
-    showConfirm('🔒', `Slot band karein?`, `${barberName} — ${slot} band ho jayega.`, 'Haan, Band karo', 'var(--re)', function(){
-      barberSlots[bi][slot] = false;
-      renderBarberSlots(bi);
-      toast(`🔒 ${barberName} — ${slot} band`);
-    });
-  } else {
-    showConfirm('✅', `Slot kholen?`, `${barberName} — ${slot} available ho jayega.`, 'Haan, Kholo', 'var(--gr)', function(){
-      barberSlots[bi][slot] = true;
-      renderBarberSlots(bi);
-      toast(`✅ ${barberName} — ${slot} open`);
-    });
-  }
+function toggleBarberSlot(bi,slot,el){
+  const isOn=barberSlots[bi][slot],name=bi===0?'Raju':'Deepak';
+  showConfirm(isOn?'🔒':'✅',isOn?'Slot band karein?':'Slot kholen?',`${name} — ${slot}`,isOn?'Haan, Band karo':'Haan, Kholo',isOn?'var(--re)':'var(--gr)',function(){
+    barberSlots[bi][slot]=!isOn; renderBarberSlots(bi);
+    toast(isOn?`🔒 ${name} — ${slot} band`:`✅ ${name} — ${slot} open`);
+  });
 }
 
 function closeAllSlots(){
-  const barberName = curBarberSlotTab===0 ? 'Raju' : 'Deepak';
-  showConfirm('🔒', `Sab slots band karein?`, `${barberName} ke aaj ke sabhi slots band ho jayenge.`, 'Haan, Sab Band karo', 'var(--re)', function(){
+  const name=curBarberSlotTab===0?'Raju':'Deepak';
+  showConfirm('🔒',`Sab slots band karein?`,`${name} ke sabhi slots band ho jayenge.`,'Haan, Sab Band karo','var(--re)',function(){
     allSlots.forEach(s=>{ barberSlots[curBarberSlotTab][s]=false; });
-    renderBarberSlots(curBarberSlotTab);
-    toast(`🔒 ${barberName} ke sabhi slots band`);
+    renderBarberSlots(curBarberSlotTab); toast(`🔒 ${name} ke sabhi slots band`);
   });
 }
 
-// update mb-time dropdown based on selected barber
 function updateMbSlots(){
-  const sel = document.getElementById('mb-barber');
-  const bi = sel.selectedIndex;
-  const timeEl = document.getElementById('mb-time');
-  timeEl.innerHTML = allSlots
-    .filter(s => barberSlots[bi][s])
-    .map(s=>`<option>${s}</option>`).join('');
-  if(!timeEl.options.length) timeEl.innerHTML = '<option disabled>Koi slot available nahi</option>';
-}
-
-// ─── SLOT TOGGLE (legacy — unused but kept) ───────────
-function toggleSlot(el){
-  if(el.classList.contains('off')){
-    el.classList.remove('off'); el.classList.add('on');
-    toast('✅ Slot open — '+el.textContent.trim());
-  } else {
-    el.classList.remove('on'); el.classList.add('off');
-    toast('🔒 Slot band — '+el.textContent.trim());
-  }
+  const bi=document.getElementById('mb-barber').selectedIndex;
+  const timeEl=document.getElementById('mb-time');
+  timeEl.innerHTML=allSlots.filter(s=>barberSlots[bi][s]).map(s=>`<option>${s}</option>`).join('');
+  if(!timeEl.options.length) timeEl.innerHTML='<option disabled>Koi slot available nahi</option>';
 }
 
 // ─── NAVIGATION ───────────────────────────────────────
-const screenKeys = ['home','schedule','analytics','profile'];
+const screenKeys=['home','schedule','analytics','profile'];
 function goScreen(id){
   screenKeys.forEach(s=>document.getElementById('sc-'+s).classList.remove('active'));
   document.getElementById('sc-'+id).classList.add('active');
   for(let i=0;i<4;i++){
-    const ni=document.getElementById('ni-'+i);
-    if(!ni) continue;
+    const ni=document.getElementById('ni-'+i); if(!ni) continue;
     ni.classList.remove('on');
     ni.querySelectorAll('span').forEach(s=>s.style.color='');
     ni.querySelectorAll('.nav-dot').forEach(d=>d.remove());
   }
-  const idx = screenKeys.indexOf(id);
+  const idx=screenKeys.indexOf(id);
   if(idx>=0){
-    const ni=document.getElementById('ni-'+idx);
-    ni.classList.add('on');
-    const sp=ni.querySelector('span');
-    if(sp) sp.style.color='var(--or)';
-    const dot=document.createElement('div');dot.className='nav-dot';ni.appendChild(dot);
+    const ni=document.getElementById('ni-'+idx); ni.classList.add('on');
+    const sp=ni.querySelector('span'); if(sp) sp.style.color='var(--or)';
+    const dot=document.createElement('div'); dot.className='nav-dot'; ni.appendChild(dot);
   }
-  if(id==='schedule'){ renderTimeline(); }
+  if(id==='schedule') renderTimeline();
 }
 
-// ─── TOAST ────────────────────────────────────────────
 function toast(msg){
   const t=document.getElementById('toast');
   t.textContent=msg; t.classList.add('show');
@@ -1214,21 +956,21 @@ function toast(msg){
 }
 
 // ─── INIT ─────────────────────────────────────────────
-let currentShopOwnerId = null;
-
 function init(){
-  const now = new Date();
-  document.getElementById('today-date').textContent = `${now.getDate()} ${monthNames[now.getMonth()]} ${now.getFullYear()} · ${dayNames[now.getDay()]}`;
-  // Notification permission maango
-  if('Notification' in window && Notification.permission === 'default'){
-    Notification.requestPermission();
-  }
+  const now=new Date();
+  document.getElementById('today-date').textContent=`${now.getDate()} ${monthNames[now.getMonth()]} ${now.getFullYear()} · ${dayNames[now.getDay()]}`;
+  if('Notification' in window && Notification.permission==='default') Notification.requestPermission();
   loadBookingsFromDB();
-  // Owner ID fetch karo + shop status check karo
-  sb.auth.getSession().then(async ({data: sessionData})=>{
+
+  // FIX: getSession use karo — faster + session cached
+  sb.auth.getSession().then(async({data:sessionData})=>{
     if(sessionData?.session?.user){
-      currentShopOwnerId = sessionData.session.user.id;
+      currentShopOwnerId=sessionData.session.user.id;
       await checkShopStatus(sessionData.session.user.id);
+    } else {
+      // No session — register pe bhejo
+      window.location.replace('../shopkeeper/register.html');
+      return;
     }
     subscribeBookings();
   });
@@ -1239,23 +981,3 @@ init();
 </script>
 </body>
 </html>
-
-
-shopkeeper/manifest.json-{
-  "name": "CutBook Shopkeeper",
-  "short_name": "Shop",
-  "start_url": "index.html",
-  "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#000000",
-  "icons": [
-    {
-      "src": "../assets/icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "../assets/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    }
