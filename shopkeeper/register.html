@@ -183,6 +183,44 @@ option{background:var(--bg3);}
     <div class="btn-wrap">
       <button class="btn-next" onclick="goStep(2)">शुरू करें →</button>
     </div>
+
+    <!-- ── RETURNING SHOPKEEPER LOGIN ── -->
+    <div style="margin-top:20px;border-top:1px solid rgba(255,255,255,0.08);padding-top:20px;">
+      <div style="font-size:12px;color:#A89E96;text-align:center;margin-bottom:14px;font-family:'Noto Sans Devanagari',sans-serif;">Pehle se registered ho? Login karo 👇</div>
+
+      <!-- Phone input -->
+      <div id="login-phone-wrap">
+        <div style="display:flex;gap:8px;margin-bottom:10px;">
+          <div style="background:#1C1C1C;border:1px solid rgba(255,255,255,0.12);border-radius:10px;padding:11px 12px;font-size:13px;color:#A89E96;white-space:nowrap;">+91</div>
+          <input id="login-phone" type="tel" maxlength="10" placeholder="Phone number daalo"
+            oninput="this.value=this.value.replace(/\D/g,'')"
+            style="flex:1;background:#1C1C1C;border:1px solid rgba(255,255,255,0.12);color:#F2EDE8;border-radius:10px;padding:11px 14px;font-size:13px;font-family:'DM Sans';outline:none;">
+        </div>
+        <button onclick="sendLoginOtp()"
+          style="width:100%;padding:12px;background:#F47B20;color:#fff;border:none;border-radius:12px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans';">
+          OTP Bhejo 📲
+        </button>
+        <div id="login-msg" style="font-size:11px;margin-top:8px;text-align:center;min-height:16px;"></div>
+      </div>
+
+      <!-- OTP input (hidden initially) -->
+      <div id="login-otp-wrap" style="display:none;">
+        <div style="font-size:11px;color:#A89E96;text-align:center;margin-bottom:10px;" id="login-otp-hint"></div>
+        <input id="login-otp" type="tel" maxlength="6" placeholder="6-digit OTP"
+          oninput="this.value=this.value.replace(/\D/g,'')"
+          style="width:100%;background:#1C1C1C;border:1px solid rgba(255,255,255,0.12);color:#F2EDE8;border-radius:10px;padding:12px 14px;font-size:18px;font-family:'DM Sans';outline:none;text-align:center;letter-spacing:6px;margin-bottom:10px;">
+        <button onclick="verifyLoginOtp()"
+          style="width:100%;padding:12px;background:#F47B20;color:#fff;border:none;border-radius:12px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans';">
+          ✓ Verify karein
+        </button>
+        <div style="text-align:center;margin-top:8px;">
+          <span onclick="resetLoginForm()" style="font-size:11px;color:#A89E96;cursor:pointer;">← Phone badlo</span>
+          <span style="color:#5A534E;margin:0 8px;">|</span>
+          <span onclick="sendLoginOtp()" style="font-size:11px;color:#F47B20;cursor:pointer;">OTP dobara bhejo</span>
+        </div>
+        <div id="login-otp-msg" style="font-size:11px;margin-top:8px;text-align:center;min-height:16px;"></div>
+      </div>
+    </div>
   </div>
 
   <!-- Step 2: Owner + OTP -->
@@ -1063,6 +1101,79 @@ async function submitRegistration(){
   if(error){setMsg('submit-msg','❌ Error: '+error.message,'error');return;}
   setMsg('submit-msg','','');
   goStep(8);
+}
+
+// ─── RETURNING SHOPKEEPER LOGIN ──────────────────────
+let loginPhone = '';
+
+async function sendLoginOtp(){
+  const raw = document.getElementById('login-phone').value.trim();
+  if(raw.length !== 10){ showLoginMsg('login-msg','❌ 10 digit phone number daalo','#E05555'); return; }
+  loginPhone = '+91' + raw;
+  showLoginMsg('login-msg','⏳ OTP bheja ja raha hai...','#A89E96');
+
+  const {error} = await sb.auth.signInWithOtp({phone: loginPhone});
+  if(error){
+    showLoginMsg('login-msg','❌ ' + (error.message||'OTP send nahi hua'),'#E05555');
+    return;
+  }
+  document.getElementById('login-phone-wrap').style.display = 'none';
+  document.getElementById('login-otp-wrap').style.display = 'block';
+  document.getElementById('login-otp-hint').textContent = loginPhone + ' par OTP bheja gaya';
+  showLoginMsg('login-otp-msg','','');
+}
+
+async function verifyLoginOtp(){
+  const otp = document.getElementById('login-otp').value.trim();
+  if(otp.length !== 6){ showLoginMsg('login-otp-msg','❌ 6 digit OTP daalo','#E05555'); return; }
+  showLoginMsg('login-otp-msg','⏳ Verify ho raha hai...','#A89E96');
+
+  const {data, error} = await sb.auth.verifyOtp({phone: loginPhone, token: otp, type: 'sms'});
+  if(error){
+    showLoginMsg('login-otp-msg','❌ OTP galat hai ya expire ho gaya','#E05555');
+    return;
+  }
+
+  const userId = data?.user?.id;
+  if(!userId){ showLoginMsg('login-otp-msg','❌ Login fail — dobara try karo','#E05555'); return; }
+
+  showLoginMsg('login-otp-msg','✅ Verify ho gaya! Dashboard khul raha hai...','#3DBB78');
+
+  // Check karo — shop hai ya nahi
+  const {data: shop} = await sb.from('shops')
+    .select('id, status')
+    .eq('owner_id', userId)
+    .order('created_at', {ascending: false})
+    .limit(1).maybeSingle();
+
+  if(!shop){
+    // Koi shop nahi — registration flow shuru karo
+    showLoginMsg('login-otp-msg','⚠️ Koi shop nahi mili — registration karo','#F4B420');
+    setTimeout(()=>{ resetLoginForm(); goStep(2); }, 1500);
+    return;
+  }
+
+  if(shop.status === 'active'){
+    localStorage.setItem('mhb_approved_' + userId, '1');
+  }
+
+  // Dashboard pe bhejo
+  setTimeout(()=>{ window.location.replace('../shopkeeper/index.html'); }, 800);
+}
+
+function resetLoginForm(){
+  loginPhone = '';
+  document.getElementById('login-phone').value = '';
+  document.getElementById('login-otp').value = '';
+  document.getElementById('login-phone-wrap').style.display = 'block';
+  document.getElementById('login-otp-wrap').style.display = 'none';
+  showLoginMsg('login-msg','','');
+  showLoginMsg('login-otp-msg','','');
+}
+
+function showLoginMsg(id, text, color){
+  const el = document.getElementById(id);
+  if(el){ el.textContent = text; el.style.color = color; }
 }
 
 function setMsg(id,html,cls){
