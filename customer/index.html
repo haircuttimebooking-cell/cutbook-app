@@ -308,17 +308,9 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
         <div class="date-chip" onclick="pickDate(this)"><div class="date-day">Sha</div><div class="date-num">30</div></div>
       </div>
 
-      <div class="sec-head"><div class="sec-title">Time slot chunao</div></div>
-      <div class="slots-grid">
-        <div class="slot booked">9:00 AM</div>
-        <div class="slot booked">9:30 AM</div>
-        <div class="slot" onclick="pickSlot(this)">10:00 AM</div>
-        <div class="slot on" onclick="pickSlot(this)">10:30 AM</div>
-        <div class="slot" onclick="pickSlot(this)">11:00 AM</div>
-        <div class="slot booked">11:30 AM</div>
-        <div class="slot" onclick="pickSlot(this)">12:00 PM</div>
-        <div class="slot" onclick="pickSlot(this)">12:30 PM</div>
-        <div class="slot" onclick="pickSlot(this)">1:00 PM</div>
+      <div class="sec-head"><div class="sec-title">Time slot chunao</div><div id="slot-loading" style="font-size:9px;color:var(--tx3);"></div></div>
+      <div class="slots-grid" id="slots-grid">
+        <div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--tx3);font-family:var(--dv);font-size:11px;">⏳ Date chunao...</div>
       </div>
 
       <div class="book-cta" onclick="openBookModal()">Confirm Booking — ₹80</div>
@@ -526,6 +518,9 @@ function openShopDetail(i){
 
   // Dates update karo
   buildDateChips();
+  // Aaj ke slots load karo
+  const today = new Date().toISOString().split('T')[0];
+  setTimeout(()=>loadSlotsForDate(today), 100);
 
   goScreen('detail');
 }
@@ -623,8 +618,8 @@ async function confirmBook(){
     service: selectedShop.services && selectedShop.services.length
       ? selectedShop.services[0].name : '✂️ Haircut',
     price: minPrice,
-    booking_date: date ? date.querySelector('.date-day').textContent+' '+date.querySelector('.date-num').textContent : 'Today',
-    booking_time: slot ? slot.textContent : '10:30 AM',
+    booking_date: date ? (date.dataset.dateStr || date.querySelector('.date-day').textContent+' '+date.querySelector('.date-num').textContent) : new Date().toISOString().split('T')[0],
+    booking_time: slot ? slot.textContent.trim() : '10:00 AM',
     barber_name: barber ? barber.textContent : 'Koi bhi',
     customer_name: userData?.name || 'Customer',
     customer_phone: userData?.phone || currentUser.phone || '',
@@ -663,7 +658,20 @@ function goScreen(id){
 
 function toggleSvc(el){ el.classList.toggle('on'); }
 function pickBarber(el){ document.querySelectorAll('.barber-item').forEach(b=>b.classList.remove('on')); el.classList.add('on'); }
-function pickDate(el){ document.querySelectorAll('.date-chip').forEach(d=>d.classList.remove('on')); el.classList.add('on'); }
+function pickDate(el){
+  document.querySelectorAll('.date-chip').forEach(d=>d.classList.remove('on'));
+  el.classList.add('on');
+  // Real slots load karo selected date ke liye
+  const day = el.querySelector('.date-day').textContent;
+  const num = el.querySelector('.date-num').textContent;
+  const now = new Date();
+  // Find actual date from chip
+  const chipIndex = Array.from(document.querySelectorAll('.date-chip')).indexOf(el);
+  const d = new Date(now); d.setDate(now.getDate()+chipIndex);
+  const dateStr = d.toISOString().split('T')[0]; // YYYY-MM-DD
+  el.dataset.dateStr = dateStr;
+  loadSlotsForDate(dateStr);
+}
 
 function buildDateChips(){
   const row = document.querySelector('.dates-row');
@@ -672,17 +680,75 @@ function buildDateChips(){
   const now = new Date();
   row.innerHTML = Array.from({length:7},(_,i)=>{
     const d = new Date(now); d.setDate(now.getDate()+i);
-    return `<div class="date-chip ${i===0?'on':''}" onclick="pickDate(this)">
+    const dStr = d.toISOString().split('T')[0];
+    return `<div class="date-chip ${i===0?'on':''}" onclick="pickDate(this)" data-date-str="${dStr}">
       <div class="date-day">${i<2?days[i]:['Rvi','Som','Man','Bud','Gu','Shu','Sha'][d.getDay()]}</div>
       <div class="date-num">${d.getDate()}</div>
     </div>`;
   }).join('');
 }
-function pickSlot(el){ if(el.classList.contains('booked')) return; document.querySelectorAll('.slot').forEach(s=>s.classList.remove('on')); el.classList.add('on'); }
+function pickSlot(el){ if(el.classList.contains('booked')) return; document.querySelectorAll('.slot').forEach(s=>s.classList.remove('on')); el.classList.add('on'); updateBookCta(); }
 function openBookModal(){ document.getElementById('book-modal').classList.add('open'); }
 function closeBookModal(){ document.getElementById('book-modal').classList.remove('open'); }
 function filterSearch(q){ document.getElementById('search-results').textContent = q?`"${q}" ke results`:'Paas ke sabhi salons'; }
 function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3000); }
+
+// ─── UPDATE BOOK CTA PRICE ───────────────────────────
+function updateBookCta(){
+  const slot = document.querySelector('.slot.on');
+  const svcPrice = selectedShop && selectedShop.services && selectedShop.services.length
+    ? Math.min(...selectedShop.services.map(s=>s.price||0)) : 0;
+  const cta = document.querySelector('.book-cta');
+  if(cta) cta.textContent = slot ? `Confirm Booking — ₹${svcPrice}` : 'Pehle slot chunao';
+}
+
+// ─── LOAD REAL BOOKED SLOTS FROM SUPABASE ──────────
+async function loadSlotsForDate(dateStr){
+  if(!selectedShop) return;
+  const grid = document.getElementById('slots-grid');
+  const lbl = document.getElementById('slot-loading');
+  if(lbl) lbl.textContent = '⏳ Loading...';
+  grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--tx3);font-size:11px;">⏳ Slots load ho rahe hain...</div>';
+
+  // Get opening/closing time from shop
+  const openHour = parseInt((selectedShop.opening_time||'09:00').split(':')[0]);
+  const closeHour = parseInt((selectedShop.closing_time||'21:00').split(':')[0]);
+  const slotDur = 30; // 30 min slots
+
+  // Generate all possible slots
+  const allSlots = [];
+  for(let h = openHour; h < closeHour; h++){
+    allSlots.push(`${h.toString().padStart(2,'0')}:00`);
+    allSlots.push(`${h.toString().padStart(2,'0')}:30`);
+  }
+
+  // Fetch booked slots for this shop+date from Supabase
+  const {data: booked} = await sb.from('bookings')
+    .select('booking_time,status')
+    .eq('shop_id', selectedShop.id)
+    .eq('booking_date', dateStr)
+    .in('status', ['pending','accepted']);
+
+  const bookedTimes = new Set((booked||[]).map(b=>b.booking_time));
+
+  // Format time to 12hr
+  function fmt24to12(t){
+    const [h,m] = t.split(':').map(Number);
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    const h12 = h % 12 || 12;
+    return `${h12}:${m.toString().padStart(2,'0')} ${ampm}`;
+  }
+
+  if(lbl) lbl.textContent = '';
+  grid.innerHTML = allSlots.map(s => {
+    const isBooked = bookedTimes.has(s) || bookedTimes.has(fmt24to12(s));
+    const display = fmt24to12(s);
+    if(isBooked){
+      return `<div class="slot booked">${display}</div>`;
+    }
+    return `<div class="slot" onclick="pickSlot(this)">${display}</div>`;
+  }).join('');
+}
 
 // ─── CUSTOMER PHOTO POPUP ────────────────────────────
 function openCustPhotoPopup(){
