@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Haircut Booking — Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --or:#F47B20;--or2:rgba(244,123,32,0.15);--or3:rgba(244,123,32,0.08);
+  --bg:#0C0C0C;--bg2:#141414;--bg3:#1C1C1C;--bg4:#242424;
+  --bd:rgba(255,255,255,0.07);--bd2:rgba(255,255,255,0.12);
+  --tx:#F2EDE8;--tx2:#A89E96;--tx3:#5A534E;
+  --gr:#3DBB78;--re:#E05555;--am:#F4B420;--bl:#4A90E2;
+  --dv:'Noto Sans Devanagari',sans-serif;
+}
+body{background:var(--bg);font-family:'DM Sans',sans-serif;color:var(--tx);min-height:100vh;}
+
+/* ─── LOGIN ─── */
+#login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
+.login-box{width:100%;max-width:360px;}
+.login-logo{text-align:center;margin-bottom:32px;}
+.login-logo img{width:56px;height:56px;object-fit:contain;margin-bottom:12px;}
+.login-title{font-size:22px;font-weight:700;}
+.login-title span{color:var(--or);}
+.login-sub{font-size:12px;color:var(--tx3);margin-top:4px;font-family:var(--dv);}
+.login-field{margin-bottom:14px;}
+.login-field label{font-size:11px;color:var(--tx3);display:block;margin-bottom:6px;font-family:var(--dv);}
+.login-input{width:100%;background:var(--bg3);border:1px solid var(--bd2);color:var(--tx);border-radius:12px;padding:13px 16px;font-size:16px;font-family:'DM Sans';outline:none;letter-spacing:2px;}
+.login-input:focus{border-color:var(--or);}
+.login-btn{width:100%;background:var(--or);border:none;color:#fff;padding:14px;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans';transition:opacity .2s;}
+.login-btn:hover{opacity:.9;}
+.login-msg{font-size:12px;margin-top:10px;text-align:center;min-height:18px;}
+.login-note{text-align:center;margin-top:16px;font-size:10px;color:var(--tx3);font-family:var(--dv);}
+
+/* ─── DASHBOARD LAYOUT ─── */
+#admin-dashboard{display:none;min-height:100vh;}
+.dash-wrap{display:flex;min-height:100vh;}
+
+/* Sidebar */
+.sidebar{width:200px;background:var(--bg2);border-right:1px solid var(--bd);display:flex;flex-direction:column;padding:16px 12px;flex-shrink:0;position:sticky;top:0;height:100vh;overflow-y:auto;}
+.sb-logo{display:flex;align-items:center;gap:8px;padding:4px 8px;margin-bottom:20px;}
+.sb-logo img{width:28px;height:28px;object-fit:contain;border-radius:8px;}
+.sb-logo-name{font-size:13px;font-weight:700;}
+.sb-logo-role{font-size:9px;color:var(--tx3);}
+.sb-section{font-size:9px;color:var(--tx3);letter-spacing:.08em;text-transform:uppercase;padding:0 8px;margin-bottom:6px;margin-top:12px;}
+.sb-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:10px;cursor:pointer;transition:all .2s;margin-bottom:2px;}
+.sb-item:hover{background:var(--bg3);}
+.sb-item.active{background:var(--or2);border:1px solid rgba(244,123,32,.2);}
+.sb-icon{font-size:14px;width:20px;text-align:center;}
+.sb-label{font-size:12px;font-weight:500;flex:1;}
+.sb-badge{background:var(--re);color:#fff;border-radius:10px;font-size:9px;font-weight:700;padding:1px 6px;}
+.sb-logout{margin-top:auto;padding:9px 10px;border-radius:10px;cursor:pointer;display:flex;align-items:center;gap:8px;color:var(--re);font-size:12px;}
+.sb-logout:hover{background:rgba(224,85,85,.08);}
+
+/* Main area */
+.main{flex:1;padding:24px;overflow-y:auto;max-width:1100px;}
+.panel{display:none;}
+.panel.active{display:block;}
+.page-hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;}
+.page-title{font-size:20px;font-weight:700;}
+.page-sub{font-size:11px;color:var(--tx3);margin-top:3px;font-family:var(--dv);}
+
+/* Stats */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
+.stat-card{background:var(--bg2);border:1px solid var(--bd);border-radius:14px;padding:16px;}
+.stat-card.hl{border-color:rgba(244,123,32,.25);background:var(--or3);}
+.stat-icon{font-size:18px;margin-bottom:8px;}
+.stat-val{font-size:22px;font-weight:700;margin-bottom:4px;}
+.stat-val.or{color:var(--or);}
+.stat-val.gr{color:var(--gr);}
+.stat-val.re{color:var(--re);}
+.stat-val.bl{color:var(--bl);}
+.stat-lbl{font-size:10px;color:var(--tx3);font-family:var(--dv);}
+.stat-delta{font-size:9px;margin-top:4px;color:var(--gr);}
+
+/* Card */
+.card{background:var(--bg2);border:1px solid var(--bd);border-radius:14px;margin-bottom:16px;overflow:hidden;}
+.card-header{padding:14px 16px;border-bottom:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center;}
+.card-title{font-size:13px;font-weight:600;}
+.card-body{padding:14px 16px;}
+
+/* Badges */
+.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:600;}
+.badge-pending{background:rgba(244,180,32,.12);color:var(--am);border:1px solid rgba(244,180,32,.25);}
+.badge-active{background:rgba(61,187,120,.12);color:var(--gr);border:1px solid rgba(61,187,120,.25);}
+.badge-rejected{background:rgba(224,85,85,.1);color:var(--re);border:1px solid rgba(224,85,85,.2);}
+
+/* Table */
+.tbl{width:100%;border-collapse:collapse;font-size:11px;}
+.tbl th{text-align:left;padding:10px 12px;font-size:10px;color:var(--tx3);font-weight:600;border-bottom:1px solid var(--bd);background:var(--bg3);}
+.tbl td{padding:12px;border-bottom:1px solid var(--bd);vertical-align:top;}
+.tbl tr:last-child td{border-bottom:none;}
+.tbl tr:hover td{background:rgba(255,255,255,.02);}
+
+/* Buttons */
+.btn{padding:7px 14px;border-radius:9px;font-size:11px;font-weight:600;cursor:pointer;border:none;font-family:'DM Sans';transition:all .2s;}
+.btn-approve{background:rgba(61,187,120,.15);color:var(--gr);border:1px solid rgba(61,187,120,.3);}
+.btn-approve:hover{background:rgba(61,187,120,.25);}
+.btn-reject{background:rgba(224,85,85,.1);color:var(--re);border:1px solid rgba(224,85,85,.2);}
+.btn-reject:hover{background:rgba(224,85,85,.2);}
+.btn-or{background:var(--or);color:#fff;}
+.btn-ghost{background:var(--bg3);color:var(--tx2);border:1px solid var(--bd2);}
+.btn-sm{padding:5px 12px;font-size:10px;}
+
+/* Two col */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+@media(max-width:900px){.two-col{grid-template-columns:1fr;}.stats-row{grid-template-columns:1fr 1fr;}.sidebar{width:160px;}}
+
+/* Shop detail in table */
+.shop-cell-name{font-size:12px;font-weight:600;margin-bottom:2px;}
+.shop-cell-meta{font-size:10px;color:var(--tx3);font-family:var(--dv);}
+
+/* Bar chart */
+.rev-bars{display:flex;gap:6px;align-items:flex-end;height:60px;margin-top:8px;}
+.rev-bar{flex:1;border-radius:4px 4px 0 0;background:var(--bg4);cursor:pointer;transition:opacity .2s;}
+.rev-bar:hover{opacity:.8;}
+.rev-bar.past{background:var(--bg4);border:1px solid var(--bd2);}
+.rev-bar.today{background:var(--or);}
+.rev-bar-lbl{font-size:8px;color:var(--tx3);text-align:center;margin-top:4px;}
+.bar-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.bar-lbl{font-size:10px;color:var(--tx2);width:80px;text-align:right;flex-shrink:0;}
+.bar-track{flex:1;height:7px;background:var(--bg4);border-radius:4px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:4px;background:var(--or);}
+.bar-fill.gr{background:var(--gr);}
+.bar-val{font-size:10px;color:var(--tx3);width:40px;text-align:right;}
+
+/* Toast */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--bg3);border:1px solid var(--bd2);color:var(--tx);font-size:12px;font-weight:500;padding:10px 20px;border-radius:20px;z-index:9999;opacity:0;transition:opacity .3s;white-space:nowrap;box-shadow:0 8px 30px rgba(0,0,0,.5);}
+.toast.show{opacity:1;}
+
+/* Confirm modal */
+.confirm-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:999;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
+.confirm-modal.open{display:flex;}
+.confirm-box{background:var(--bg2);border:1px solid var(--bd2);border-radius:20px;padding:24px;width:320px;text-align:center;}
+.confirm-icon{font-size:36px;margin-bottom:12px;}
+.confirm-title{font-size:16px;font-weight:700;margin-bottom:6px;}
+.confirm-sub{font-size:12px;color:var(--tx3);font-family:var(--dv);line-height:1.6;margin-bottom:20px;}
+.confirm-btns{display:flex;gap:10px;}
+.confirm-btns button{flex:1;padding:12px;border-radius:12px;font-size:12px;font-weight:600;cursor:pointer;border:none;font-family:'DM Sans';}
+
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:2px;}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+<!-- ══ LOGIN ══ -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">
+      <img src="../assets/logo.png" onerror="this.style.display='none'">
+      <div class="login-title">My Haircut Booking <span>Admin</span></div>
+      <div class="login-sub">Superadmin panel — sirf authorized access</div>
+    </div>
+
+    <!-- Phone step -->
+    <div id="login-phone-step">
+      <div class="login-field">
+        <label>Admin Phone Number</label>
+        <div style="display:flex;gap:8px;">
+          <div style="background:var(--bg3);border:1px solid var(--bd2);border-radius:12px;padding:13px 14px;font-size:14px;color:var(--tx2);">+91</div>
+          <input id="admin-phone" class="login-input" type="tel" maxlength="10" placeholder="98765 43210" oninput="this.value=this.value.replace(/\D/g,'')">
+        </div>
+      </div>
+      <button class="login-btn" onclick="adminSendOTP()">OTP Bhejo →</button>
+      <div class="login-msg" id="login-phone-msg"></div>
+    </div>
+
+    <!-- OTP step -->
+    <div id="login-otp-step" style="display:none;">
+      <div class="login-field">
+        <label id="otp-hint-lbl">OTP Daalo</label>
+        <input id="admin-otp" class="login-input" type="tel" maxlength="6" placeholder="6 अंकों का OTP डालें" oninput="this.value=this.value.replace(/\D/g,'');if(this.value.length===6) adminVerifyOTP()">
+      </div>
+      <button class="login-btn" onclick="adminVerifyOTP()">Verify karein ✓</button>
+      <div style="text-align:center;margin-top:10px;font-size:11px;color:var(--tx3);">
+        OTP nahi aaya? <span style="color:var(--or);cursor:pointer;" onclick="adminSendOTP()">Dobara bhejo</span>
+        &nbsp;|&nbsp; <span style="color:var(--tx3);cursor:pointer;" onclick="resetLoginForm()">← Wapas</span>
+      </div>
+      <div class="login-msg" id="login-otp-msg"></div>
+    </div>
+
+    <div class="login-note">🔒 Sirf authorized admins access kar sakte hain</div>
+  </div>
+</div>
+
+<!-- ══ DASHBOARD ══ -->
+<div id="admin-dashboard">
+  <div class="dash-wrap">
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sb-logo">
+        <img src="../assets/logo.png" style="width:28px;height:28px;object-fit:contain;border-radius:8px;" onerror="this.style.display='none'">
+        <div><div class="sb-logo-name">MHB</div><div class="sb-logo-role">Superadmin</div></div>
+      </div>
+
+      <div class="sb-section">Main</div>
+      <div class="sb-item active" onclick="showPanel('overview',this)">
+        <div class="sb-icon">📊</div><div class="sb-label">Overview</div>
+      </div>
+      <div class="sb-item" onclick="showPanel('shops',this)">
+        <div class="sb-icon">🏪</div><div class="sb-label">Shops</div>
+        <div class="sb-badge" id="pending-sb-badge" style="display:none;">0</div>
+      </div>
+      <div class="sb-item" onclick="showPanel('bookings',this)">
+        <div class="sb-icon">📅</div><div class="sb-label">Bookings</div>
+      </div>
+      <div class="sb-item" onclick="showPanel('users',this)">
+        <div class="sb-icon">👥</div><div class="sb-label">Users</div>
+      </div>
+
+      <div style="margin-top:auto;">
+        <div style="background:var(--bg3);border-radius:10px;border:1px solid var(--bd);padding:10px;margin-bottom:8px;">
+          <div style="font-size:9px;color:var(--tx3);margin-bottom:3px;font-family:var(--dv);">Logged in as</div>
+          <div style="font-size:11px;font-weight:600;" id="admin-logged-name">Admin</div>
+          <div style="font-size:10px;color:var(--tx3);" id="admin-logged-phone"></div>
+        </div>
+        <div class="sb-logout" onclick="doAdminLogout()">🚪 <span>Log Out</span></div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main">
+
+      <!-- ═══ OVERVIEW ═══ -->
+      <div id="panel-overview" class="panel active">
+        <div class="page-hdr">
+          <div>
+            <div class="page-title">Platform Overview</div>
+            <div class="page-sub" id="overview-date">Loading...</div>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="loadAllData()">↻ Refresh</button>
+        </div>
+
+        <div class="stats-row">
+          <div class="stat-card hl">
+            <div class="stat-icon">🏪</div>
+            <div class="stat-val or" id="stat-total-shops">—</div>
+            <div class="stat-lbl">Total Shops</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">⏳</div>
+            <div class="stat-val am" id="stat-pending-shops">—</div>
+            <div class="stat-lbl">Pending Approval</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">📅</div>
+            <div class="stat-val gr" id="stat-total-bookings">—</div>
+            <div class="stat-lbl">Total Bookings</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">👥</div>
+            <div class="stat-val bl" id="stat-total-users">—</div>
+            <div class="stat-lbl">Total Users</div>
+          </div>
+        </div>
+
+        <!-- Pending Approvals Table -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">⏳ Pending Shop Approvals</div>
+            <span class="badge badge-pending" id="pending-count-badge">Loading...</span>
+          </div>
+          <div class="card-body" style="padding:0;">
+            <table class="tbl">
+              <thead>
+                <tr>
+                  <th>Shop Details</th>
+                  <th>Owner / Phone</th>
+                  <th>City</th>
+                  <th>Registered</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="pending-approvals-list">
+                <tr><td colspan="5" style="text-align:center;padding:24px;color:var(--tx3);">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Recent Bookings -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">📅 Recent Bookings</div>
+            <span class="badge badge-active">Live</span>
+          </div>
+          <div class="card-body" style="padding:0;">
+            <table class="tbl">
+              <thead>
+                <tr>
+                  <th>Customer</th>
+                  <th>Shop</th>
+                  <th>Service</th>
+                  <th>Date/Time</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="recent-bookings-list">
+                <tr><td colspan="5" style="text-align:center;padding:24px;color:var(--tx3);">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ SHOPS ═══ -->
+      <div id="panel-shops" class="panel">
+        <div class="page-hdr">
+          <div>
+            <div class="page-title">Shop Management</div>
+            <div class="page-sub">Sabhi registered shops — approve ya reject karo</div>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-ghost btn-sm" onclick="loadShopsPanel('pending')">⏳ Pending</button>
+            <button class="btn btn-ghost btn-sm" onclick="loadShopsPanel('active')">✅ Active</button>
+            <button class="btn btn-ghost btn-sm" onclick="loadShopsPanel('all')">Sab</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title" id="shops-panel-title">All Shops</div>
+          </div>
+          <div class="card-body" style="padding:0;">
+            <table class="tbl">
+              <thead>
+                <tr>
+                  <th>Shop Name</th>
+                  <th>Owner</th>
+                  <th>City</th>
+                  <th>Services</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="all-shops-list">
+                <tr><td colspan="6" style="text-align:center;padding:24px;color:var(--tx3);">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ BOOKINGS ═══ -->
+      <div id="panel-bookings" class="panel">
+        <div class="page-hdr">
+          <div>
+            <div class="page-title">All Bookings</div>
+            <div class="page-sub">Platform pe sabhi bookings</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-body" style="padding:0;">
+            <table class="tbl">
+              <thead>
+                <tr>
+                  <th>Customer</th>
+                  <th>Shop</th>
+                  <th>Service</th>
+                  <th>Date/Time</th>
+                  <th>Price</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="all-bookings-list">
+                <tr><td colspan="6" style="text-align:center;padding:24px;color:var(--tx3);">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ USERS ═══ -->
+      <div id="panel-users" class="panel">
+        <div class="page-hdr">
+          <div>
+            <div class="page-title">Users</div>
+            <div class="page-sub">Registered customers aur shopkeepers</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-body" style="padding:0;">
+            <table class="tbl">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Phone</th>
+                  <th>Role</th>
+                  <th>Joined</th>
+                </tr>
+              </thead>
+              <tbody id="all-users-list">
+                <tr><td colspan="4" style="text-align:center;padding:24px;color:var(--tx3);">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Confirm Modal -->
+<div class="confirm-modal" id="confirm-modal">
+  <div class="confirm-box">
+    <div class="confirm-icon" id="cm-icon">❓</div>
+    <div class="confirm-title" id="cm-title">Confirm?</div>
+    <div class="confirm-sub" id="cm-sub"></div>
+    <div class="confirm-btns">
+      <button onclick="closeConfirm()" style="background:var(--bg3);color:var(--tx2);border:1px solid var(--bd2);">Nahi</button>
+      <button id="cm-yes-btn" style="background:var(--or);color:#fff;">Haan</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+const SUPABASE_URL = 'https://kovpsqdkrlgwyfrqlhry.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtvdnBzcWRrcmxnd3lmcnFsaHJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1MTg3MDAsImV4cCI6MjA5MDA5NDcwMH0.poZR0KcozCyL1xSo3mFi_yle5bRNhM4TWe1nWfvVx30';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let adminUser = null;
+let adminPhone = '';
+let confirmCb = null;
+
+// ─── LOGIN ────────────────────────────────────────────
+async function adminSendOTP(){
+  const raw = document.getElementById('admin-phone').value.trim();
+  if(raw.length !== 10){ showMsg('login-phone-msg','❌ 10 digit number daalo','var(--re)'); return; }
+  adminPhone = '+91' + raw;
+  showMsg('login-phone-msg','⏳ OTP bheja ja raha hai...','var(--tx3)');
+  const {error} = await sb.auth.signInWithOtp({phone: adminPhone});
+  if(error){ showMsg('login-phone-msg','❌ '+error.message,'var(--re)'); return; }
+  document.getElementById('login-phone-step').style.display = 'none';
+  document.getElementById('login-otp-step').style.display = 'block';
+  document.getElementById('otp-hint-lbl').textContent = adminPhone + ' par OTP bheja gaya';
+  showMsg('login-otp-msg','','');
+}
+
+async function adminVerifyOTP(){
+  const otp = document.getElementById('admin-otp').value.trim();
+  if(otp.length !== 6){ showMsg('login-otp-msg','❌ 6 digit OTP daalo','var(--re)'); return; }
+  showMsg('login-otp-msg','⏳ Verify ho raha hai...','var(--tx3)');
+  const {data, error} = await sb.auth.verifyOtp({phone: adminPhone, token: otp, type: 'sms'});
+  if(error){ showMsg('login-otp-msg','❌ OTP galat hai ya expire ho gaya','var(--re)'); return; }
+
+  const userId = data?.user?.id;
+  if(!userId){ showMsg('login-otp-msg','❌ Login fail','var(--re)'); return; }
+
+  // Check admin role in users table
+  const {data: userData, error: userErr} = await sb.from('users')
+    .select('id,name,phone,role')
+    .eq('id', userId)
+    .maybeSingle();
+
+  if(userErr || !userData){
+    showMsg('login-otp-msg','❌ User nahi mila — register karo','var(--re)');
+    await sb.auth.signOut(); return;
+  }
+  if(userData.role !== 'admin'){
+    showMsg('login-otp-msg','❌ Access denied — aap admin nahi hain','var(--re)');
+    await sb.auth.signOut(); return;
+  }
+
+  adminUser = userData;
+  document.getElementById('admin-logged-name').textContent = userData.name || 'Admin';
+  document.getElementById('admin-logged-phone').textContent = adminPhone;
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('admin-dashboard').style.display = 'block';
+  loadAllData();
+}
+
+function resetLoginForm(){
+  document.getElementById('login-phone-step').style.display = 'block';
+  document.getElementById('login-otp-step').style.display = 'none';
+  document.getElementById('admin-phone').value = '';
+  document.getElementById('admin-otp').value = '';
+  showMsg('login-phone-msg','','');
+}
+
+// ─── LOAD ALL DATA ────────────────────────────────────
+async function loadAllData(){
+  const now = new Date();
+  document.getElementById('overview-date').textContent =
+    now.toLocaleDateString('hi-IN',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+
+  await Promise.all([
+    loadStats(),
+    loadPendingApprovals(),
+    loadRecentBookings(),
+  ]);
+}
+
+async function loadStats(){
+  const [{data: shops}, {data: bookings}, {data: users}] = await Promise.all([
+    sb.from('shops').select('id,status'),
+    sb.from('bookings').select('id'),
+    sb.from('users').select('id'),
+  ]);
+  const total = shops?.length || 0;
+  const pending = shops?.filter(s=>s.status==='pending').length || 0;
+  document.getElementById('stat-total-shops').textContent = total;
+  document.getElementById('stat-pending-shops').textContent = pending;
+  document.getElementById('stat-total-bookings').textContent = bookings?.length || 0;
+  document.getElementById('stat-total-users').textContent = users?.length || 0;
+  // Sidebar badge
+  const sb_badge = document.getElementById('pending-sb-badge');
+  if(pending > 0){ sb_badge.textContent = pending; sb_badge.style.display = 'block'; }
+  else sb_badge.style.display = 'none';
+  // Overview badge
+  document.getElementById('pending-count-badge').textContent = pending + ' pending';
+  document.getElementById('pending-count-badge').className = 'badge ' + (pending > 0 ? 'badge-pending' : 'badge-active');
+}
+
+// ─── PENDING APPROVALS ────────────────────────────────
+async function loadPendingApprovals(){
+  const {data, error} = await sb.from('shops')
+    .select('*')
+    .eq('status','pending')
+    .order('created_at',{ascending:false});
+
+  const tbody = document.getElementById('pending-approvals-list');
+  if(error || !data || !data.length){
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--tx3);font-family:var(--dv);">✅ Koi pending approval nahi</td></tr>';
+    return;
+  }
+  tbody.innerHTML = data.map(s => `
+    <tr>
+      <td>
+        <div class="shop-cell-name">🏪 ${s.name||'—'}</div>
+        <div class="shop-cell-meta">${s.services && s.services.length ? s.services.map(sv=>sv.name).join(', ') : '—'}</div>
+      </td>
+      <td>
+        <div style="font-size:11px;font-weight:500;">${s.owner_name||'—'}</div>
+        <div style="font-size:10px;color:var(--tx3);">${s.owner_phone||'—'}</div>
+      </td>
+      <td><div style="font-size:11px;">${s.city||'—'}</div><div style="font-size:10px;color:var(--tx3);">${s.pincode||''}</div></td>
+      <td style="font-size:10px;color:var(--tx3);">${new Date(s.created_at).toLocaleDateString('hi-IN')}</td>
+      <td>
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-approve" onclick="approveShop('${s.id}','${(s.name||'').replace(/'/g,"\\'")}')">✅ Approve</button>
+          <button class="btn btn-reject" onclick="rejectShop('${s.id}','${(s.name||'').replace(/'/g,"\\'")}')">❌ Reject</button>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+
+// ─── APPROVE SHOP ─────────────────────────────────────
+function approveShop(shopId, shopName){
+  showConfirm('✅', `"${shopName}" approve karein?`,
+    'Shop live ho jayegi. Shopkeeper ko dashboard mil jayega.',
+    'var(--gr)', async()=>{
+      const {error} = await sb.from('shops').update({status:'active'}).eq('id', shopId);
+      if(error){ toast('❌ Error: '+error.message); return; }
+      toast(`✅ "${shopName}" approve ho gayi! Ab live hai.`);
+      await loadAllData();
+      await loadShopsPanel('all');
+    });
+}
+
+// ─── REJECT SHOP ──────────────────────────────────────
+function rejectShop(shopId, shopName){
+  showConfirm('❌', `"${shopName}" reject karein?`,
+    'Shop ko rejected status milegi. Shopkeeper ko inform karna padega.',
+    'var(--re)', async()=>{
+      const {error} = await sb.from('shops').update({status:'rejected'}).eq('id', shopId);
+      if(error){ toast('❌ Error: '+error.message); return; }
+      toast(`❌ "${shopName}" reject ho gayi.`);
+      await loadAllData();
+      await loadShopsPanel('all');
+    });
+}
+
+// ─── RECENT BOOKINGS ──────────────────────────────────
+async function loadRecentBookings(){
+  const {data, error} = await sb.from('bookings')
+    .select('*')
+    .order('created_at',{ascending:false})
+    .limit(20);
+
+  const tbody = document.getElementById('recent-bookings-list');
+  if(error || !data || !data.length){
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--tx3);">Koi booking nahi</td></tr>';
+    return;
+  }
+  const stMap = {
+    pending:'badge-pending', accepted:'badge-active',
+    completed:'badge-active', cancelled:'badge-rejected'
+  };
+  const stLbl = {pending:'⏳ Pending',accepted:'✅ Confirmed',completed:'🏁 Done',cancelled:'❌ Cancelled'};
+  tbody.innerHTML = data.map(b=>`
+    <tr>
+      <td><div style="font-size:11px;font-weight:500;">${b.customer_name||'—'}</div><div style="font-size:10px;color:var(--tx3);">${b.customer_phone||'—'}</div></td>
+      <td style="font-size:11px;">${b.shop_name||'—'}</td>
+      <td style="font-size:11px;">${b.service||'—'}</td>
+      <td><div style="font-size:11px;">${b.booking_date||'—'}</div><div style="font-size:10px;color:var(--tx3);">${b.booking_time||''}</div></td>
+      <td><span class="badge ${stMap[b.status]||'badge-pending'}" style="font-size:9px;">${stLbl[b.status]||b.status}</span></td>
+    </tr>`).join('');
+}
+
+// ─── SHOPS PANEL ──────────────────────────────────────
+async function loadShopsPanel(filter='all'){
+  showPanel('shops', document.querySelector('.sb-item:nth-child(3)'));
+  document.getElementById('shops-panel-title').textContent =
+    filter==='pending'?'⏳ Pending Shops':filter==='active'?'✅ Active Shops':'All Shops';
+
+  let query = sb.from('shops').select('*').order('created_at',{ascending:false});
+  if(filter !== 'all') query = query.eq('status', filter);
+  const {data, error} = await query;
+
+  const tbody = document.getElementById('all-shops-list');
+  if(error || !data || !data.length){
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--tx3);">Koi shop nahi</td></tr>';
+    return;
+  }
+  const stMap = {active:'badge-active',pending:'badge-pending',rejected:'badge-rejected'};
+  const stLbl = {active:'✅ Active',pending:'⏳ Pending',rejected:'❌ Rejected'};
+  tbody.innerHTML = data.map(s=>`
+    <tr>
+      <td><div class="shop-cell-name">🏪 ${s.name||'—'}</div><div class="shop-cell-meta">${s.address||''}</div></td>
+      <td><div style="font-size:11px;">${s.owner_name||'—'}</div><div style="font-size:10px;color:var(--tx3);">${s.owner_phone||'—'}</div></td>
+      <td style="font-size:11px;">${s.city||'—'}</td>
+      <td style="font-size:10px;color:var(--tx3);">${s.services && s.services.length ? s.services.map(sv=>sv.name).join(', ') : '—'}</td>
+      <td><span class="badge ${stMap[s.status]||'badge-pending'}">${stLbl[s.status]||s.status}</span></td>
+      <td>
+        ${s.status==='pending'?`<div style="display:flex;gap:4px;">
+          <button class="btn btn-approve btn-sm" onclick="approveShop('${s.id}','${(s.name||'').replace(/'/g,"\\'")}')">✅</button>
+          <button class="btn btn-reject btn-sm" onclick="rejectShop('${s.id}','${(s.name||'').replace(/'/g,"\\'")}')">❌</button>
+        </div>`
+        : s.status==='active'?`<button class="btn btn-reject btn-sm" onclick="rejectShop('${s.id}','${(s.name||'').replace(/'/g,"\\'")}')">Suspend</button>`
+        : `<button class="btn btn-approve btn-sm" onclick="approveShop('${s.id}','${(s.name||'').replace(/'/g,"\\'")}')">Restore</button>`}
+      </td>
+    </tr>`).join('');
+}
+
+// ─── ALL BOOKINGS PANEL ───────────────────────────────
+async function loadBookingsPanel(){
+  const {data, error} = await sb.from('bookings')
+    .select('*').order('created_at',{ascending:false}).limit(100);
+  const tbody = document.getElementById('all-bookings-list');
+  if(error || !data || !data.length){
+    tbody.innerHTML='<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--tx3);">Koi booking nahi</td></tr>';
+    return;
+  }
+  const stMap={pending:'badge-pending',accepted:'badge-active',completed:'badge-active',cancelled:'badge-rejected'};
+  const stLbl={pending:'⏳ Pending',accepted:'✅ Confirmed',completed:'🏁 Done',cancelled:'❌ Cancelled'};
+  tbody.innerHTML=data.map(b=>`
+    <tr>
+      <td><div style="font-size:11px;font-weight:500;">${b.customer_name||'—'}</div><div style="font-size:10px;color:var(--tx3);">${b.customer_phone||''}</div></td>
+      <td style="font-size:11px;">${b.shop_name||'—'}</td>
+      <td style="font-size:11px;">${b.service||'—'}</td>
+      <td><div style="font-size:11px;">${b.booking_date||'—'}</div><div style="font-size:10px;color:var(--tx3);">${b.booking_time||''}</div></td>
+      <td style="font-size:11px;color:var(--gr);font-weight:600;">₹${b.price||0}</td>
+      <td><span class="badge ${stMap[b.status]||'badge-pending'}" style="font-size:9px;">${stLbl[b.status]||b.status}</span></td>
+    </tr>`).join('');
+}
+
+// ─── USERS PANEL ─────────────────────────────────────
+async function loadUsersPanel(){
+  const {data, error} = await sb.from('users').select('*').order('created_at',{ascending:false});
+  const tbody = document.getElementById('all-users-list');
+  if(error || !data || !data.length){
+    tbody.innerHTML='<tr><td colspan="4" style="text-align:center;padding:24px;color:var(--tx3);">Koi user nahi</td></tr>';
+    return;
+  }
+  const roleMap={customer:'badge-active',shopkeeper:'badge-pending',admin:'badge-rejected'};
+  tbody.innerHTML=data.map(u=>`
+    <tr>
+      <td style="font-size:12px;font-weight:500;">${u.name||'—'}</td>
+      <td style="font-size:11px;">${u.phone||'—'}</td>
+      <td><span class="badge ${roleMap[u.role]||'badge-pending'}" style="font-size:9px;">${u.role||'—'}</span></td>
+      <td style="font-size:10px;color:var(--tx3);">${new Date(u.created_at).toLocaleDateString('hi-IN')}</td>
+    </tr>`).join('');
+}
+
+// ─── NAVIGATION ───────────────────────────────────────
+function showPanel(id, el){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
+  if(el) el.classList.add('active');
+  // Load panel data
+  if(id==='shops') loadShopsPanel('all');
+  if(id==='bookings') loadBookingsPanel();
+  if(id==='users') loadUsersPanel();
+}
+
+// ─── CONFIRM MODAL ────────────────────────────────────
+function showConfirm(icon, title, sub, yesColor, cb){
+  confirmCb = cb;
+  document.getElementById('cm-icon').textContent = icon;
+  document.getElementById('cm-title').textContent = title;
+  document.getElementById('cm-sub').textContent = sub;
+  const btn = document.getElementById('cm-yes-btn');
+  btn.style.background = yesColor;
+  btn.onclick = ()=>{ closeConfirm(); if(confirmCb) confirmCb(); };
+  document.getElementById('confirm-modal').classList.add('open');
+}
+function closeConfirm(){ document.getElementById('confirm-modal').classList.remove('open'); confirmCb=null; }
+
+// ─── LOGOUT ───────────────────────────────────────────
+function doAdminLogout(){
+  showConfirm('🚪','Log out karein?','Aap admin panel se log out ho jayenge.','var(--re)',async()=>{
+    await sb.auth.signOut();
+    document.getElementById('admin-dashboard').style.display='none';
+    document.getElementById('login-screen').style.display='flex';
+    resetLoginForm();
+    adminUser=null;
+  });
+}
+
+// ─── HELPERS ──────────────────────────────────────────
+function showMsg(id, text, color){
+  const el=document.getElementById(id);
+  if(el){ el.textContent=text; el.style.color=color; }
+}
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3500);
+}
+
+// ─── INIT ─────────────────────────────────────────────
+(async function(){
+  const {data:{session}} = await sb.auth.getSession();
+  if(session?.user){
+    const {data:u} = await sb.from('users').select('id,name,phone,role').eq('id',session.user.id).maybeSingle();
+    if(u && u.role==='admin'){
+      adminUser=u;
+      document.getElementById('admin-logged-name').textContent=u.name||'Admin';
+      document.getElementById('admin-logged-phone').textContent=u.phone||'';
+      document.getElementById('login-screen').style.display='none';
+      document.getElementById('admin-dashboard').style.display='block';
+      loadAllData();
+    }
+  }
+})();
+</script>
+</body>
+</html>
