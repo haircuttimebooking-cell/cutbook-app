@@ -622,22 +622,41 @@ async function loadShopsPanel(filter='all'){
   }
   const stMap = {active:'badge-active',pending:'badge-pending',rejected:'badge-rejected'};
   const stLbl = {active:'✅ Active',pending:'⏳ Pending',rejected:'❌ Rejected'};
-  tbody.innerHTML = data.map(s=>`
-    <tr>
-      <td><div class="shop-cell-name">🏪 ${s.name||'—'}</div><div class="shop-cell-meta">${s.address||''}</div></td>
+  tbody.innerHTML = data.map(s=>{
+    const photos = s.photos || [];
+    const firstPhoto = photos.length ? photos[0] : null;
+    const addr = [s.address, s.city, s.pincode].filter(Boolean).join(', ') || '—';
+    const shopNameSafe = (s.name||'').replace(/'/g,"\\'");
+    const addrSafe = addr.replace(/'/g,"\\'");
+    return `<tr>
+      <td>
+        <div style="display:flex;align-items:center;gap:8px;">
+          ${firstPhoto
+            ? `<img src="${firstPhoto}" style="width:38px;height:38px;border-radius:8px;object-fit:cover;border:1px solid var(--bd);flex-shrink:0;" onerror="this.style.display='none'">`
+            : `<div style="width:38px;height:38px;border-radius:8px;background:var(--bg3);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;">🏪</div>`}
+          <div>
+            <div class="shop-cell-name">${s.name||'—'}</div>
+            <div style="display:flex;gap:4px;margin-top:3px;">
+              ${photos.length ? `<button class="btn btn-ghost btn-sm" onclick="showAdminPhotos('${s.id}',${JSON.stringify(photos).replace(/"/g,'&quot;')})">📷 ${photos.length}</button>` : ''}
+              <button class="btn btn-ghost btn-sm" onclick="showAdminAddress('${shopNameSafe}','${addrSafe}',${s.latitude||null},${s.longitude||null})">📍</button>
+            </div>
+          </div>
+        </div>
+      </td>
       <td><div style="font-size:11px;">${s.owner_name||'—'}</div><div style="font-size:10px;color:var(--tx3);">${s.owner_phone||'—'}</div></td>
       <td style="font-size:11px;">${s.city||'—'}</td>
       <td style="font-size:10px;color:var(--tx3);">${s.services && s.services.length ? s.services.map(sv=>sv.name).join(', ') : '—'}</td>
       <td><span class="badge ${stMap[s.status]||'badge-pending'}">${stLbl[s.status]||s.status}</span></td>
       <td>
         ${s.status==='pending'?`<div style="display:flex;gap:4px;">
-          <button class="btn btn-approve btn-sm" onclick="approveShop('${s.id}','${(s.name||'').replace(/'/g,"\\'")}')">✅</button>
-          <button class="btn btn-reject btn-sm" onclick="rejectShop('${s.id}','${(s.name||'').replace(/'/g,"\\'")}')">❌</button>
+          <button class="btn btn-approve btn-sm" onclick="approveShop('${s.id}','${shopNameSafe}')">✅</button>
+          <button class="btn btn-reject btn-sm" onclick="rejectShop('${s.id}','${shopNameSafe}')">❌</button>
         </div>`
-        : s.status==='active'?`<button class="btn btn-reject btn-sm" onclick="rejectShop('${s.id}','${(s.name||'').replace(/'/g,"\\'")}')">Suspend</button>`
-        : `<button class="btn btn-approve btn-sm" onclick="approveShop('${s.id}','${(s.name||'').replace(/'/g,"\\'")}')">Restore</button>`}
+        : s.status==='active'?`<button class="btn btn-reject btn-sm" onclick="rejectShop('${s.id}','${shopNameSafe}')">Suspend</button>`
+        : `<button class="btn btn-approve btn-sm" onclick="approveShop('${s.id}','${shopNameSafe}')">Restore</button>`}
       </td>
-    </tr>`).join('');
+    </tr>`;
+  }).join('');
 }
 
 // ─── ALL BOOKINGS PANEL ───────────────────────────────
@@ -742,6 +761,72 @@ function toast(msg){
     }
   }
 })();
+</script>
+
+<!-- ══ ADMIN PHOTO MODAL ══ -->
+<div id="admin-photo-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:var(--bg2);border:1px solid var(--bd2);border-radius:20px;width:90%;max-width:560px;max-height:85vh;overflow:hidden;display:flex;flex-direction:column;">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--bd);">
+      <div id="ap-title" style="font-size:15px;font-weight:700;"></div>
+      <button onclick="document.getElementById('admin-photo-modal').style.display='none'" style="width:32px;height:32px;background:var(--bg3);border:1px solid var(--bd2);border-radius:10px;color:var(--tx2);font-size:16px;cursor:pointer;">✕</button>
+    </div>
+    <div style="overflow-y:auto;padding:16px;">
+      <div id="ap-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ ADMIN ADDRESS MODAL ══ -->
+<div id="admin-addr-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:var(--bg2);border:1px solid var(--bd2);border-radius:20px;width:90%;max-width:400px;">
+    <div style="padding:16px 20px;border-bottom:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center;">
+      <div id="aa-title" style="font-size:15px;font-weight:700;"></div>
+      <button onclick="document.getElementById('admin-addr-modal').style.display='none'" style="width:32px;height:32px;background:var(--bg3);border:1px solid var(--bd2);border-radius:10px;color:var(--tx2);font-size:16px;cursor:pointer;">✕</button>
+    </div>
+    <div style="padding:20px;">
+      <div style="background:var(--bg3);border:1px solid var(--bd);border-radius:12px;padding:14px;margin-bottom:14px;">
+        <div style="font-size:10px;color:var(--tx3);margin-bottom:6px;font-family:var(--dv);">📍 Pura Pata:</div>
+        <div id="aa-addr" style="font-size:13px;line-height:1.7;font-family:var(--dv);"></div>
+      </div>
+      <button id="aa-maps-btn" style="width:100%;background:var(--or);border:none;color:#fff;padding:12px;border-radius:12px;font-size:13px;font-weight:600;cursor:pointer;">🗺️ Google Maps pe dekho</button>
+    </div>
+  </div>
+</div>
+<script>
+// ─── ADMIN PHOTO POPUP ───────────────────────────────
+function showAdminPhotos(shopId, photos){
+  const modal = document.getElementById('admin-photo-modal');
+  const grid = document.getElementById('ap-grid');
+  document.getElementById('ap-title').textContent = '📷 Shop Photos';
+  if(!photos || !photos.length){
+    grid.innerHTML = '<div style="text-align:center;padding:40px;color:var(--tx3);grid-column:1/-1;">Koi photo nahi</div>';
+  } else {
+    grid.innerHTML = photos.map((url,i)=>`
+      <div style="border-radius:10px;overflow:hidden;cursor:pointer;" onclick="window.open('${url}','_blank')">
+        <img src="${url}" style="width:100%;aspect-ratio:1;object-fit:cover;display:block;" onerror="this.parentElement.style.display='none'">
+      </div>`).join('');
+  }
+  modal.style.display = 'flex';
+}
+
+// ─── ADMIN ADDRESS POPUP ─────────────────────────────
+function showAdminAddress(name, addr, lat, lng){
+  document.getElementById('aa-title').textContent = name;
+  document.getElementById('aa-addr').textContent = addr;
+  const mapsBtn = document.getElementById('aa-maps-btn');
+  if(lat && lng){
+    mapsBtn.onclick = ()=>window.open(`https://www.google.com/maps?q=${lat},${lng}`,'_blank');
+  } else {
+    const q = encodeURIComponent(addr);
+    mapsBtn.onclick = ()=>window.open(`https://www.google.com/maps/search/${q}`,'_blank');
+  }
+  document.getElementById('admin-addr-modal').style.display = 'flex';
+}
+</script>
+<script>
+['admin-photo-modal','admin-addr-modal'].forEach(id=>{
+  document.getElementById(id).addEventListener('click',function(e){ if(e.target===this) this.style.display='none'; });
+});
 </script>
 </body>
 </html>

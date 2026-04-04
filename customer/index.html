@@ -452,33 +452,35 @@ async function loadShops(){
 
   allShops = data;
   const emojis = ['✂️','💈','💇','🧖','🪒'];
-  list.innerHTML = data.map((s,i)=>`
-    <div class="salon-card" onclick="openShopDetail(${i})">
-      <div class="salon-img" style="background:linear-gradient(135deg,#181010,#281810);">
-        ${emojis[i%emojis.length]}
-        <div class="salon-open">Open</div>
+
+  function salonCardHtml(s, i){
+    const firstPhoto = s.photos && s.photos.length ? s.photos[0] : null;
+    const minPrice = s.services && s.services.length ? Math.min(...s.services.map(sv=>sv.price||0)) : 0;
+    const imgHtml = firstPhoto
+      ? `<img src="${firstPhoto}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;" onerror="this.style.display='none'">`
+      : `<span style="font-size:26px;">${emojis[i%emojis.length]}</span>`;
+    return `<div class="salon-card" onclick="openShopDetail(${i})">
+      <div class="salon-img" style="background:linear-gradient(135deg,#181010,#281810);position:relative;overflow:hidden;">
+        ${imgHtml}
+        <div class="salon-open" style="position:absolute;top:8px;left:10px;z-index:2;">Open</div>
       </div>
       <div class="salon-body">
         <div class="salon-name">${s.name}</div>
         <div class="salon-meta">
           <span>📍 ${s.city||'—'}</span>
           <span>${s.opening_time||'9AM'}–${s.closing_time||'9PM'}</span>
-          ${s.services && s.services.length ? `<span style="color:var(--or);font-weight:600;">₹${Math.min(...s.services.map(sv=>sv.price||0))} se</span>` : ''}
+          ${minPrice ? `<span style="color:var(--or);font-weight:600;">₹${minPrice} se</span>` : ''}
         </div>
       </div>
-    </div>`).join('');
+    </div>`;
+  }
+
+  list.innerHTML = data.map((s,i)=>salonCardHtml(s,i)).join('');
 
   // Search list bhi update karo
   const searchList = document.getElementById('search-list');
   if(searchList){
-    searchList.innerHTML = data.map((s,i)=>`
-      <div class="salon-card" onclick="openShopDetail(${i})">
-        <div class="salon-img">${emojis[i%emojis.length]}<div class="salon-open">Open</div></div>
-        <div class="salon-body">
-          <div class="salon-name">${s.name}</div>
-          <div class="salon-meta"><span>📍 ${s.city||'—'}</span><span style="color:var(--or);">₹${s.services&&s.services.length?Math.min(...s.services.map(sv=>sv.price||0)):0} se</span></div>
-        </div>
-      </div>`).join('');
+    searchList.innerHTML = data.map((s,i)=>salonCardHtml(s,i)).join('');
   }
 }
 
@@ -489,6 +491,20 @@ function openShopDetail(i){
   const addrEl = document.querySelector('.detail-addr');
   if(nameEl) nameEl.textContent = selectedShop.name;
   if(addrEl) addrEl.textContent = '📍 '+(selectedShop.address||selectedShop.city||'—');
+
+  // Detail hero pe real photo dikhao
+  const heroEl = document.querySelector('.detail-hero');
+  if(heroEl){
+    const firstPhoto = selectedShop.photos && selectedShop.photos.length ? selectedShop.photos[0] : null;
+    if(firstPhoto){
+      heroEl.style.backgroundImage = `url('${firstPhoto}')`;
+      heroEl.style.backgroundSize = 'cover';
+      heroEl.style.backgroundPosition = 'center';
+      heroEl.innerHTML = heroEl.innerHTML; // keep overlay + back btn
+    } else {
+      heroEl.style.backgroundImage = '';
+    }
+  }
 
   // Photos button update
   const photosBtn = document.getElementById('cust-photos-btn');
