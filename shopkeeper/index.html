@@ -496,6 +496,7 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 let cancelCount = 0, doneTarget = null, rejectTarget = null, assignTarget = null;
 let isOnline = true, autoAccept = true, schedOffset = 0, curView = 'timeline';
 let bookings = [], currentShopOwnerId = null, pollInterval = null;
+let heldSlots = []; // slot_holds table se active holds
 
 const statusCfg = {
   pending:   {label:'⏳ Pending',   cls:'pill-am'},
@@ -522,8 +523,39 @@ async function loadBookingsFromDB(){
       b.status='accepted';
     }
   }
+  await loadHeldSlots();
   renderBk(getCurFilter());
   updateStats();
+}
+
+// ─── LOAD ACTIVE HOLDS ───────────────────────────────
+async function loadHeldSlots(){
+  if(!currentShopOwnerId) return;
+  const today = new Date().toISOString().split('T')[0];
+  // Shop id — DB se nikalo
+  const {data:shopData} = await sb.from('shops')
+    .select('id').eq('owner_id',currentShopOwnerId)
+    .order('created_at',{ascending:false}).limit(1).maybeSingle();
+  if(!shopData?.id) return;
+  const {data} = await sb.from('slot_holds')
+    .select('*')
+    .eq('shop_id', shopData.id)
+    .eq('booking_date', today)
+    .eq('status','active')
+    .gt('expires_at', new Date().toISOString());
+  heldSlots = data || [];
+}
+
+// ─── FORCE RELEASE HOLD ──────────────────────────────
+function forceReleaseHold(holdId, customerName){
+  showConfirm('🔓','Hold release karein?',
+    `${customerName} ka slot hold release ho jayega.`,
+    'Haan, Release karo','var(--re)',async()=>{
+      await sb.from('slot_holds').update({status:'expired'}).eq('id',holdId);
+      heldSlots = heldSlots.filter(h=>h.id!==holdId);
+      renderBk(getCurFilter());
+      toast('🔓 Hold release ho gaya');
+    });
 }
 
 // ─── SUPABASE: REALTIME ──────────────────────────────
@@ -535,6 +567,8 @@ function subscribeBookings(){
       sendBrowserNotif('🔔 Nayi Booking!',`${payload.new.customer_name||'Customer'} — ${payload.new.service||'Service'} · ${payload.new.booking_time||''}`);
     })
     .on('postgres_changes',{event:'UPDATE',schema:'public',table:'bookings'},()=>loadBookingsFromDB())
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'slot_holds'},()=>loadBookingsFromDB())
+    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'slot_holds'},()=>loadBookingsFromDB())
     .subscribe();
 }
 
@@ -725,7 +759,34 @@ function getTimeBadge(b){
 function renderBk(filter='all'){
   const list=document.getElementById('bk-list');
   const data=filter==='all'?bookings:bookings.filter(b=>b.status===filter);
-  if(!data.length){
+
+  let html = '';
+
+  // ── Held slots (orange) — sirf "all" filter pe dikhao ──
+  if((filter==='all' || filter==='pending') && heldSlots.length){
+    heldSlots.forEach(h=>{
+      const exp = new Date(h.expires_at);
+      const diffMs = exp - Date.now();
+      const diffMin = Math.floor(diffMs/60000);
+      const diffSec = Math.floor((diffMs%60000)/1000);
+      const timeLeft = diffMs > 0 ? `${diffMin}:${String(diffSec).padStart(2,'0')} बाकी` : 'Expire';
+      html += `<div class="bk-card" style="border-left:3px solid var(--am);border-color:rgba(244,180,32,0.3);background:rgba(244,180,32,0.04);">
+        <div class="bk-top">
+          <div>
+            <div class="bk-name">⏳ ${h.customer_name||'Customer'} <span style="font-size:10px;color:var(--am);font-weight:400;">(Hold में)</span></div>
+            <div class="bk-meta">${h.slot_time} · ${h.barber_name}</div>
+            <div class="bk-meta" style="color:var(--am);">⏱ ${timeLeft}</div>
+          </div>
+          <span class="pill pill-am" style="font-size:9px;">Hold</span>
+        </div>
+        <div class="bk-actions">
+          <button class="btn btn-re" style="flex:1;font-size:11px;" onclick="forceReleaseHold('${h.id}','${(h.customer_name||'Customer').replace(/'/g,"\\'")}')">🔓 Force Release</button>
+        </div>
+      </div>`;
+    });
+  }
+
+  if(!data.length && !html){
     list.innerHTML=`<div style="text-align:center;padding:40px 16px;">
       <div style="font-size:32px;margin-bottom:12px;">📭</div>
       <div style="font-size:14px;font-weight:600;margin-bottom:6px;">Koi booking nahi</div>
@@ -733,7 +794,8 @@ function renderBk(filter='all'){
     </div>`;
     return;
   }
-  list.innerHTML=data.map(b=>{
+
+  list.innerHTML = html + data.map(b=>{
     const sc=statusCfg[b.status]||statusCfg.pending;
     const locked=b.status==='accepted'&&isWithin30Min(b.time);
     const barberChip=b.barber?`<div class="barber-chip">👨‍🔧 ${b.barber} · 💺 ${b.chair}</div>`:'';

@@ -253,10 +253,7 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
       </div>
       <div id="search-results" class="sec-title" style="padding:0 16px;margin-bottom:10px;font-size:11px;color:var(--tx3);">Paas ke sabhi salons</div>
       <div id="search-list">
-        <div class="salon-card" onclick="goScreen('detail')"><div class="salon-img">✂️<div class="salon-open">Open</div><div class="salon-rating">⭐ 4.8</div></div><div class="salon-body"><div class="salon-name">Raj Hair Studio</div><div class="salon-meta"><span>📍 0.4 km</span><span style="color:var(--or);">₹80 se</span></div></div></div>
-        <div class="salon-card" onclick="goScreen('detail')"><div class="salon-img salon-img-2">💈<div class="salon-open">Open</div><div class="salon-rating">⭐ 4.6</div></div><div class="salon-body"><div class="salon-name">Modern Cut</div><div class="salon-meta"><span>📍 1.1 km</span><span style="color:var(--or);">₹60 se</span></div></div></div>
-        <div class="salon-card" onclick="goScreen('detail')"><div class="salon-img">💇<div class="salon-open">Open</div><div class="salon-rating">⭐ 4.9</div></div><div class="salon-body"><div class="salon-name">Star Salon</div><div class="salon-meta"><span>📍 2.0 km</span><span style="color:var(--or);">₹120 se</span></div></div></div>
-        <div class="salon-card" onclick="goScreen('detail')"><div class="salon-img" style="background:linear-gradient(135deg,#101020,#101828);">👨‍🦲<div class="salon-rating">⭐ 4.5</div></div><div class="salon-body"><div class="salon-name">Classic Barber</div><div class="salon-meta"><span>📍 3.2 km</span><span style="color:var(--or);">₹70 se</span></div></div></div>
+        <div style="text-align:center;padding:30px;color:var(--tx3);font-family:var(--dv);">Loading...</div>
       </div>
       <div style="height:20px;"></div>
     </div>
@@ -389,6 +386,7 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
         <div style="font-size:15px;font-weight:700;margin-bottom:3px;">Booking confirm karein?</div>
         <div style="font-size:11px;color:var(--tx3);font-family:var(--dv);">Raj Hair Studio · Ramu bhai · 26 Mar · 10:30 AM</div>
       </div>
+      <div id="hold-countdown-banner" style="background:rgba(244,180,32,0.1);border:1px solid rgba(244,180,32,0.3);border-radius:10px;padding:8px 12px;text-align:center;font-size:13px;font-weight:600;color:var(--am);margin-bottom:12px;">⏳ Slot hold है — 3:00 बाकी</div>
       <div style="background:var(--bg3);border-radius:12px;padding:12px 14px;margin-bottom:14px;">
         <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px;"><span style="color:var(--tx3);">✂️ Haircut</span><span style="font-weight:600;">₹80</span></div>
         <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px;"><span style="color:var(--tx3);">Discount (FIRST50)</span><span style="color:var(--gr);font-weight:600;">-₹50</span></div>
@@ -609,7 +607,80 @@ async function cancelBk(id){
   toast('❌ Booking cancel ho gayi');
 }
 
-// ─── CONFIRM BOOKING (real insert) ──────────────────
+// ─── SLOT HOLD STATE ────────────────────────────────
+let activeHoldId = null;
+let holdCountdownTimer = null;
+
+// ─── HOLD SLOT (called when slot clicked) ───────────
+async function holdSlot(slotTime, dateStr, barberName){
+  if(!currentUser || !selectedShop) return;
+
+  // Pehle existing hold release karo agar hai
+  if(activeHoldId) await releaseHold(activeHoldId);
+
+  const expiresAt = new Date(Date.now() + 3*60*1000).toISOString();
+  const {data: userData} = await sb.from('users').select('name').eq('id',currentUser.id).maybeSingle();
+
+  const {data, error} = await sb.from('slot_holds').insert([{
+    shop_id: selectedShop.id,
+    booking_date: dateStr,
+    slot_time: slotTime,
+    barber_name: barberName || 'Koi bhi',
+    customer_id: currentUser.id,
+    customer_name: userData?.name || 'Customer',
+    expires_at: expiresAt,
+    status: 'active',
+  }]).select().maybeSingle();
+
+  if(error){
+    // Unique constraint fail = kisi aur ne pehle hold kiya
+    toast('⚠️ Yeh slot hold mein hai — doosra chunein');
+    return false;
+  }
+  activeHoldId = data?.id || null;
+  startHoldCountdown(3*60);
+  return true;
+}
+
+async function releaseHold(holdId){
+  if(!holdId) return;
+  await sb.from('slot_holds').update({status:'expired'}).eq('id',holdId);
+  activeHoldId = null;
+  clearHoldCountdown();
+}
+
+function startHoldCountdown(seconds){
+  clearHoldCountdown();
+  let remaining = seconds;
+  updateHoldBanner(remaining);
+  holdCountdownTimer = setInterval(async()=>{
+    remaining--;
+    updateHoldBanner(remaining);
+    if(remaining <= 0){
+      clearHoldCountdown();
+      if(activeHoldId){ await releaseHold(activeHoldId); }
+      toast('⏰ Hold expire ho gaya — dobara slot chunein');
+      closeBookModal();
+      const dateEl = document.querySelector('.date-chip.on');
+      if(dateEl) loadSlotsForDate(dateEl.dataset.dateStr || new Date().toISOString().split('T')[0]);
+    }
+  }, 1000);
+}
+
+function clearHoldCountdown(){
+  if(holdCountdownTimer){ clearInterval(holdCountdownTimer); holdCountdownTimer = null; }
+}
+
+function updateHoldBanner(seconds){
+  const banner = document.getElementById('hold-countdown-banner');
+  if(!banner) return;
+  const m = Math.floor(seconds/60);
+  const s = seconds % 60;
+  banner.textContent = `⏳ Slot hold है — ${m}:${String(s).padStart(2,'0')} बाकी`;
+  banner.style.color = seconds < 60 ? 'var(--re)' : 'var(--am)';
+}
+
+// ─── CONFIRM BOOKING (hold → permanent) ─────────────
 async function confirmBook(){
   if(!currentUser){ toast('❌ Pehle login karo'); return; }
   if(!selectedShop){ toast('❌ Pehle salon chunao'); return; }
@@ -618,32 +689,48 @@ async function confirmBook(){
   const date = document.querySelector('.date-chip.on');
   const barber = document.querySelector('.barber-item.on span');
 
-  if(!slot){ toast('❌ Time slot chunao'); return; }
-  if(!date){ toast('❌ Date chunao'); return; }
+  if(!slot){ toast('❌ Time slot chunein'); return; }
+  if(!date){ toast('❌ Date chunein'); return; }
 
-  // Customer name get karo profile se
-  const {data: userData} = await sb.from('users').select('name,phone').eq('id',currentUser.id).single();
+  const slotTime = slot.textContent.replace('⏳ ','').trim();
+  const dateStr = date.dataset.dateStr || new Date().toISOString().split('T')[0];
+  const barberName = barber ? barber.textContent.trim() : 'Koi bhi';
 
-  const minPrice = selectedShop.services && selectedShop.services.length
-    ? Math.min(...selectedShop.services.map(s=>s.price||0)) : 0;
+  // Selected service (jo selected hai, warna pehli)
+  const selSvcEl = document.querySelector('.detail-tags .pill-or');
+  const selSvcName = selSvcEl ? selSvcEl.textContent.replace('✂️','').replace('🪒','').replace('💇','').replace('🎨','').trim() : null;
+  const service = selectedShop.services?.find(s=>s.name===selSvcName) || selectedShop.services?.[0];
+  const svcName = service?.name || '✂️ Haircut';
+  const svcPrice = service?.price || 0;
+
+  // Customer data
+  const {data: userData} = await sb.from('users').select('name,phone').eq('id',currentUser.id).maybeSingle();
 
   const {error} = await sb.from('bookings').insert([{
     customer_id: currentUser.id,
     shop_id: selectedShop.id,
     shop_name: selectedShop.name,
-    service: selectedShop.services && selectedShop.services.length
-      ? selectedShop.services[0].name : '✂️ Haircut',
-    price: minPrice,
-    booking_date: date ? (date.dataset.dateStr || date.querySelector('.date-day').textContent+' '+date.querySelector('.date-num').textContent) : new Date().toISOString().split('T')[0],
-    booking_time: slot ? slot.textContent.trim() : '10:00 AM',
-    barber_name: barber ? barber.textContent : 'Koi bhi',
+    service: svcName,
+    price: svcPrice,
+    booking_date: dateStr,
+    booking_time: slotTime,
+    barber_name: barberName,
     customer_name: userData?.name || 'Customer',
-    customer_phone: userData?.phone || currentUser.phone || '',
-    status: 'pending'
+    customer_phone: userData?.phone || '',
+    status: 'pending',
   }]);
-  closeBookModal();
+
   if(error){ toast('❌ Booking fail — '+error.message); return; }
-  toast('📤 Booking bheji! Shopkeeper confirm karega.');
+
+  // Hold ko converted mark karo
+  if(activeHoldId){
+    await sb.from('slot_holds').update({status:'converted'}).eq('id',activeHoldId);
+    activeHoldId = null;
+    clearHoldCountdown();
+  }
+
+  closeBookModal();
+  toast('✅ Booking ho gayi! Shopkeeper confirm karega.');
   await loadBookings();
   goScreen('bookings');
 }
@@ -703,9 +790,25 @@ function buildDateChips(){
     </div>`;
   }).join('');
 }
-function pickSlot(el){ if(el.classList.contains('booked')) return; document.querySelectorAll('.slot').forEach(s=>s.classList.remove('on')); el.classList.add('on'); updateBookCta(); }
+function pickSlot(el){
+  if(el.classList.contains('booked')) return;
+  document.querySelectorAll('.slot').forEach(s=>s.classList.remove('on'));
+  el.classList.add('on');
+  updateBookCta();
+  // Hold trigger karo
+  const date = document.querySelector('.date-chip.on');
+  const barber = document.querySelector('.barber-item.on span');
+  const dateStr = date?.dataset.dateStr || new Date().toISOString().split('T')[0];
+  const barberName = barber ? barber.textContent.trim() : 'Koi bhi';
+  const slotTime = el.textContent.replace('⏳ ','').trim();
+  holdSlot(slotTime, dateStr, barberName);
+}
 function openBookModal(){ document.getElementById('book-modal').classList.add('open'); }
-function closeBookModal(){ document.getElementById('book-modal').classList.remove('open'); }
+function closeBookModal(){
+  document.getElementById('book-modal').classList.remove('open');
+  // Hold release karo agar confirm nahi kiya
+  if(activeHoldId){ releaseHold(activeHoldId); }
+}
 function filterSearch(q){ document.getElementById('search-results').textContent = q?`"${q}" ke results`:'Paas ke sabhi salons'; }
 function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3000); }
 
@@ -719,6 +822,7 @@ function updateBookCta(){
 }
 
 // ─── LOAD REAL BOOKED SLOTS FROM SUPABASE ──────────
+// Barber-wise: same time + alag barber = alag slot
 async function loadSlotsForDate(dateStr){
   if(!selectedShop) return;
   const grid = document.getElementById('slots-grid');
@@ -726,26 +830,21 @@ async function loadSlotsForDate(dateStr){
   if(lbl) lbl.textContent = '⏳ Loading...';
   grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--tx3);font-size:11px;">⏳ Slots load ho rahe hain...</div>';
 
-  // Get opening/closing time from shop
+  // Selected barber (agar "Koi bhi" hai to null)
+  const barberEl = document.querySelector('.barber-item.on span');
+  const selectedBarber = barberEl ? barberEl.textContent.trim() : null;
+  const isAnyBarber = !selectedBarber || selectedBarber === 'Koi bhi';
+
+  // Opening/closing times
   const openHour = parseInt((selectedShop.opening_time||'09:00').split(':')[0]);
   const closeHour = parseInt((selectedShop.closing_time||'21:00').split(':')[0]);
-  const slotDur = 30; // 30 min slots
 
-  // Generate all possible slots
+  // All possible slots (24hr format)
   const allSlots = [];
   for(let h = openHour; h < closeHour; h++){
     allSlots.push(`${h.toString().padStart(2,'0')}:00`);
     allSlots.push(`${h.toString().padStart(2,'0')}:30`);
   }
-
-  // Fetch booked slots for this shop+date from Supabase
-  const {data: booked} = await sb.from('bookings')
-    .select('booking_time,status')
-    .eq('shop_id', selectedShop.id)
-    .eq('booking_date', dateStr)
-    .in('status', ['pending','accepted']);
-
-  const bookedTimes = new Set((booked||[]).map(b=>b.booking_time));
 
   // Format time to 12hr
   function fmt24to12(t){
@@ -755,13 +854,57 @@ async function loadSlotsForDate(dateStr){
     return `${h12}:${m.toString().padStart(2,'0')} ${ampm}`;
   }
 
+  // Booked slots — barber-wise filter
+  const bookingQuery = sb.from('bookings')
+    .select('booking_time,barber_name,status')
+    .eq('shop_id', selectedShop.id)
+    .eq('booking_date', dateStr)
+    .in('status', ['pending','accepted','arrived','inservice']);
+  if(!isAnyBarber) bookingQuery.eq('barber_name', selectedBarber);
+  const {data: booked} = await bookingQuery;
+
+  // Active holds — barber-wise filter
+  const holdsQuery = sb.from('slot_holds')
+    .select('slot_time,barber_name,expires_at,customer_id')
+    .eq('shop_id', selectedShop.id)
+    .eq('booking_date', dateStr)
+    .eq('status', 'active')
+    .gt('expires_at', new Date().toISOString());
+  if(!isAnyBarber) holdsQuery.eq('barber_name', selectedBarber);
+  const {data: holds} = await holdsQuery;
+
+  // Build sets
+  const bookedTimes = new Set((booked||[]).map(b=>b.booking_time));
+  const holdTimes = new Map(); // time → customer_id
+  (holds||[]).forEach(h=>holdTimes.set(h.slot_time, h.customer_id));
+
   if(lbl) lbl.textContent = '';
+
+  // "Koi bhi" case — slot free sirf tab jab ALL barbers ke liye available ho
+  let fullyBookedTimes = new Set();
+  if(isAnyBarber && selectedShop.barbers && selectedShop.barbers.length > 0){
+    const totalBarbers = selectedShop.barbers.length;
+    const countMap = {};
+    (booked||[]).forEach(b=>{
+      const t = b.booking_time;
+      countMap[t] = (countMap[t]||0) + 1;
+    });
+    (holds||[]).forEach(h=>{
+      const t = h.slot_time;
+      if(h.customer_id !== currentUser?.id) countMap[t] = (countMap[t]||0) + 1;
+    });
+    Object.keys(countMap).forEach(t=>{ if(countMap[t]>=totalBarbers) fullyBookedTimes.add(t); });
+  }
+
   grid.innerHTML = allSlots.map(s => {
-    const isBooked = bookedTimes.has(s) || bookedTimes.has(fmt24to12(s));
     const display = fmt24to12(s);
-    if(isBooked){
-      return `<div class="slot booked">${display}</div>`;
-    }
+    const isBooked = bookedTimes.has(s) || bookedTimes.has(display) || fullyBookedTimes.has(s) || fullyBookedTimes.has(display);
+    const isMyHold = holdTimes.has(display) && holdTimes.get(display) === currentUser?.id;
+    const isOtherHold = holdTimes.has(display) && holdTimes.get(display) !== currentUser?.id;
+
+    if(isBooked) return `<div class="slot booked">${display}</div>`;
+    if(isOtherHold) return `<div class="slot" style="background:rgba(244,180,32,0.12);border-color:rgba(244,180,32,0.4);color:var(--am);cursor:default;" title="Hold mein">⏳ ${display}</div>`;
+    if(isMyHold) return `<div class="slot on" onclick="pickSlot(this)">${display}</div>`;
     return `<div class="slot" onclick="pickSlot(this)">${display}</div>`;
   }).join('');
 }

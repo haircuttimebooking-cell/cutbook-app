@@ -539,7 +539,7 @@ async function loadPendingApprovals(){
       </td>
       <td>
         <div style="font-size:11px;font-weight:500;">${s.owner_name||'—'}</div>
-        <div style="font-size:10px;color:var(--tx3);">${s.owner_phone||'—'}</div>
+        <div style="font-size:10px;color:var(--tx3);">${s.phone||'—'}</div>
       </td>
       <td><div style="font-size:11px;">${s.city||'—'}</div><div style="font-size:10px;color:var(--tx3);">${s.pincode||''}</div></td>
       <td style="font-size:10px;color:var(--tx3);">${new Date(s.created_at).toLocaleDateString('hi-IN')}</td>
@@ -670,7 +670,7 @@ async function loadShopsPanel(filter='all'){
           </div>
         </div>
       </td>
-      <td><div style="font-size:11px;">${s.owner_name||'—'}</div><div style="font-size:10px;color:var(--tx3);">${s.owner_phone||'—'}</div></td>
+      <td><div style="font-size:11px;">${s.owner_name||'—'}</div><div style="font-size:10px;color:var(--tx3);">${s.phone||'—'}</div></td>
       <td style="font-size:11px;">${s.city||'—'}</td>
       <td style="font-size:10px;color:var(--tx3);">${s.services && s.services.length ? s.services.map(sv=>sv.name).join(', ') : '—'}</td>
       <td><span class="badge ${stMap[s.status]||'badge-pending'}">${stLbl[s.status]||s.status}</span></td>
