@@ -201,9 +201,9 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
       <div class="home-header">
         <div class="loc-wrap">
           <div class="loc-icon"><svg width="10" height="12" viewBox="0 0 10 12" fill="none"><path d="M5 0C2.8 0 1 1.8 1 4c0 3 4 8 4 8s4-5 4-8c0-2.2-1.8-4-4-4zm0 5.5C4.2 5.5 3.5 4.8 3.5 4S4.2 2.5 5 2.5 6.5 3.2 6.5 4 5.8 5.5 5 5.5z" fill="#F47B20"/></svg></div>
-          <div>
+          <div onclick="detectLocation()" style="cursor:pointer;">
             <div class="loc-label">आपकी लोकेशन</div>
-            <div class="loc-name">हजरतगंज, लखनऊ ▾</div>
+            <div class="loc-name" id="loc-name-display">📍 tap करें...</div>
           </div>
         </div>
         <div class="notif-btn" onclick="toast('🔔 2 nayi notifications hain')">
@@ -431,7 +431,21 @@ async function init(){
   await new Promise(resolve=>{
     if(navigator.geolocation){
       navigator.geolocation.getCurrentPosition(
-        pos=>{ userLat=pos.coords.latitude; userLng=pos.coords.longitude; resolve(); },
+        async pos=>{ 
+          userLat=pos.coords.latitude; userLng=pos.coords.longitude;
+          // Location name display update karo
+          try{
+            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${userLat}&lon=${userLng}&format=json&accept-language=hi`);
+            const data = await res.json();
+            const addr = data.address || {};
+            const area = addr.suburb || addr.neighbourhood || addr.village || addr.town || addr.city_district || addr.county || '';
+            const city = addr.city || addr.town || addr.state_district || addr.state || '';
+            const displayName = area ? `${area}, ${city}` : city || '';
+            const el = document.getElementById('loc-name-display');
+            if(el && displayName) el.textContent = displayName + ' ▾';
+          } catch(e){}
+          resolve(); 
+        },
         ()=>resolve(),
         {timeout:4000, maximumAge:60000}
       );
@@ -861,6 +875,46 @@ function closeBookModal(){
   if(activeHoldId){ releaseHold(activeHoldId); }
 }
 function filterSearch(q){ document.getElementById('search-results').textContent = q?`"${q}" ke results`:'Paas ke sabhi salons'; }
+
+function detectLocation(){
+  const locDisplay = document.getElementById('loc-name-display');
+  if(!navigator.geolocation){
+    toast('❌ यह browser GPS support नहीं करता');
+    return;
+  }
+  locDisplay.textContent = '⏳ location dhundh raha hoon...';
+  navigator.geolocation.getCurrentPosition(
+    async pos=>{
+      userLat = pos.coords.latitude;
+      userLng = pos.coords.longitude;
+      // Reverse geocoding — OpenStreetMap Nominatim (free)
+      try{
+        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${userLat}&lon=${userLng}&format=json&accept-language=hi`);
+        const data = await res.json();
+        const addr = data.address || {};
+        const area = addr.suburb || addr.neighbourhood || addr.village || addr.town || addr.city_district || addr.county || '';
+        const city = addr.city || addr.town || addr.state_district || addr.state || '';
+        const displayName = area ? `${area}, ${city}` : city || `${userLat.toFixed(3)}, ${userLng.toFixed(3)}`;
+        locDisplay.textContent = displayName + ' ▾';
+      } catch(e){
+        locDisplay.textContent = `${userLat.toFixed(3)}, ${userLng.toFixed(3)} ▾`;
+      }
+      // Shops re-sort with distance
+      await loadShops();
+      toast('✅ Location mil gayi! Paas ke salons update ho gaye');
+    },
+    err=>{
+      if(err.code === 1){
+        locDisplay.textContent = '❌ Permission denied ▾';
+        toast('📱 Settings mein Location permission Allow karo');
+      } else {
+        locDisplay.textContent = '❌ Location nahi mili ▾';
+        toast('GPS on karke dobara try karo');
+      }
+    },
+    {timeout:10000, enableHighAccuracy:true}
+  );
+}
 
 function openAllShopsMap(){
   // Shops with lat/lng filter karo
