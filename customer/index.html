@@ -238,7 +238,7 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
         <div class="svc-chip" onclick="toast('और सर्विसेज...')"><div class="svc-icon" style="font-size:16px;">⊞</div><span>और देखें</span></div>
       </div>
 
-      <div class="sec-head"><div class="sec-title">पास की दुकानें</div><div class="sec-all">मैप पर देखें →</div></div>
+      <div class="sec-head"><div class="sec-title">पास की दुकानें</div><div class="sec-all" onclick="openAllShopsMap()" style="cursor:pointer;">मैप पर देखें →</div></div>
       <div id="salons-list">
         <div style="text-align:center;padding:30px;color:var(--tx3);font-family:var(--dv);">Loading salons...</div>
       </div>
@@ -249,7 +249,7 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
     <div id="sc-search" class="screen">
       <div class="search-full">
         <svg width="14" height="14" viewBox="0 0 12 12" fill="none"><circle cx="5" cy="5" r="4" stroke="#F47B20" stroke-width="1.3"/><path d="M8.5 8.5L11 11" stroke="#F47B20" stroke-width="1.3" stroke-linecap="round"/></svg>
-        <input class="search-input" placeholder="दुकान का नाम या क्षेत्र / पिनकोड लिखिए..." autofocus oninput="filterSearch(this.value)">
+        <input class="search-input" placeholder="दुकान का नाम या क्षेत्र / पिनकोड लिखिए..." autofocus oninput="filterSearch(this.value)" onkeydown="if(event.key==='Enter'){this.blur();filterSearch(this.value);}">
       </div>
       <div id="search-results" class="sec-title" style="padding:0 16px;margin-bottom:10px;font-size:11px;color:var(--tx3);">Paas ke sabhi salons</div>
       <div id="search-list">
@@ -427,13 +427,16 @@ async function init(){
   const {data:{user}} = await sb.auth.getUser();
   if(!user){ window.location.href='../index.html'; return; }
   currentUser = user;
-  // GPS silently — agar mile to distance dikhega, nahi mile to city dikhega
-  if(navigator.geolocation){
-    navigator.geolocation.getCurrentPosition(
-      pos=>{ userLat=pos.coords.latitude; userLng=pos.coords.longitude; },
-      ()=>{}
-    );
-  }
+  // GPS pehle lo (max 4 sec wait) — phir shops distance ke saath sort honge
+  await new Promise(resolve=>{
+    if(navigator.geolocation){
+      navigator.geolocation.getCurrentPosition(
+        pos=>{ userLat=pos.coords.latitude; userLng=pos.coords.longitude; resolve(); },
+        ()=>resolve(),
+        {timeout:4000, maximumAge:60000}
+      );
+    } else resolve();
+  });
   await loadBookings();
   await loadShops();
   subscribeBookings();
@@ -464,6 +467,15 @@ async function loadShops(){
   }
 
   allShops = data;
+
+  // Distance ke hisaab se sort karo (agar GPS mila ho)
+  if(userLat && userLng){
+    allShops.sort((a,b)=>{
+      const dA = (a.latitude && a.longitude) ? parseFloat(calcDist(userLat,userLng,a.latitude,a.longitude)) : 9999;
+      const dB = (b.latitude && b.longitude) ? parseFloat(calcDist(userLat,userLng,b.latitude,b.longitude)) : 9999;
+      return dA - dB;
+    });
+  }
   const emojis = ['✂️','💈','💇','🧖','🪒'];
 
   function salonCardHtml(s, i){
@@ -849,6 +861,30 @@ function closeBookModal(){
   if(activeHoldId){ releaseHold(activeHoldId); }
 }
 function filterSearch(q){ document.getElementById('search-results').textContent = q?`"${q}" ke results`:'Paas ke sabhi salons'; }
+
+function openAllShopsMap(){
+  // Shops with lat/lng filter karo
+  const shopsWithCoords = allShops.filter(s=>s.latitude && s.longitude);
+  if(!shopsWithCoords.length){
+    // Koi coordinates nahi — Prayagraj center pe open karo
+    window.open('https://www.openstreetmap.org/#map=13/25.4358/81.8464','_blank');
+    return;
+  }
+  // OpenStreetMap pe sabhi shops ke markers dikhao
+  // Format: lat,lng,name|lat,lng,name ...
+  // OSM direct multi-marker support nahi karta, to Google Maps search URL use karte hain
+  if(shopsWithCoords.length === 1){
+    const s = shopsWithCoords[0];
+    window.open(`https://www.google.com/maps?q=${s.latitude},${s.longitude}&z=15`,'_blank');
+    return;
+  }
+  // Multiple shops — center calculate karo
+  const avgLat = shopsWithCoords.reduce((sum,s)=>sum+parseFloat(s.latitude),0)/shopsWithCoords.length;
+  const avgLng = shopsWithCoords.reduce((sum,s)=>sum+parseFloat(s.longitude),0)/shopsWithCoords.length;
+  // Google Maps search with center — sabhi nearby salons dikhayega
+  const userPos = (userLat && userLng) ? `${userLat},${userLng}` : `${avgLat},${avgLng}`;
+  window.open(`https://www.google.com/maps/search/salon+barber/@${userPos},14z`,'_blank');
+}
 function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3000); }
 
 // ─── UPDATE BOOK CTA PRICE ───────────────────────────
