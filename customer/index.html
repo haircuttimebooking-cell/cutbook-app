@@ -202,8 +202,8 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
         <div class="loc-wrap">
           <div class="loc-icon"><svg width="10" height="12" viewBox="0 0 10 12" fill="none"><path d="M5 0C2.8 0 1 1.8 1 4c0 3 4 8 4 8s4-5 4-8c0-2.2-1.8-4-4-4zm0 5.5C4.2 5.5 3.5 4.8 3.5 4S4.2 2.5 5 2.5 6.5 3.2 6.5 4 5.8 5.5 5 5.5z" fill="#F47B20"/></svg></div>
           <div>
-            <div class="loc-label">Aapki location</div>
-            <div class="loc-name">Hazratganj, Lko ▾</div>
+            <div class="loc-label">आपकी लोकेशन</div>
+            <div class="loc-name">हजरतगंज, लखनऊ ▾</div>
           </div>
         </div>
         <div class="notif-btn" onclick="toast('🔔 2 nayi notifications hain')">
@@ -214,31 +214,31 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
 
       <div class="search-bar" onclick="goScreen('search')">
         <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="5" cy="5" r="4" stroke="#5A534E" stroke-width="1.3"/><path d="M8.5 8.5L11 11" stroke="#5A534E" stroke-width="1.3" stroke-linecap="round"/></svg>
-        <span style="font-family:var(--dv);">Salon ya barber dhundho...</span>
+        <span style="font-family:var(--dv);">दुकान का नाम या क्षेत्र / पिनकोड लिखिए...</span>
       </div>
 
       <div class="hero">
         <div class="hero-bg"></div>
         <div class="hero-lines"></div>
         <div class="hero-content">
-          <div class="hero-badge">🔥 Aaj ka offer</div>
-          <div class="hero-title">Pehli booking pe<br><em>₹50 off</em></div>
-          <div class="hero-sub">Code: FIRST50 · Sirf aaj</div>
+          <div class="hero-badge">🔥 आज का ऑफर</div>
+          <div class="hero-title">पहली booking पर<br><em>₹50 off</em></div>
+          <div class="hero-sub">कोड: FIRST50 · सिर्फ आज</div>
         </div>
-        <div class="hero-cta" onclick="toast('🎉 Code FIRST50 copy ho gaya!')">Book karo</div>
+        <div class="hero-cta" onclick="toast('🎉 Code FIRST50 copy ho gaya!')">अभी बुक करें</div>
       </div>
 
-      <div class="sec-head"><div class="sec-title">Services</div><div class="sec-all">Sab dekho</div></div>
+      <div class="sec-head"><div class="sec-title">सर्विसेज</div><div class="sec-all">सभी सर्विसेज देखें →</div></div>
       <div class="svc-row">
-        <div class="svc-chip on" onclick="toggleSvc(this)"><div class="svc-icon">✂️</div><span>Haircut</span></div>
-        <div class="svc-chip" onclick="toggleSvc(this)"><div class="svc-icon">🪒</div><span>Shave</span></div>
-        <div class="svc-chip" onclick="toggleSvc(this)"><div class="svc-icon">💇</div><span>Styling</span></div>
-        <div class="svc-chip" onclick="toggleSvc(this)"><div class="svc-icon">💆</div><span>Facial</span></div>
-        <div class="svc-chip" onclick="toggleSvc(this)"><div class="svc-icon">🎨</div><span>Colour</span></div>
-        <div class="svc-chip" onclick="toast('Aur services...')"><div class="svc-icon">➕</div><span>Aur</span></div>
+        <div class="svc-chip on" onclick="toggleSvc(this)"><div class="svc-icon">✂️</div><span>हेयरकट</span></div>
+        <div class="svc-chip" onclick="toggleSvc(this)"><div class="svc-icon">🪒</div><span>शेव / दाढ़ी</span></div>
+        <div class="svc-chip" onclick="toggleSvc(this)"><div class="svc-icon">💇</div><span>स्टाइलिंग</span></div>
+        <div class="svc-chip" onclick="toggleSvc(this)"><div class="svc-icon">💆</div><span>फेशियल</span></div>
+        <div class="svc-chip" onclick="toggleSvc(this)"><div class="svc-icon">🎨</div><span>हेयर कलर</span></div>
+        <div class="svc-chip" onclick="toast('और सर्विसेज...')"><div class="svc-icon" style="font-size:16px;">⊞</div><span>और देखें</span></div>
       </div>
 
-      <div class="sec-head"><div class="sec-title">Paas ke Salons</div><div class="sec-all">Map dekho</div></div>
+      <div class="sec-head"><div class="sec-title">पास की दुकानें</div><div class="sec-all">मैप पर देखें →</div></div>
       <div id="salons-list">
         <div style="text-align:center;padding:30px;color:var(--tx3);font-family:var(--dv);">Loading salons...</div>
       </div>
@@ -249,7 +249,7 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
     <div id="sc-search" class="screen">
       <div class="search-full">
         <svg width="14" height="14" viewBox="0 0 12 12" fill="none"><circle cx="5" cy="5" r="4" stroke="#F47B20" stroke-width="1.3"/><path d="M8.5 8.5L11 11" stroke="#F47B20" stroke-width="1.3" stroke-linecap="round"/></svg>
-        <input class="search-input" placeholder="Salon ya barber dhundho..." autofocus oninput="filterSearch(this.value)">
+        <input class="search-input" placeholder="दुकान का नाम या क्षेत्र / पिनकोड लिखिए..." autofocus oninput="filterSearch(this.value)">
       </div>
       <div id="search-results" class="sec-title" style="padding:0 16px;margin-bottom:10px;font-size:11px;color:var(--tx3);">Paas ke sabhi salons</div>
       <div id="search-list">
@@ -316,9 +316,9 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
 
     <!-- ══ MY BOOKINGS ══ -->
     <div id="sc-bookings" class="screen">
-      <div style="padding:14px 16px 10px;font-size:16px;font-weight:700;">Meri Bookings</div>
+      <div style="padding:14px 16px 10px;font-size:16px;font-weight:700;">मेरी बुकिंग</div>
       <div class="tabs">
-        <div class="tab on" onclick="filterBk(this,'all')">Sab</div>
+        <div class="tab on" onclick="filterBk(this,'all')">सब</div>
         <div class="tab" onclick="filterBk(this,'pending')">Pending</div>
         <div class="tab" onclick="filterBk(this,'confirmed')">Confirmed</div>
         <div class="tab" onclick="filterBk(this,'completed')">Completed</div>
@@ -358,22 +358,22 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
   <div class="bot-nav">
     <div class="nav-i on" id="ni-0" onclick="goScreen('home')">
       <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 10L10 3L17 10V17H13V13H7V17H3V10Z" stroke="#F47B20" stroke-width="1.5" fill="none" stroke-linejoin="round"/></svg>
-      <span style="color:var(--or)">Home</span><div class="nav-dot"></div>
+      <span style="color:var(--or)">होम</span><div class="nav-dot"></div>
     </div>
     <div class="nav-i" id="ni-1" onclick="goScreen('search')">
       <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="9" cy="9" r="6" stroke="#5A534E" stroke-width="1.5"/><path d="M14 14L18 18" stroke="#5A534E" stroke-width="1.5" stroke-linecap="round"/></svg>
-      <span>Khojo</span>
+      <span>खोजें</span>
     </div>
     <div class="nav-i" id="ni-2" onclick="goScreen('bookings')" style="position:relative;">
       <div style="position:relative;">
         <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="3" y="4" width="14" height="13" rx="3" stroke="#5A534E" stroke-width="1.5"/><path d="M7 3V5M13 3V5M3 9h14" stroke="#5A534E" stroke-width="1.5" stroke-linecap="round"/></svg>
         <div class="nav-badge" id="bk-badge">2</div>
       </div>
-      <span>Bookings</span>
+      <span>बुकिंग</span>
     </div>
     <div class="nav-i" id="ni-3" onclick="goScreen('profile')">
       <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="8" r="4" stroke="#5A534E" stroke-width="1.5"/><path d="M3 18c0-4 3.1-7 7-7s7 3 7 7" stroke="#5A534E" stroke-width="1.5" stroke-linecap="round"/></svg>
-      <span>Profile</span>
+      <span>प्रोफ़ाइल</span>
     </div>
   </div>
 
@@ -427,6 +427,13 @@ async function init(){
   const {data:{user}} = await sb.auth.getUser();
   if(!user){ window.location.href='../index.html'; return; }
   currentUser = user;
+  // GPS silently — agar mile to distance dikhega, nahi mile to city dikhega
+  if(navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(
+      pos=>{ userLat=pos.coords.latitude; userLng=pos.coords.longitude; },
+      ()=>{}
+    );
+  }
   await loadBookings();
   await loadShops();
   subscribeBookings();
@@ -435,6 +442,14 @@ async function init(){
 // ─── LOAD SHOPS FROM SUPABASE ────────────────────────
 let allShops = [];
 let selectedShop = null;
+let userLat = null, userLng = null;
+
+// Distance calculator (Haversine)
+function calcDist(lat1,lon1,lat2,lon2){
+  const R=6371, dLat=(lat2-lat1)*Math.PI/180, dLon=(lon2-lon1)*Math.PI/180;
+  const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
+  return (R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a))).toFixed(1);
+}
 
 async function loadShops(){
   const {data, error} = await sb.from('shops')
@@ -457,17 +472,41 @@ async function loadShops(){
     const imgHtml = firstPhoto
       ? `<img src="${firstPhoto}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;" onerror="this.style.display='none'">`
       : `<span style="font-size:26px;">${emojis[i%emojis.length]}</span>`;
+
+    // Open/Closed check
+    const now = new Date();
+    const curMin = now.getHours()*60 + now.getMinutes();
+    const openMin = s.opening_time ? parseInt(s.opening_time.split(':')[0])*60+parseInt(s.opening_time.split(':')[1]) : 9*60;
+    const closeMin = s.closing_time ? parseInt(s.closing_time.split(':')[0])*60+parseInt(s.closing_time.split(':')[1]) : 21*60;
+    const isOpen = curMin >= openMin && curMin < closeMin;
+    const openBadge = isOpen
+      ? `<div class="salon-open" style="position:absolute;top:8px;left:10px;z-index:2;">✅ खुला है</div>`
+      : `<div class="salon-open" style="position:absolute;top:8px;left:10px;z-index:2;background:rgba(224,85,85,0.2);border:1px solid rgba(224,85,85,0.3);color:var(--re);">❌ बंद है</div>`;
+
+    // Distance (lat/lng se calculate — agar available ho)
+    let distHtml = '';
+    if(s.latitude && s.longitude && userLat && userLng){
+      const dist = calcDist(userLat, userLng, s.latitude, s.longitude);
+      distHtml = `<span>📍 ${dist} किमी दूर</span>`;
+    } else {
+      distHtml = `<span>📍 ${s.city||'—'}</span>`;
+    }
+
+    // Timing format
+    function fmtT(t){ if(!t) return ''; const [h,m]=t.split(':').map(Number); const ap=h>=12?'PM':'AM'; return `${h%12||12}:${String(m).padStart(2,'0')} ${ap}`; }
+    const timing = (s.opening_time && s.closing_time) ? `${fmtT(s.opening_time)}–${fmtT(s.closing_time)}` : '';
+
     return `<div class="salon-card" onclick="openShopDetail(${i})">
       <div class="salon-img" style="background:linear-gradient(135deg,#181010,#281810);position:relative;overflow:hidden;">
         ${imgHtml}
-        <div class="salon-open" style="position:absolute;top:8px;left:10px;z-index:2;">Open</div>
+        ${openBadge}
       </div>
       <div class="salon-body">
         <div class="salon-name">${s.name}</div>
         <div class="salon-meta">
-          <span>📍 ${s.city||'—'}</span>
-          <span>${s.opening_time||'9AM'}–${s.closing_time||'9PM'}</span>
-          ${minPrice ? `<span style="color:var(--or);font-weight:600;">₹${minPrice} se</span>` : ''}
+          ${distHtml}
+          ${timing ? `<span>⏰ ${timing}</span>` : ''}
+          ${minPrice ? `<span style="color:var(--or);font-weight:600;">₹${minPrice} से</span>` : ''}
         </div>
       </div>
     </div>`;
