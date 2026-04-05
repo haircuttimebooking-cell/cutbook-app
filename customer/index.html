@@ -178,6 +178,11 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
 .search-full{margin:10px 16px 14px;background:var(--bg3);border:1.5px solid rgba(244,123,32,0.3);border-radius:14px;padding:11px 14px;display:flex;align-items:center;gap:8px;}
 .search-input{background:transparent;border:none;outline:none;color:var(--tx);font-size:12px;flex:1;font-family:'DM Sans',sans-serif;}
 .search-input::placeholder{color:var(--tx3);}
+
+/* ─── LOCATION PERMISSION MODAL ─── */
+.loc-perm-modal{display:none;position:absolute;inset:0;background:rgba(0,0,0,0.85);z-index:200;align-items:flex-end;backdrop-filter:blur(6px);}
+.loc-perm-modal.open{display:flex;}
+.loc-perm-sheet{background:var(--bg2);border:1px solid var(--bd2);border-radius:24px 24px 0 0;padding:24px 20px 36px;width:100%;}
 </style>
 </head>
 <body>
@@ -916,6 +921,21 @@ function detectLocation(){
   );
 }
 
+
+// ─── LOCATION PERMISSION MODAL ───────────────────────
+function openLocPermModal(){
+  document.getElementById('loc-perm-modal').classList.add('open');
+}
+function closeLocPermModal(){
+  document.getElementById('loc-perm-modal').classList.remove('open');
+}
+function openChromeSettings(){
+  closeLocPermModal();
+  toast('⚙️ Settings mein Location → Allow karo, phir wapas tap karein 📍');
+  // Android Chrome pe directly location settings nahi khul sakta
+  // User ko manual steps follow karne honge (modal mein already dikh rahe hain)
+}
+
 function openAllShopsMap(){
   // Shops with lat/lng filter karo
   const shopsWithCoords = allShops.filter(s=>s.latitude && s.longitude);
@@ -1130,7 +1150,8 @@ init();
 <script>
 document.getElementById('cust-photo-modal').addEventListener('click',function(e){ if(e.target===this) closeCustPhotoPopup(); });
 document.getElementById('cust-addr-modal').addEventListener('click',function(e){ if(e.target===this) closeCustAddressPopup(); });
-document.addEventListener('keydown',function(e){ if(e.key==='Escape'){ closeCustPhotoPopup(); closeCustAddressPopup(); } });
+document.getElementById('loc-perm-modal').addEventListener('click',function(e){ if(e.target===this) closeLocPermModal(); });
+document.addEventListener('keydown',function(e){ if(e.key==='Escape'){ closeCustPhotoPopup(); closeCustAddressPopup(); closeLocPermModal(); });
 </script>
 
 </body>
