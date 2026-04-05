@@ -555,20 +555,26 @@ async function loadPendingApprovals(){
 // ─── APPROVE SHOP ─────────────────────────────────────
 // ─── DIRECT REST UPDATE (RLS bypass via anon + open policy) ─────────────
 async function updateShopStatus(shopId, status){
-  // Direct REST API call — Supabase client ke saath
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/shops?id=eq.${shopId}`, {
-    method: 'PATCH',
-    headers: {
-      'apikey': SUPABASE_KEY,
-      'Authorization': `Bearer ${(await sb.auth.getSession()).data.session?.access_token || SUPABASE_KEY}`,
-      'Content-Type': 'application/json',
-      'Prefer': 'return=minimal'
-    },
-    body: JSON.stringify({ status })
-  });
-  if(!res.ok){
-    const err = await res.text();
-    throw new Error(err);
+  // Method 1: sb.from() with authenticated session
+  const {error} = await sb.from('shops').update({status: status}).eq('id', shopId);
+  if(error){
+    // Method 2: REST API with auth token fallback
+    const session = (await sb.auth.getSession()).data.session;
+    const token = session?.access_token || SUPABASE_KEY;
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/shops?id=eq.${shopId}`, {
+      method: 'PATCH',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation'
+      },
+      body: JSON.stringify({ status })
+    });
+    if(!res.ok){
+      const err = await res.text();
+      throw new Error('Update fail: ' + err);
+    }
   }
 }
 
@@ -582,7 +588,12 @@ function approveShop(shopId, shopName){
         await loadAllData();
         await loadShopsPanel('all');
       } catch(e){
-        toast('❌ Error: '+e.message);
+        const msg = e.message || 'Unknown error';
+        if(msg.includes('policy') || msg.includes('RLS') || msg.includes('permission')){
+          toast('❌ Permission denied — Supabase RLS policy update karein');
+        } else {
+          toast('❌ Approve fail: ' + msg);
+        }
         console.error('Approve error:', e);
       }
     });
@@ -676,8 +687,8 @@ async function loadShopsPanel(filter='all'){
       <td><span class="badge ${stMap[s.status]||'badge-pending'}">${stLbl[s.status]||s.status}</span></td>
       <td>
         ${s.status==='pending'?`<div style="display:flex;gap:4px;">
-          <button class="btn btn-approve btn-sm" onclick="approveShop('${s.id}','${shopNameSafe}')">✅</button>
-          <button class="btn btn-reject btn-sm" onclick="rejectShop('${s.id}','${shopNameSafe}')">❌</button>
+          <button class="btn btn-approve btn-sm" onclick="approveShop('${s.id}','${shopNameSafe}')">✅ Approve</button>
+          <button class="btn btn-reject btn-sm" onclick="rejectShop('${s.id}','${shopNameSafe}')">❌ Reject</button>
         </div>`
         : s.status==='active'?`<button class="btn btn-reject btn-sm" onclick="rejectShop('${s.id}','${shopNameSafe}')">Suspend</button>`
         : `<button class="btn btn-approve btn-sm" onclick="approveShop('${s.id}','${shopNameSafe}')">Restore</button>`}
