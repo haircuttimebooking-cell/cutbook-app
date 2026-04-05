@@ -211,15 +211,18 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
             <div class="loc-name" id="loc-name-display">📍 tap करें...</div>
           </div>
         </div>
-        <div class="notif-btn" onclick="toast('🔔 2 nayi notifications hain')">
+        <div class="notif-btn" id="notif-bell-btn" onclick="openNotifModal()">
           <svg width="14" height="15" viewBox="0 0 14 15" fill="none"><path d="M7 0C7 0 4.5 2.2 4.5 5.5V8.5L2.5 11h9L9.5 8.5V5.5C9.5 2.2 7 0 7 0Z" stroke="#A89E96" stroke-width="1.2" fill="none"/><path d="M5.5 11.5C5.5 12.3 6.2 13 7 13S8.5 12.3 8.5 11.5" stroke="#A89E96" stroke-width="1.2" fill="none"/></svg>
-          <div style="position:absolute;top:6px;right:6px;width:7px;height:7px;background:var(--re);border:1.5px solid var(--bg);border-radius:50%;"></div>
+          <div id="notif-red-dot" style="position:absolute;top:6px;right:6px;width:7px;height:7px;background:var(--re);border:1.5px solid var(--bg);border-radius:50%;"></div>
         </div>
       </div>
 
-      <div class="search-bar" onclick="goScreen('search')">
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="5" cy="5" r="4" stroke="#5A534E" stroke-width="1.3"/><path d="M8.5 8.5L11 11" stroke="#5A534E" stroke-width="1.3" stroke-linecap="round"/></svg>
-        <span style="font-family:var(--dv);">दुकान का नाम या क्षेत्र / पिनकोड लिखिए...</span>
+      <div class="search-bar" style="cursor:pointer;padding:0;overflow:hidden;" onclick="goScreen('search')">
+        <div style="display:flex;align-items:center;gap:8px;flex:1;padding:10px 14px;">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="5" cy="5" r="4" stroke="#5A534E" stroke-width="1.3"/><path d="M8.5 8.5L11 11" stroke="#5A534E" stroke-width="1.3" stroke-linecap="round"/></svg>
+          <span style="font-family:var(--dv);font-size:11px;color:var(--tx3);">दुकान का नाम या अपने क्षेत्र का पिन कोड लिखिए</span>
+        </div>
+        <div style="background:var(--or);color:#fff;font-size:10px;font-weight:600;padding:0 12px;height:100%;min-height:38px;display:flex;align-items:center;border-radius:0 14px 14px 0;flex-shrink:0;">खोजें</div>
       </div>
 
       <div class="hero">
@@ -252,9 +255,12 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
 
     <!-- ══ SEARCH ══ -->
     <div id="sc-search" class="screen">
-      <div class="search-full">
-        <svg width="14" height="14" viewBox="0 0 12 12" fill="none"><circle cx="5" cy="5" r="4" stroke="#F47B20" stroke-width="1.3"/><path d="M8.5 8.5L11 11" stroke="#F47B20" stroke-width="1.3" stroke-linecap="round"/></svg>
-        <input class="search-input" placeholder="दुकान का नाम या क्षेत्र / पिनकोड लिखिए..." autofocus oninput="filterSearch(this.value)" onkeydown="if(event.key==='Enter'){this.blur();filterSearch(this.value);}">
+      <div class="search-full" style="padding:0;overflow:hidden;gap:0;">
+        <div style="display:flex;align-items:center;gap:8px;flex:1;padding:11px 14px;">
+          <svg width="14" height="14" viewBox="0 0 12 12" fill="none"><circle cx="5" cy="5" r="4" stroke="#F47B20" stroke-width="1.3"/><path d="M8.5 8.5L11 11" stroke="#F47B20" stroke-width="1.3" stroke-linecap="round"/></svg>
+          <input class="search-input" id="main-search-input" placeholder="दुकान का नाम या अपने क्षेत्र का पिन कोड लिखिए" autofocus oninput="filterSearch(this.value)" onkeydown="if(event.key==='Enter'){doSearch();}">
+        </div>
+        <button onclick="doSearch()" style="background:var(--or);border:none;color:#fff;font-size:11px;font-weight:600;padding:0 14px;height:100%;min-height:42px;cursor:pointer;font-family:var(--dv);white-space:nowrap;flex-shrink:0;">खोजें →</button>
       </div>
       <div id="search-results" class="sec-title" style="padding:0 16px;margin-bottom:10px;font-size:11px;color:var(--tx3);">Paas ke sabhi salons</div>
       <div id="search-list">
@@ -879,7 +885,32 @@ function closeBookModal(){
   // Hold release karo agar confirm nahi kiya
   if(activeHoldId){ releaseHold(activeHoldId); }
 }
-function filterSearch(q){ document.getElementById('search-results').textContent = q?`"${q}" ke results`:'Paas ke sabhi salons'; }
+function filterSearch(q){
+  const resLbl = document.getElementById('search-results');
+  const searchList = document.getElementById('search-list');
+  if(!allShops.length) return;
+  const term = q.trim().toLowerCase();
+  if(!term){
+    resLbl.textContent = 'Paas ke sabhi salons';
+    const emojis = ['✂️','💈','💇','🧖','🪒'];
+    searchList.innerHTML = allShops.map((s,i)=>salonCardHtml(s,i)).join('');
+    return;
+  }
+  const filtered = allShops.filter(s=>
+    (s.name||'').toLowerCase().includes(term) ||
+    (s.city||'').toLowerCase().includes(term) ||
+    (s.address||'').toLowerCase().includes(term) ||
+    (s.pincode||'').toString().includes(term)
+  );
+  resLbl.textContent = filtered.length ? `"${q}" — ${filtered.length} salon mila` : `"${q}" ke liye koi salon nahi mila`;
+  searchList.innerHTML = filtered.length
+    ? filtered.map((s,i)=>salonCardHtml(s,i)).join('')
+    : '<div style="text-align:center;padding:40px 16px;color:var(--tx3);font-family:var(--dv);">😕 Koi salon nahi mila<br><span style="font-size:10px;">Doosra naam ya pincode try karein</span></div>';
+}
+function doSearch(){
+  const inp = document.getElementById('main-search-input');
+  if(inp) filterSearch(inp.value);
+}
 
 function detectLocation(){
   const locDisplay = document.getElementById('loc-name-display');
@@ -1147,11 +1178,129 @@ init();
   </div>
 </div>
 
+<!-- ══ LOCATION PERMISSION MODAL ══ -->
+<div id="loc-perm-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:300;align-items:flex-end;justify-content:center;">
+  <div style="background:var(--bg2);border:1px solid var(--bd2);border-radius:24px 24px 0 0;width:100%;max-width:480px;padding:24px 20px 36px;">
+    <div style="width:36px;height:4px;background:var(--bd2);border-radius:2px;margin:0 auto 20px;"></div>
+    <div style="font-size:24px;text-align:center;margin-bottom:12px;">📍</div>
+    <div style="font-size:15px;font-weight:700;text-align:center;margin-bottom:6px;">Location Permission chahiye</div>
+    <div style="font-size:11px;color:var(--tx3);text-align:center;margin-bottom:20px;font-family:var(--dv);line-height:1.6;">Paas ke salons dikhane ke liye<br>location allow karein</div>
+    <div style="background:var(--bg3);border:1px solid var(--bd);border-radius:12px;padding:14px;margin-bottom:16px;font-size:11px;color:var(--tx2);font-family:var(--dv);line-height:1.8;">
+      1. Browser address bar mein 🔒 icon tap karein<br>
+      2. Location → Allow select karein<br>
+      3. Page refresh karein
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button onclick="closeLocPermModal()" style="flex:1;background:var(--bg3);border:1px solid var(--bd2);color:var(--tx2);padding:12px;border-radius:12px;font-size:12px;font-weight:600;cursor:pointer;">Baad mein</button>
+      <button onclick="openChromeSettings()" style="flex:2;background:var(--or);border:none;color:#fff;padding:12px;border-radius:12px;font-size:12px;font-weight:600;cursor:pointer;">⚙️ Settings kholein</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ NOTIFICATION MODAL ══ -->
+<div id="notif-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:300;align-items:flex-start;justify-content:flex-end;">
+  <div id="notif-sheet" style="background:var(--bg2);border:1px solid var(--bd2);border-radius:0 0 0 20px;width:280px;max-height:420px;overflow-y:auto;padding:0 0 16px;box-shadow:-8px 8px 40px rgba(0,0,0,0.6);">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px 10px;border-bottom:1px solid var(--bd);position:sticky;top:0;background:var(--bg2);z-index:1;">
+      <div style="font-size:13px;font-weight:700;">🔔 Notifications</div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <span id="notif-clear-all" onclick="clearAllNotifs()" style="font-size:9px;color:var(--or);cursor:pointer;">सब साफ करें</span>
+        <button onclick="closeNotifModal()" style="width:24px;height:24px;background:var(--bg3);border:1px solid var(--bd);border-radius:7px;color:var(--tx2);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>
+      </div>
+    </div>
+    <div id="notif-list" style="padding:8px 0;"></div>
+  </div>
+</div>
+
 <script>
 document.getElementById('cust-photo-modal').addEventListener('click',function(e){ if(e.target===this) closeCustPhotoPopup(); });
 document.getElementById('cust-addr-modal').addEventListener('click',function(e){ if(e.target===this) closeCustAddressPopup(); });
 document.getElementById('loc-perm-modal').addEventListener('click',function(e){ if(e.target===this) closeLocPermModal(); });
-document.addEventListener('keydown',function(e){ if(e.key==='Escape'){ closeCustPhotoPopup(); closeCustAddressPopup(); closeLocPermModal(); });
+document.getElementById('notif-modal').addEventListener('click',function(e){ if(e.target===this) closeNotifModal(); });
+document.addEventListener('keydown',function(e){ if(e.key==='Escape'){ closeCustPhotoPopup(); closeCustAddressPopup(); closeLocPermModal(); closeNotifModal(); } });
+
+// ─── NOTIFICATION SYSTEM ────────────────────────────
+// Notifications store (runtime only — resets on refresh, demo mode)
+let notifications = [
+  {id:1, icon:'✅', title:'Booking Confirmed!', body:'Raj Hair Studio ne aapki booking confirm kar di — Kal 10:30 AM', time:'2 min pehle', read:false},
+  {id:2, icon:'⏳', title:'Slot Hold Reminder', body:'Aapka selected slot 3 minute mein expire ho jayega', time:'5 min pehle', read:false},
+];
+
+function openNotifModal(){
+  renderNotifs();
+  document.getElementById('notif-modal').style.display = 'flex';
+  // Mark all as read after viewing
+  setTimeout(()=>{
+    notifications.forEach(n=>n.read=true);
+    updateNotifBadge();
+  }, 1500);
+}
+function closeNotifModal(){
+  document.getElementById('notif-modal').style.display = 'none';
+}
+function updateNotifBadge(){
+  const unread = notifications.filter(n=>!n.read).length;
+  const dot = document.getElementById('notif-red-dot');
+  if(dot) dot.style.display = unread > 0 ? 'block' : 'none';
+}
+function clearAllNotifs(){
+  notifications = [];
+  renderNotifs();
+  updateNotifBadge();
+}
+function dismissNotif(id){
+  notifications = notifications.filter(n=>n.id!==id);
+  renderNotifs();
+  updateNotifBadge();
+}
+function renderNotifs(){
+  const list = document.getElementById('notif-list');
+  if(!notifications.length){
+    list.innerHTML = '<div style="text-align:center;padding:30px 16px;color:var(--tx3);font-family:var(--dv);font-size:12px;">🔕 Koi notification nahi</div>';
+    return;
+  }
+  list.innerHTML = notifications.map(n=>`
+    <div style="padding:10px 14px;border-bottom:1px solid var(--bd);background:${n.read?'transparent':'rgba(244,123,32,0.04)'};">
+      <div style="display:flex;gap:10px;align-items:flex-start;">
+        <div style="width:32px;height:32px;background:var(--bg3);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">${n.icon}</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:11px;font-weight:600;margin-bottom:2px;">${n.title}</div>
+          <div style="font-size:10px;color:var(--tx3);font-family:var(--dv);line-height:1.5;">${n.body}</div>
+          <div style="font-size:9px;color:var(--tx3);margin-top:4px;">${n.time}</div>
+        </div>
+        <div onclick="dismissNotif(${n.id})" style="color:var(--tx3);font-size:14px;cursor:pointer;padding:2px 4px;flex-shrink:0;">✕</div>
+      </div>
+    </div>`).join('');
+}
+
+// Subscribe to booking changes — push notification into list
+function subscribeNotifBookings(){
+  sb.channel('notif-bookings')
+    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'bookings'},payload=>{
+      const b = payload.new;
+      if(b.customer_id !== (currentUser && currentUser.id)) return;
+      const icons = {accepted:'✅',cancelled:'❌',completed:'🏁'};
+      const msgs = {
+        accepted:`${b.shop_name} ne aapki booking confirm kar di — ${b.booking_date} ${b.booking_time}`,
+        cancelled:`${b.shop_name} ne aapki booking cancel kar di`,
+        completed:`${b.shop_name} — Service ho gayi! Review dena na bhulein`
+      };
+      if(msgs[b.status]){
+        notifications.unshift({id:Date.now(),icon:icons[b.status]||'🔔',title:'Booking Update',body:msgs[b.status],time:'Abhi',read:false});
+        updateNotifBadge();
+        toast((icons[b.status]||'🔔')+' '+msgs[b.status]);
+      }
+    })
+    .subscribe();
+}
+
+// Init hook: subscribe after login
+const _origInit = window.init;
+window.addEventListener('DOMContentLoaded', ()=>{
+  setTimeout(()=>{
+    updateNotifBadge();
+    if(typeof subscribeBookings === 'function') subscribeNotifBookings();
+  }, 2000);
+});
 </script>
 
 </body>

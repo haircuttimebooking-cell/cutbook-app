@@ -142,11 +142,32 @@ function showScreen(name){
   });
 }
 
+// Demo accounts — real Supabase OTP bypass
+const DEMO_PHONES = {
+  '+919555984489':'123456',
+  '+919876543210':'123456',
+  '+919999999999':'123456',
+  '+919000000001':'123456',
+  '+919000000002':'123456',
+  '+919000000003':'123456',
+  '+919000000004':'123456',
+  '+919000000005':'123456',
+  '+919000000006':'123456',
+  '+919000000007':'123456',
+};
+
 async function sendOTP(){
   const ph = document.getElementById('phone-input').value.trim();
   if(ph.length!==10){setMsg('phone-msg','❌ 10 digit ka number daalo','error');return;}
   phoneNumber = '+91'+ph;
   setMsg('phone-msg','<span class="spinner"></span> OTP bheja ja raha hai...','');
+  if(DEMO_PHONES[phoneNumber]){
+    // Demo account — skip real SMS
+    document.getElementById('otp-sent-to').textContent = phoneNumber+' pe OTP bheja gaya (Demo: 123456)';
+    showScreen('otp');
+    document.getElementById('otp-single').focus();
+    return;
+  }
   const {error} = await sb.auth.signInWithOtp({phone:phoneNumber});
   if(error){setMsg('phone-msg','❌ '+error.message,'error');return;}
   document.getElementById('otp-sent-to').textContent = phoneNumber+' pe OTP bheja gaya';
@@ -158,6 +179,30 @@ async function verifyOTP(){
   const otp = document.getElementById('otp-single').value.trim();
   if(otp.length!==6){setMsg('otp-msg','❌ 6 digit OTP daalo','error');return;}
   setMsg('otp-msg','<span class="spinner"></span> Verify ho raha hai...','');
+
+  // Demo account bypass
+  if(DEMO_PHONES[phoneNumber]){
+    if(otp !== DEMO_PHONES[phoneNumber]){
+      setMsg('otp-msg','❌ Galat OTP — demo ke liye 123456 daalo','error');
+      return;
+    }
+    // Sign in via Supabase with demo OTP (must be enabled in Supabase dashboard)
+    const {data,error} = await sb.auth.verifyOtp({phone:phoneNumber,token:otp,type:'sms'});
+    if(error){
+      // Fallback: store demo session locally if Supabase rejects
+      localStorage.setItem('cb_role', selectedRole);
+      localStorage.setItem('cb_phone', phoneNumber);
+      localStorage.setItem('cb_demo', '1');
+      window.location.href = selectedRole==='customer' ? 'customer/index.html' : 'shopkeeper/index.html';
+      return;
+    }
+    await sb.from('users').upsert({id:data.user.id,phone:phoneNumber,role:selectedRole},{onConflict:'id'});
+    localStorage.setItem('cb_role', selectedRole);
+    localStorage.setItem('cb_phone', phoneNumber);
+    window.location.href = selectedRole==='customer' ? 'customer/index.html' : 'shopkeeper/index.html';
+    return;
+  }
+
   const {data,error} = await sb.auth.verifyOtp({phone:phoneNumber,token:otp,type:'sms'});
   if(error){setMsg('otp-msg','❌ Galat OTP — dobara try karo','error');return;}
   await sb.from('users').upsert({id:data.user.id,phone:phoneNumber,role:selectedRole},{onConflict:'id'});
