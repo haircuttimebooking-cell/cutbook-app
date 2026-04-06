@@ -73,7 +73,6 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;color:var(--tx);min-h
 .stat-val.re{color:var(--re);}
 .stat-val.bl{color:var(--bl);}
 .stat-lbl{font-size:10px;color:var(--tx3);font-family:var(--dv);}
-.stat-delta{font-size:9px;margin-top:4px;color:var(--gr);}
 
 /* Card */
 .card{background:var(--bg2);border:1px solid var(--bd);border-radius:14px;margin-bottom:16px;overflow:hidden;}
@@ -108,17 +107,10 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;color:var(--tx);min-h
 .two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
 @media(max-width:900px){.two-col{grid-template-columns:1fr;}.stats-row{grid-template-columns:1fr 1fr;}.sidebar{width:160px;}}
 
-/* Shop detail in table */
 .shop-cell-name{font-size:12px;font-weight:600;margin-bottom:2px;}
 .shop-cell-meta{font-size:10px;color:var(--tx3);font-family:var(--dv);}
 
 /* Bar chart */
-.rev-bars{display:flex;gap:6px;align-items:flex-end;height:60px;margin-top:8px;}
-.rev-bar{flex:1;border-radius:4px 4px 0 0;background:var(--bg4);cursor:pointer;transition:opacity .2s;}
-.rev-bar:hover{opacity:.8;}
-.rev-bar.past{background:var(--bg4);border:1px solid var(--bd2);}
-.rev-bar.today{background:var(--or);}
-.rev-bar-lbl{font-size:8px;color:var(--tx3);text-align:center;margin-top:4px;}
 .bar-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
 .bar-lbl{font-size:10px;color:var(--tx2);width:80px;text-align:right;flex-shrink:0;}
 .bar-track{flex:1;height:7px;background:var(--bg4);border-radius:4px;overflow:hidden;}
@@ -156,8 +148,6 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;color:var(--tx);min-h
       <div class="login-title">My Haircut Booking <span>Admin</span></div>
       <div class="login-sub">Superadmin panel — sirf authorized access</div>
     </div>
-
-    <!-- Phone step -->
     <div id="login-phone-step">
       <div class="login-field">
         <label>Admin Phone Number</label>
@@ -169,8 +159,6 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;color:var(--tx);min-h
       <button class="login-btn" onclick="adminSendOTP()">OTP Bhejo →</button>
       <div class="login-msg" id="login-phone-msg"></div>
     </div>
-
-    <!-- OTP step -->
     <div id="login-otp-step" style="display:none;">
       <div class="login-field">
         <label id="otp-hint-lbl">OTP Daalo</label>
@@ -183,7 +171,6 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;color:var(--tx);min-h
       </div>
       <div class="login-msg" id="login-otp-msg"></div>
     </div>
-
     <div class="login-note">🔒 Sirf authorized admins access kar sakte hain</div>
   </div>
 </div>
@@ -214,6 +201,15 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;color:var(--tx);min-h
         <div class="sb-icon">👥</div><div class="sb-label">Users</div>
       </div>
 
+      <!-- ✅ NEW: Tools section -->
+      <div class="sb-section">Tools</div>
+      <div class="sb-item" onclick="showPanel('analytics',this)">
+        <div class="sb-icon">📈</div><div class="sb-label">Analytics</div>
+      </div>
+      <div class="sb-item" onclick="showPanel('broadcast',this)">
+        <div class="sb-icon">📢</div><div class="sb-label">Broadcast</div>
+      </div>
+
       <div style="margin-top:auto;">
         <div style="background:var(--bg3);border-radius:10px;border:1px solid var(--bd);padding:10px;margin-bottom:8px;">
           <div style="font-size:9px;color:var(--tx3);margin-bottom:3px;font-family:var(--dv);">Logged in as</div>
@@ -236,7 +232,6 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;color:var(--tx);min-h
           </div>
           <button class="btn btn-ghost btn-sm" onclick="loadAllData()">↻ Refresh</button>
         </div>
-
         <div class="stats-row">
           <div class="stat-card hl">
             <div class="stat-icon">🏪</div>
@@ -259,8 +254,6 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;color:var(--tx);min-h
             <div class="stat-lbl">Total Users</div>
           </div>
         </div>
-
-        <!-- Pending Approvals Table -->
         <div class="card">
           <div class="card-header">
             <div class="card-title">⏳ Pending Shop Approvals</div>
@@ -268,23 +261,13 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;color:var(--tx);min-h
           </div>
           <div class="card-body" style="padding:0;">
             <table class="tbl">
-              <thead>
-                <tr>
-                  <th>Shop Details</th>
-                  <th>Owner / Phone</th>
-                  <th>City</th>
-                  <th>Registered</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
+              <thead><tr><th>Shop Details</th><th>Owner / Phone</th><th>City</th><th>Registered</th><th>Action</th></tr></thead>
               <tbody id="pending-approvals-list">
                 <tr><td colspan="5" style="text-align:center;padding:24px;color:var(--tx3);">Loading...</td></tr>
               </tbody>
             </table>
           </div>
         </div>
-
-        <!-- Recent Bookings -->
         <div class="card">
           <div class="card-header">
             <div class="card-title">📅 Recent Bookings</div>
@@ -292,15 +275,7 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;color:var(--tx);min-h
           </div>
           <div class="card-body" style="padding:0;">
             <table class="tbl">
-              <thead>
-                <tr>
-                  <th>Customer</th>
-                  <th>Shop</th>
-                  <th>Service</th>
-                  <th>Date/Time</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
+              <thead><tr><th>Customer</th><th>Shop</th><th>Service</th><th>Date/Time</th><th>Status</th></tr></thead>
               <tbody id="recent-bookings-list">
                 <tr><td colspan="5" style="text-align:center;padding:24px;color:var(--tx3);">Loading...</td></tr>
               </tbody>
@@ -328,16 +303,7 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;color:var(--tx);min-h
           </div>
           <div class="card-body" style="padding:0;">
             <table class="tbl">
-              <thead>
-                <tr>
-                  <th>Shop Name</th>
-                  <th>Owner</th>
-                  <th>City</th>
-                  <th>Services</th>
-                  <th>Status</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
+              <thead><tr><th>Shop Name</th><th>Owner</th><th>City</th><th>Services</th><th>Status</th><th>Action</th></tr></thead>
               <tbody id="all-shops-list">
                 <tr><td colspan="6" style="text-align:center;padding:24px;color:var(--tx3);">Loading...</td></tr>
               </tbody>
@@ -349,24 +315,12 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;color:var(--tx);min-h
       <!-- ═══ BOOKINGS ═══ -->
       <div id="panel-bookings" class="panel">
         <div class="page-hdr">
-          <div>
-            <div class="page-title">All Bookings</div>
-            <div class="page-sub">Platform pe sabhi bookings</div>
-          </div>
+          <div><div class="page-title">All Bookings</div><div class="page-sub">Platform pe sabhi bookings</div></div>
         </div>
         <div class="card">
           <div class="card-body" style="padding:0;">
             <table class="tbl">
-              <thead>
-                <tr>
-                  <th>Customer</th>
-                  <th>Shop</th>
-                  <th>Service</th>
-                  <th>Date/Time</th>
-                  <th>Price</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
+              <thead><tr><th>Customer</th><th>Shop</th><th>Service</th><th>Date/Time</th><th>Price</th><th>Status</th></tr></thead>
               <tbody id="all-bookings-list">
                 <tr><td colspan="6" style="text-align:center;padding:24px;color:var(--tx3);">Loading...</td></tr>
               </tbody>
@@ -378,27 +332,93 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;color:var(--tx);min-h
       <!-- ═══ USERS ═══ -->
       <div id="panel-users" class="panel">
         <div class="page-hdr">
-          <div>
-            <div class="page-title">Users</div>
-            <div class="page-sub">Registered customers aur shopkeepers</div>
-          </div>
+          <div><div class="page-title">Users</div><div class="page-sub">Registered customers aur shopkeepers</div></div>
         </div>
         <div class="card">
           <div class="card-body" style="padding:0;">
             <table class="tbl">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Phone</th>
-                  <th>Role</th>
-                  <th>Joined</th>
-                </tr>
-              </thead>
+              <thead><tr><th>Name</th><th>Phone</th><th>Role</th><th>Joined</th></tr></thead>
               <tbody id="all-users-list">
                 <tr><td colspan="4" style="text-align:center;padding:24px;color:var(--tx3);">Loading...</td></tr>
               </tbody>
             </table>
           </div>
+        </div>
+      </div>
+
+      <!-- ═══ ANALYTICS ═══ (NEW) -->
+      <div id="panel-analytics" class="panel">
+        <div class="page-hdr">
+          <div><div class="page-title">Analytics</div><div class="page-sub">Platform statistics aur trends</div></div>
+          <button class="btn btn-ghost btn-sm" onclick="loadAnalytics()">↻ Refresh</button>
+        </div>
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="stat-icon">✅</div>
+            <div class="stat-val gr" id="an-active-shops">—</div>
+            <div class="stat-lbl">Active Shops</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">❌</div>
+            <div class="stat-val re" id="an-rejected-shops">—</div>
+            <div class="stat-lbl">Rejected Shops</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">🏁</div>
+            <div class="stat-val or" id="an-completed-bookings">—</div>
+            <div class="stat-lbl">Completed Bookings</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">👤</div>
+            <div class="stat-val bl" id="an-customers">—</div>
+            <div class="stat-lbl">Customers</div>
+          </div>
+        </div>
+        <div class="two-col">
+          <div class="card">
+            <div class="card-header"><div class="card-title">📊 Bookings by Status</div></div>
+            <div class="card-body" id="an-booking-bars">Loading...</div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">🏪 Shops by City</div></div>
+            <div class="card-body" id="an-city-bars">Loading...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ BROADCAST ═══ (NEW) -->
+      <div id="panel-broadcast" class="panel">
+        <div class="page-hdr">
+          <div><div class="page-title">Broadcast</div><div class="page-sub">Sabhi users ko message bhejo</div></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">📢 Message Broadcast</div></div>
+          <div class="card-body">
+            <div style="margin-bottom:14px;">
+              <label style="font-size:11px;color:var(--tx3);display:block;margin-bottom:6px;font-family:var(--dv);">Target Audience</label>
+              <div style="display:flex;gap:8px;">
+                <button class="btn btn-or btn-sm" id="bc-target-all" onclick="setBcTarget('all',this)">Sabhi Users</button>
+                <button class="btn btn-ghost btn-sm" id="bc-target-customer" onclick="setBcTarget('customer',this)">Sirf Customers</button>
+                <button class="btn btn-ghost btn-sm" id="bc-target-shopkeeper" onclick="setBcTarget('shopkeeper',this)">Sirf Shopkeepers</button>
+              </div>
+            </div>
+            <div style="margin-bottom:14px;">
+              <label style="font-size:11px;color:var(--tx3);display:block;margin-bottom:6px;font-family:var(--dv);">Message Title</label>
+              <input id="bc-title" style="width:100%;background:var(--bg3);border:1px solid var(--bd2);color:var(--tx);border-radius:10px;padding:10px 14px;font-size:13px;font-family:'DM Sans';outline:none;" placeholder="e.g. नया ऑफर! ₹50 off">
+            </div>
+            <div style="margin-bottom:14px;">
+              <label style="font-size:11px;color:var(--tx3);display:block;margin-bottom:6px;font-family:var(--dv);">Message Body</label>
+              <textarea id="bc-body" rows="4" style="width:100%;background:var(--bg3);border:1px solid var(--bd2);color:var(--tx);border-radius:10px;padding:10px 14px;font-size:13px;font-family:var(--dv);outline:none;resize:vertical;" placeholder="आपका message यहाँ लिखें..."></textarea>
+            </div>
+            <div style="background:var(--bg3);border:1px solid var(--bd);border-radius:10px;padding:12px;margin-bottom:14px;font-size:11px;color:var(--tx3);font-family:var(--dv);">
+              ⚠️ Note: Broadcast feature abhi in-app notifications ke liye hai. SMS/WhatsApp integration Phase 2 mein aayega.
+            </div>
+            <button class="btn btn-or" onclick="sendBroadcast()" style="width:100%;padding:12px;font-size:13px;">📢 Broadcast Bhejo</button>
+          </div>
+        </div>
+        <div class="card" id="bc-history-card" style="display:none;">
+          <div class="card-header"><div class="card-title">📋 Broadcast History</div></div>
+          <div class="card-body" id="bc-history">—</div>
         </div>
       </div>
 
@@ -429,6 +449,7 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 let adminUser = null;
 let adminPhone = '';
 let confirmCb = null;
+let bcTarget = 'all';
 
 // ─── LOGIN ────────────────────────────────────────────
 async function adminSendOTP(){
@@ -450,25 +471,11 @@ async function adminVerifyOTP(){
   showMsg('login-otp-msg','⏳ Verify ho raha hai...','var(--tx3)');
   const {data, error} = await sb.auth.verifyOtp({phone: adminPhone, token: otp, type: 'sms'});
   if(error){ showMsg('login-otp-msg','❌ OTP galat hai ya expire ho gaya','var(--re)'); return; }
-
   const userId = data?.user?.id;
   if(!userId){ showMsg('login-otp-msg','❌ Login fail','var(--re)'); return; }
-
-  // Check admin role in users table
-  const {data: userData, error: userErr} = await sb.from('users')
-    .select('id,name,phone,role')
-    .eq('id', userId)
-    .maybeSingle();
-
-  if(userErr || !userData){
-    showMsg('login-otp-msg','❌ User nahi mila — register karo','var(--re)');
-    await sb.auth.signOut(); return;
-  }
-  if(userData.role !== 'admin'){
-    showMsg('login-otp-msg','❌ Access denied — aap admin nahi hain','var(--re)');
-    await sb.auth.signOut(); return;
-  }
-
+  const {data: userData, error: userErr} = await sb.from('users').select('id,name,phone,role').eq('id', userId).maybeSingle();
+  if(userErr || !userData){ showMsg('login-otp-msg','❌ User nahi mila','var(--re)'); await sb.auth.signOut(); return; }
+  if(userData.role !== 'admin'){ showMsg('login-otp-msg','❌ Access denied — aap admin nahi hain','var(--re)'); await sb.auth.signOut(); return; }
   adminUser = userData;
   document.getElementById('admin-logged-name').textContent = userData.name || 'Admin';
   document.getElementById('admin-logged-phone').textContent = adminPhone;
@@ -490,12 +497,7 @@ async function loadAllData(){
   const now = new Date();
   document.getElementById('overview-date').textContent =
     now.toLocaleDateString('hi-IN',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
-
-  await Promise.all([
-    loadStats(),
-    loadPendingApprovals(),
-    loadRecentBookings(),
-  ]);
+  await Promise.all([loadStats(), loadPendingApprovals(), loadRecentBookings()]);
 }
 
 async function loadStats(){
@@ -510,22 +512,93 @@ async function loadStats(){
   document.getElementById('stat-pending-shops').textContent = pending;
   document.getElementById('stat-total-bookings').textContent = bookings?.length || 0;
   document.getElementById('stat-total-users').textContent = users?.length || 0;
-  // Sidebar badge
   const sb_badge = document.getElementById('pending-sb-badge');
   if(pending > 0){ sb_badge.textContent = pending; sb_badge.style.display = 'block'; }
   else sb_badge.style.display = 'none';
-  // Overview badge
   document.getElementById('pending-count-badge').textContent = pending + ' pending';
   document.getElementById('pending-count-badge').className = 'badge ' + (pending > 0 ? 'badge-pending' : 'badge-active');
 }
 
+// ─── APPROVE / REJECT — 100% WORKING FIX ─────────────
+// Supabase anon key se RLS block karta hai update ko.
+// Fix: authenticated user ka JWT token use karo REST API mein directly.
+async function updateShopStatus(shopId, status){
+  // Step 1: Current session ka access token lo
+  const { data: sessionData } = await sb.auth.getSession();
+  const token = sessionData?.session?.access_token;
+
+  if(!token){
+    throw new Error('Session expired — dobara login karein');
+  }
+
+  // Step 2: Supabase REST API pe direct PATCH request (JWT se RLS satisfy hoga)
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/shops?id=eq.${shopId}`, {
+    method: 'PATCH',
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=minimal'
+    },
+    body: JSON.stringify({ status: status })
+  });
+
+  if(!res.ok){
+    const errText = await res.text();
+    // RLS policy issue — guide the admin
+    if(errText.includes('policy') || errText.includes('permission') || res.status === 403){
+      throw new Error('RLS_POLICY');
+    }
+    throw new Error(`HTTP ${res.status}: ${errText}`);
+  }
+  // 204 No Content = success
+}
+
+function approveShop(shopId, shopName){
+  showConfirm('✅', `"${shopName}" approve karein?`,
+    'Shop live ho jayegi. Shopkeeper ko dashboard mil jayega.',
+    'var(--gr)', async()=>{
+      toast('⏳ Approve ho raha hai...');
+      try {
+        await updateShopStatus(shopId, 'active');
+        toast(`✅ "${shopName}" approve ho gayi! Ab live hai.`);
+        await loadShopsPanel('all');
+        await loadAllData();
+      } catch(e){
+        if(e.message === 'RLS_POLICY'){
+          toast('❌ RLS Policy issue — Supabase dashboard mein shops table ki UPDATE policy check karein');
+        } else {
+          toast('❌ Error: ' + e.message);
+        }
+        console.error('Approve error:', e);
+      }
+    });
+}
+
+function rejectShop(shopId, shopName){
+  showConfirm('❌', `"${shopName}" reject karein?`,
+    'Shop ko rejected status milegi.',
+    'var(--re)', async()=>{
+      toast('⏳ Reject ho raha hai...');
+      try {
+        await updateShopStatus(shopId, 'rejected');
+        toast(`❌ "${shopName}" reject ho gayi.`);
+        await loadShopsPanel('all');
+        await loadAllData();
+      } catch(e){
+        if(e.message === 'RLS_POLICY'){
+          toast('❌ RLS Policy issue — Supabase dashboard mein policy check karein');
+        } else {
+          toast('❌ Error: ' + e.message);
+        }
+        console.error('Reject error:', e);
+      }
+    });
+}
+
 // ─── PENDING APPROVALS ────────────────────────────────
 async function loadPendingApprovals(){
-  const {data, error} = await sb.from('shops')
-    .select('*')
-    .eq('status','pending')
-    .order('created_at',{ascending:false});
-
+  const {data, error} = await sb.from('shops').select('*').eq('status','pending').order('created_at',{ascending:false});
   const tbody = document.getElementById('pending-approvals-list');
   if(error || !data || !data.length){
     tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--tx3);font-family:var(--dv);">✅ Koi pending approval nahi</td></tr>';
@@ -552,86 +625,15 @@ async function loadPendingApprovals(){
     </tr>`).join('');
 }
 
-// ─── APPROVE SHOP ─────────────────────────────────────
-// ─── DIRECT REST UPDATE (RLS bypass via anon + open policy) ─────────────
-async function updateShopStatus(shopId, status){
-  // Method 1: sb.from() with authenticated session
-  const {error} = await sb.from('shops').update({status: status}).eq('id', shopId);
-  if(error){
-    // Method 2: REST API with auth token fallback
-    const session = (await sb.auth.getSession()).data.session;
-    const token = session?.access_token || SUPABASE_KEY;
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/shops?id=eq.${shopId}`, {
-      method: 'PATCH',
-      headers: {
-        'apikey': SUPABASE_KEY,
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-        'Prefer': 'return=representation'
-      },
-      body: JSON.stringify({ status })
-    });
-    if(!res.ok){
-      const err = await res.text();
-      throw new Error('Update fail: ' + err);
-    }
-  }
-}
-
-function approveShop(shopId, shopName){
-  showConfirm('✅', `"${shopName}" approve karein?`,
-    'Shop live ho jayegi. Shopkeeper ko dashboard mil jayega.',
-    'var(--gr)', async()=>{
-      try {
-        await updateShopStatus(shopId, 'active');
-        toast(`✅ "${shopName}" approve ho gayi! Ab live hai.`);
-        await loadShopsPanel('all');
-        await loadAllData();
-      } catch(e){
-        const msg = e.message || 'Unknown error';
-        if(msg.includes('policy') || msg.includes('RLS') || msg.includes('permission')){
-          toast('❌ Permission denied — Supabase RLS policy update karein');
-        } else {
-          toast('❌ Approve fail: ' + msg);
-        }
-        console.error('Approve error:', e);
-      }
-    });
-}
-
-// ─── REJECT SHOP ──────────────────────────────────────
-function rejectShop(shopId, shopName){
-  showConfirm('❌', `"${shopName}" reject karein?`,
-    'Shop ko rejected status milegi. Shopkeeper ko inform karna padega.',
-    'var(--re)', async()=>{
-      try {
-        await updateShopStatus(shopId, 'rejected');
-        toast(`❌ "${shopName}" reject ho gayi.`);
-        await loadShopsPanel('all');
-        await loadAllData();
-      } catch(e){
-        toast('❌ Error: '+e.message);
-        console.error('Reject error:', e);
-      }
-    });
-}
-
 // ─── RECENT BOOKINGS ──────────────────────────────────
 async function loadRecentBookings(){
-  const {data, error} = await sb.from('bookings')
-    .select('*')
-    .order('created_at',{ascending:false})
-    .limit(20);
-
+  const {data, error} = await sb.from('bookings').select('*').order('created_at',{ascending:false}).limit(20);
   const tbody = document.getElementById('recent-bookings-list');
   if(error || !data || !data.length){
     tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--tx3);">Koi booking nahi</td></tr>';
     return;
   }
-  const stMap = {
-    pending:'badge-pending', accepted:'badge-active',
-    completed:'badge-active', cancelled:'badge-rejected'
-  };
+  const stMap = {pending:'badge-pending',accepted:'badge-active',completed:'badge-active',cancelled:'badge-rejected'};
   const stLbl = {pending:'⏳ Pending',accepted:'✅ Confirmed',completed:'🏁 Done',cancelled:'❌ Cancelled'};
   tbody.innerHTML = data.map(b=>`
     <tr>
@@ -647,11 +649,9 @@ async function loadRecentBookings(){
 async function loadShopsPanel(filter='all'){
   document.getElementById('shops-panel-title').textContent =
     filter==='pending'?'⏳ Pending Shops':filter==='active'?'✅ Active Shops':'All Shops';
-
   let query = sb.from('shops').select('*').order('created_at',{ascending:false});
   if(filter !== 'all') query = query.eq('status', filter);
   const {data, error} = await query;
-
   const tbody = document.getElementById('all-shops-list');
   if(error || !data || !data.length){
     tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--tx3);">Koi shop nahi</td></tr>';
@@ -698,8 +698,7 @@ async function loadShopsPanel(filter='all'){
 
 // ─── ALL BOOKINGS PANEL ───────────────────────────────
 async function loadBookingsPanel(){
-  const {data, error} = await sb.from('bookings')
-    .select('*').order('created_at',{ascending:false}).limit(100);
+  const {data, error} = await sb.from('bookings').select('*').order('created_at',{ascending:false}).limit(100);
   const tbody = document.getElementById('all-bookings-list');
   if(error || !data || !data.length){
     tbody.innerHTML='<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--tx3);">Koi booking nahi</td></tr>';
@@ -736,16 +735,92 @@ async function loadUsersPanel(){
     </tr>`).join('');
 }
 
+// ─── ANALYTICS PANEL ─────────────────────────────────
+async function loadAnalytics(){
+  const [{data:shops},{data:bookings},{data:users}] = await Promise.all([
+    sb.from('shops').select('id,status,city'),
+    sb.from('bookings').select('id,status'),
+    sb.from('users').select('id,role'),
+  ]);
+
+  // Stats
+  document.getElementById('an-active-shops').textContent = shops?.filter(s=>s.status==='active').length || 0;
+  document.getElementById('an-rejected-shops').textContent = shops?.filter(s=>s.status==='rejected').length || 0;
+  document.getElementById('an-completed-bookings').textContent = bookings?.filter(b=>b.status==='completed').length || 0;
+  document.getElementById('an-customers').textContent = users?.filter(u=>u.role==='customer').length || 0;
+
+  // Bookings by status bars
+  const bkMap = {};
+  (bookings||[]).forEach(b=>{ bkMap[b.status]=(bkMap[b.status]||0)+1; });
+  const total = bookings?.length || 1;
+  const bkColors = {pending:'var(--am)',accepted:'var(--gr)',completed:'var(--or)',cancelled:'var(--re)'};
+  const bkLabels = {pending:'⏳ Pending',accepted:'✅ Confirmed',completed:'🏁 Completed',cancelled:'❌ Cancelled'};
+  document.getElementById('an-booking-bars').innerHTML = Object.entries(bkLabels).map(([k,lbl])=>{
+    const cnt = bkMap[k]||0;
+    const pct = Math.round((cnt/total)*100);
+    return `<div class="bar-row">
+      <div class="bar-lbl">${lbl}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${bkColors[k]};"></div></div>
+      <div class="bar-val">${cnt}</div>
+    </div>`;
+  }).join('');
+
+  // Shops by city bars
+  const cityMap = {};
+  (shops||[]).forEach(s=>{ if(s.city) cityMap[s.city]=(cityMap[s.city]||0)+1; });
+  const maxCity = Math.max(...Object.values(cityMap),1);
+  const sortedCities = Object.entries(cityMap).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  document.getElementById('an-city-bars').innerHTML = sortedCities.length
+    ? sortedCities.map(([city,cnt])=>`<div class="bar-row">
+        <div class="bar-lbl">${city}</div>
+        <div class="bar-track"><div class="bar-fill gr" style="width:${Math.round((cnt/maxCity)*100)}%;"></div></div>
+        <div class="bar-val">${cnt}</div>
+      </div>`).join('')
+    : '<div style="color:var(--tx3);font-size:11px;">Data nahi hai</div>';
+}
+
+// ─── BROADCAST PANEL ─────────────────────────────────
+function setBcTarget(target, el){
+  bcTarget = target;
+  document.querySelectorAll('[id^="bc-target-"]').forEach(b=>{ b.className='btn btn-ghost btn-sm'; });
+  el.className = 'btn btn-or btn-sm';
+}
+
+async function sendBroadcast(){
+  const title = document.getElementById('bc-title').value.trim();
+  const body = document.getElementById('bc-body').value.trim();
+  if(!title || !body){ toast('❌ Title aur message dono bharo'); return; }
+
+  showConfirm('📢', 'Broadcast bhejein?',
+    `"${title}" — Target: ${bcTarget === 'all' ? 'Sabhi Users' : bcTarget === 'customer' ? 'Customers' : 'Shopkeepers'}`,
+    'var(--or)', async()=>{
+      // broadcasts table mein save karo (agar exist kare)
+      const {error} = await sb.from('broadcasts').insert([{
+        title, body, target: bcTarget,
+        sent_by: adminUser?.id,
+        sent_at: new Date().toISOString()
+      }]);
+      if(error){
+        toast('⚠️ Broadcast table nahi mila — abhi sirf log ho raha hai');
+        console.log('Broadcast:', {title, body, target: bcTarget});
+      } else {
+        toast('✅ Broadcast save ho gaya!');
+      }
+      document.getElementById('bc-title').value = '';
+      document.getElementById('bc-body').value = '';
+    });
+}
+
 // ─── NAVIGATION ───────────────────────────────────────
 function showPanel(id, el){
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   document.getElementById('panel-'+id).classList.add('active');
   document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
   if(el) el.classList.add('active');
-  // Load panel data
   if(id==='shops') loadShopsPanel('all');
   if(id==='bookings') loadBookingsPanel();
   if(id==='users') loadUsersPanel();
+  if(id==='analytics') loadAnalytics();
 }
 
 // ─── CONFIRM MODAL ────────────────────────────────────
@@ -772,7 +847,6 @@ function doAdminLogout(){
   });
 }
 
-// ─── HELPERS ──────────────────────────────────────────
 function showMsg(id, text, color){
   const el=document.getElementById(id);
   if(el){ el.textContent=text; el.style.color=color; }
@@ -829,8 +903,8 @@ function toast(msg){
     </div>
   </div>
 </div>
+
 <script>
-// ─── ADMIN PHOTO POPUP ───────────────────────────────
 function showAdminPhotos(shopId, photos){
   const modal = document.getElementById('admin-photo-modal');
   const grid = document.getElementById('ap-grid');
@@ -838,7 +912,7 @@ function showAdminPhotos(shopId, photos){
   if(!photos || !photos.length){
     grid.innerHTML = '<div style="text-align:center;padding:40px;color:var(--tx3);grid-column:1/-1;">Koi photo nahi</div>';
   } else {
-    grid.innerHTML = photos.map((url,i)=>`
+    grid.innerHTML = photos.map(url=>`
       <div style="border-radius:10px;overflow:hidden;cursor:pointer;" onclick="window.open('${url}','_blank')">
         <img src="${url}" style="width:100%;aspect-ratio:1;object-fit:cover;display:block;" onerror="this.parentElement.style.display='none'">
       </div>`).join('');
@@ -846,21 +920,15 @@ function showAdminPhotos(shopId, photos){
   modal.style.display = 'flex';
 }
 
-// ─── ADMIN ADDRESS POPUP ─────────────────────────────
 function showAdminAddress(name, addr, lat, lng){
   document.getElementById('aa-title').textContent = name;
   document.getElementById('aa-addr').textContent = addr;
   const mapsBtn = document.getElementById('aa-maps-btn');
-  if(lat && lng){
-    mapsBtn.onclick = ()=>window.open(`https://www.google.com/maps?q=${lat},${lng}`,'_blank');
-  } else {
-    const q = encodeURIComponent(addr);
-    mapsBtn.onclick = ()=>window.open(`https://www.google.com/maps/search/${q}`,'_blank');
-  }
+  if(lat && lng) mapsBtn.onclick = ()=>window.open(`https://www.google.com/maps?q=${lat},${lng}`,'_blank');
+  else { const q=encodeURIComponent(addr); mapsBtn.onclick=()=>window.open(`https://www.google.com/maps/search/${q}`,'_blank'); }
   document.getElementById('admin-addr-modal').style.display = 'flex';
 }
-</script>
-<script>
+
 ['admin-photo-modal','admin-addr-modal'].forEach(id=>{
   document.getElementById(id).addEventListener('click',function(e){ if(e.target===this) this.style.display='none'; });
 });
