@@ -585,8 +585,8 @@ function approveShop(shopId, shopName){
       try {
         await updateShopStatus(shopId, 'active');
         toast(`✅ "${shopName}" approve ho gayi! Ab live hai.`);
-        await loadAllData();
         await loadShopsPanel('all');
+        await loadAllData();
       } catch(e){
         const msg = e.message || 'Unknown error';
         if(msg.includes('policy') || msg.includes('RLS') || msg.includes('permission')){
@@ -607,8 +607,8 @@ function rejectShop(shopId, shopName){
       try {
         await updateShopStatus(shopId, 'rejected');
         toast(`❌ "${shopName}" reject ho gayi.`);
-        await loadAllData();
         await loadShopsPanel('all');
+        await loadAllData();
       } catch(e){
         toast('❌ Error: '+e.message);
         console.error('Reject error:', e);
@@ -645,7 +645,6 @@ async function loadRecentBookings(){
 
 // ─── SHOPS PANEL ──────────────────────────────────────
 async function loadShopsPanel(filter='all'){
-  showPanel('shops', document.querySelector('.sb-item:nth-child(3)'));
   document.getElementById('shops-panel-title').textContent =
     filter==='pending'?'⏳ Pending Shops':filter==='active'?'✅ Active Shops':'All Shops';
 
