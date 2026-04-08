@@ -359,7 +359,8 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
         <div class="profile-row" onclick="toast('🎁 Refer karo ₹50 pao!')"><div class="pr-icon">🎁</div><div class="pr-label">Refer &amp; Earn</div><div class="pr-val" style="color:var(--or);">₹50/referral</div><div class="pr-arrow">›</div></div>
         <div class="profile-row" onclick="toast('🔔 Notifications setting')"><div class="pr-icon">🔔</div><div class="pr-label">Notifications</div><div class="pr-arrow">›</div></div>
         <div class="profile-row" onclick="toast('🔒 Privacy &amp; Security')"><div class="pr-icon">🔒</div><div class="pr-label">Privacy &amp; Security</div><div class="pr-arrow">›</div></div>
-        <div class="profile-row" onclick="window.location.href='../index.html'"><div class="pr-icon">🚪</div><div class="pr-label" style="color:var(--re);">Log Out</div><div class="pr-arrow">›</div></div>
+        <div class="profile-row" onclick="doLogout()"><div class="pr-icon">🚪</div><div class="pr-label" style="color:var(--re);">Log Out</div><div class="pr-arrow">›</div></div>
+        <div class="profile-row" onclick="doDeleteAccount()"><div class="pr-icon">🗑️</div><div class="pr-label" style="color:var(--re);font-size:11px;">Account Delete Karo</div><div class="pr-arrow">›</div></div>
       </div>
     </div>
 
@@ -437,6 +438,26 @@ let curFilter = 'all';
 async function init(){
   const {data:{user}} = await sb.auth.getUser();
   if(!user){ window.location.href='../index.html'; return; }
+
+  // Role check — sirf customer yahan aa sake
+  const {data: userData} = await sb.from('users').select('role,name,phone').eq('id', user.id).maybeSingle();
+  if(!userData){
+    // User table mein nahi hai — register karwao
+    await sb.auth.signOut();
+    window.location.href='../index.html';
+    return;
+  }
+  if(userData.role === 'shopkeeper'){
+    await sb.auth.signOut();
+    window.location.href='../shopkeeper/index.html';
+    return;
+  }
+  if(userData.role === 'admin'){
+    await sb.auth.signOut();
+    window.location.href='../admin/index.html';
+    return;
+  }
+
   currentUser = user;
   // GPS pehle lo (max 4 sec wait) — phir shops distance ke saath sort honge
   await new Promise(resolve=>{
@@ -991,6 +1012,39 @@ function openAllShopsMap(){
   window.open(`https://www.google.com/maps/search/salon+barber/@${userPos},14z`,'_blank');
 }
 function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3000); }
+
+// ─── LOGOUT ───────────────────────────────────────────
+async function doLogout(){
+  if(!confirm('Log out karna chahte ho?')) return;
+  await sb.auth.signOut();
+  window.location.href = '../index.html';
+}
+
+// ─── DELETE ACCOUNT ───────────────────────────────────
+async function doDeleteAccount(){
+  const confirmed = confirm('⚠️ Account permanently delete ho jayega!\nSabhi bookings bhi delete ho jayengi.\n\nPakka delete karna hai?');
+  if(!confirmed) return;
+  const confirmed2 = confirm('Last chance! Yeh undo nahi ho sakta.\nHaan = Delete, Cancel = Ruk jao');
+  if(!confirmed2) return;
+
+  try {
+    toast('⏳ Account delete ho raha hai...');
+    const uid = currentUser?.id;
+    if(!uid){ toast('❌ User ID nahi mili'); return; }
+
+    // Bookings delete karo
+    await sb.from('bookings').delete().eq('customer_id', uid);
+    // Users table se delete karo
+    await sb.from('users').delete().eq('id', uid);
+    // Sign out karo
+    await sb.auth.signOut();
+    alert('✅ Account delete ho gaya.');
+    window.location.href = '../index.html';
+  } catch(e){
+    toast('❌ Error: ' + e.message);
+    console.error('Delete error:', e);
+  }
+}
 
 // ─── UPDATE BOOK CTA PRICE ───────────────────────────
 function updateBookCta(){

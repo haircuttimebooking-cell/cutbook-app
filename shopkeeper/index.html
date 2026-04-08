@@ -370,6 +370,7 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
         <div class="pr-row" onclick="toast('📞 Support se baat karo')"><div class="pr-icon-wrap">📞</div><div class="pr-lbl">Support</div><span style="color:var(--tx3);margin-left:auto;">›</span></div>
         <div class="pr-row" onclick="toast('📜 Terms & Conditions')"><div class="pr-icon-wrap">📄</div><div class="pr-lbl">Terms & Privacy</div><span style="color:var(--tx3);margin-left:auto;">›</span></div>
         <div class="pr-row" onclick="doLogout()"><div class="pr-icon-wrap">🚪</div><div class="pr-lbl" style="color:var(--re);">Log Out</div><span style="color:var(--tx3);margin-left:auto;">›</span></div>
+        <div class="pr-row" onclick="doDeleteAccount()"><div class="pr-icon-wrap">🗑️</div><div class="pr-lbl" style="color:var(--re);font-size:11px;">Account Delete Karo</div><span style="color:var(--tx3);margin-left:auto;">›</span></div>
       </div>
       <div style="height:20px;"></div>
     </div>
@@ -950,6 +951,35 @@ function doLogout(){
   });
 }
 
+// ─── DELETE ACCOUNT ───────────────────────────────────
+function doDeleteAccount(){
+  showConfirm('🗑️','Account Delete Karein?',
+    '⚠️ Shop, bookings sab permanently delete ho jayenge. Yeh undo nahi hoga!',
+    'Haan, Delete Karo','var(--re)', async function(){
+      try {
+        toast('⏳ Account delete ho raha hai...');
+        const uid = currentShopOwnerId;
+        if(!uid){ toast('❌ User ID nahi mili'); return; }
+
+        // Shop delete karo
+        await sb.from('shops').delete().eq('owner_id', uid);
+        // Bookings delete karo
+        await sb.from('bookings').delete().eq('shop_owner_id', uid);
+        // Users table se delete karo
+        await sb.from('users').delete().eq('id', uid);
+        // LocalStorage clear karo
+        localStorage.removeItem('mhb_approved_'+uid);
+        // Sign out karo
+        await sb.auth.signOut();
+        alert('✅ Account delete ho gaya.');
+        window.location.href = '../index.html';
+      } catch(e){
+        toast('❌ Error: ' + e.message);
+        console.error('Delete error:', e);
+      }
+    });
+}
+
 // ─── SCHEDULE ─────────────────────────────────────────
 function renderTimeline(){
   const times=['9:00 AM','9:30 AM','10:00 AM','10:30 AM','11:00 AM','11:30 AM','12:00 PM'];
@@ -1058,8 +1088,23 @@ function init(){
   // getSession use karo — faster + session cached
   sb.auth.getSession().then(async({data:sessionData})=>{
     if(sessionData?.session?.user){
-      currentShopOwnerId=sessionData.session.user.id;
-      await checkShopStatus(sessionData.session.user.id);
+      const uid = sessionData.session.user.id;
+
+      // Role check — sirf shopkeeper yahan aa sake
+      const {data: userData} = await sb.from('users').select('role').eq('id', uid).maybeSingle();
+      if(userData?.role === 'customer'){
+        await sb.auth.signOut();
+        window.location.href = '../customer/index.html';
+        return;
+      }
+      if(userData?.role === 'admin'){
+        await sb.auth.signOut();
+        window.location.href = '../admin/index.html';
+        return;
+      }
+
+      currentShopOwnerId = uid;
+      await checkShopStatus(uid);
       // Bookings load karo SIRF agar pending-overlay nahi hai
       if(!document.getElementById('pending-overlay')){
         loadBookingsFromDB();
