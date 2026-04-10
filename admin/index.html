@@ -444,7 +444,7 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;color:var(--tx);min-h
 <script>
 const SUPABASE_URL = 'https://kovpsqdkrlgwyfrqlhry.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtvdnBzcWRrcmxnd3lmcnFsaHJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1MTg3MDAsImV4cCI6MjA5MDA5NDcwMH0.poZR0KcozCyL1xSo3mFi_yle5bRNhM4TWe1nWfvVx30';
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+var sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let adminUser = null;
 let adminPhone = '';
