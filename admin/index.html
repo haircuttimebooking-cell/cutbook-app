@@ -550,8 +550,11 @@ function approveShop(shopId, shopName){
       try {
         await updateShopStatus(shopId, 'active');
         toast(`✅ "${shopName}" approve ho gayi! Ab live hai.`);
-        await loadShopsPanel('all');
         await loadAllData();
+        await loadPendingApprovals();
+        if(document.getElementById('panel-shops').classList.contains('active')){
+          await loadShopsPanel('all');
+        }
       } catch(e){
         if(e.message === 'RLS_POLICY'){
           toast('❌ RLS Policy issue — Supabase dashboard mein shops table ki UPDATE policy check karein');
@@ -571,8 +574,11 @@ function rejectShop(shopId, shopName){
       try {
         await updateShopStatus(shopId, 'rejected');
         toast(`❌ "${shopName}" reject ho gayi.`);
-        await loadShopsPanel('all');
         await loadAllData();
+        await loadPendingApprovals();
+        if(document.getElementById('panel-shops').classList.contains('active')){
+          await loadShopsPanel('all');
+        }
       } catch(e){
         if(e.message === 'RLS_POLICY'){
           toast('❌ RLS Policy issue — Supabase dashboard mein policy check karein');
