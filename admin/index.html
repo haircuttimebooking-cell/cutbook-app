@@ -819,16 +819,16 @@ function showPanel(id, el){
 
 // ─── CONFIRM MODAL ────────────────────────────────────
 function showConfirm(icon, title, sub, yesColor, cb){
-  confirmCb = cb;
   document.getElementById('cm-icon').textContent = icon;
   document.getElementById('cm-title').textContent = title;
   document.getElementById('cm-sub').textContent = sub;
   const btn = document.getElementById('cm-yes-btn');
   btn.style.background = yesColor;
-  btn.onclick = ()=>{ closeConfirm(); if(confirmCb) confirmCb(); };
+  // cb ko seedha capture karo — confirmCb pe depend mat karo
+  btn.onclick = ()=>{ closeConfirm(); cb && cb(); };
   document.getElementById('confirm-modal').classList.add('open');
 }
-function closeConfirm(){ document.getElementById('confirm-modal').classList.remove('open'); confirmCb=null; }
+function closeConfirm(){ document.getElementById('confirm-modal').classList.remove('open'); }
 
 // ─── LOGOUT ───────────────────────────────────────────
 function doAdminLogout(){
