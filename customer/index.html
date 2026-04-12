@@ -224,34 +224,25 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
         <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="5" cy="5" r="4" stroke="#5A534E" stroke-width="1.3"/><path d="M8.5 8.5L11 11" stroke="#5A534E" stroke-width="1.3" stroke-linecap="round"/></svg>
         <span style="font-family:var(--dv);">दुकान का नाम या क्षेत्र / पिनकोड लिखिए...</span>
       </div>
-      <!-- ══ AD BANNER — sirf yahan image URL aur link badlo ══ -->
+      <!-- ══ AD BANNER — sirf 2 cheezein badlo ══ -->
       <div class="hero" style="padding:0;background:var(--bg3);border:1px solid var(--bd);">
-        <a id="ad-link" href="#" target="_blank" style="display:block;width:100%;height:100%;position:relative;">
-          <img id="ad-image" src="" alt=""
-            style="width:100%;height:100%;object-fit:cover;border-radius:18px;display:none;">
-          <!-- Placeholder — jab tak real ad nahi hai -->
+        <a id="ad-link" href="#" target="_blank" style="display:block;width:100%;height:100%;position:relative;border-radius:18px;overflow:hidden;">
+          <img id="ad-image" src="" alt="" style="width:100%;height:100%;object-fit:cover;display:none;">
           <div id="ad-placeholder" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;border-radius:18px;border:1.5px dashed rgba(244,123,32,0.3);background:rgba(244,123,32,0.04);">
             <div style="font-size:18px;">📢</div>
             <div style="font-size:10px;color:var(--tx3);font-family:var(--dv);">Ad Space Available</div>
           </div>
         </a>
       </div>
-      <!-- ══ AD CONFIG — Yahan sirf 2 cheezein badlo ══
-           AD_IMAGE_URL = apni banner image ka link
-           AD_CLICK_URL = click pe kahan jaaye
-      ══ -->
       <script>
         (function(){
-          var AD_IMAGE_URL = '';   // 👈 Yahan image URL daalo
-          var AD_CLICK_URL = '#';  // 👈 Yahan click link daalo
+          var AD_IMAGE_URL = '';   // 👈 Yahan banner image URL daalo
+          var AD_CLICK_URL = '#';  // 👈 Yahan click pe jane wala link daalo
           if(AD_IMAGE_URL){
-            var img = document.getElementById('ad-image');
-            var ph  = document.getElementById('ad-placeholder');
-            var lnk = document.getElementById('ad-link');
-            img.src = AD_IMAGE_URL;
-            img.style.display = 'block';
-            ph.style.display  = 'none';
-            lnk.href = AD_CLICK_URL;
+            document.getElementById('ad-image').src = AD_IMAGE_URL;
+            document.getElementById('ad-image').style.display = 'block';
+            document.getElementById('ad-placeholder').style.display = 'none';
+            document.getElementById('ad-link').href = AD_CLICK_URL;
           }
         })();
       </script>
