@@ -276,7 +276,7 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
       <div style="position:relative;">
         <div class="detail-hero" id="detail-hero-img">
           <div class="detail-overlay"></div>
-          <div class="back-btn" onclick="goScreen('home')"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M7 1L3 5L7 9" stroke="#F2EDE8" stroke-width="1.4" stroke-linecap="round"/></svg></div>
+          <div class="back-btn" onclick="goScreen(prevScreen||'home')"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M7 1L3 5L7 9" stroke="#F2EDE8" stroke-width="1.4" stroke-linecap="round"/></svg></div>
           <div class="fav-btn" onclick="toast('❤️ Favourites mein add ho gaya!')"><svg width="12" height="11" viewBox="0 0 12 11" fill="none"><path d="M6 10L1.5 5.5C0.7 4.7.7 3.5 1.5 2.7 2.3 1.9 3.5 1.9 4.3 2.7L6 4.4l1.7-1.7C8.5 1.9 9.7 1.9 10.5 2.7 11.3 3.5 11.3 4.7 10.5 5.5L6 10Z" stroke="#F2EDE8" stroke-width="1.2" fill="none"/></svg></div>
         </div>
       </div>
@@ -295,8 +295,13 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
       </div>
       <!-- START BOOKING CTA -->
       <div style="padding:0 16px 20px;">
-        <button onclick="startBookingFlow()" style="width:100%;background:var(--or);border:none;color:#fff;padding:16px;border-radius:14px;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans';display:flex;align-items:center;justify-content:center;gap:8px;">
-          ✂️ Services Dekhein &amp; Book Karein →
+        <!-- Service buttons — clickable, multi-select -->
+        <div style="margin-bottom:12px;">
+          <div id="detail-service-buttons" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+        </div>
+        <button id="detail-book-btn" onclick="startBookingFromDetail()" disabled
+          style="width:100%;background:var(--or);border:none;color:#fff;padding:16px;border-radius:14px;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans';display:flex;align-items:center;justify-content:center;gap:8px;opacity:0.4;transition:opacity .2s;">
+          सर्विस चुने और आगे बड़े →
         </button>
         <div id="detail-services-hint" style="text-align:center;margin-top:8px;font-size:10px;color:var(--tx3);font-family:var(--dv);"></div>
       </div>
@@ -483,7 +488,7 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
     <!-- ══ PROFILE ══ -->
     <div id="sc-profile" class="screen">
       <div class="profile-header">
-        <div class="profile-av">RK</div>
+        <div class="profile-av" id="profile-av-initials">?</div>
         <div>
           <div class="profile-name" id="profile-name-display">User</div>
           <div class="profile-sub" id="profile-phone-display">—</div>
@@ -580,6 +585,7 @@ let selectedServices = []; // [{name, price, duration}]
 let selectedBarber = null; // string
 let selectedDate = null;   // YYYY-MM-DD
 let selectedSlot = null;   // "10:30 AM"
+let prevScreen = 'home'; // track where user came from
 let activeHoldId = null;
 let holdCountdownTimer = null;
 
@@ -660,7 +666,7 @@ async function loadShops(){
     else distHtml=`<span>📍 ${s.city||'—'}</span>`;
     function fmtT(t){if(!t)return'';const[h,m]=t.split(':').map(Number);const ap=h>=12?'PM':'AM';return`${h%12||12}:${String(m).padStart(2,'0')} ${ap}`;}
     const timing=(s.opening_time&&s.closing_time)?`${fmtT(s.opening_time)}–${fmtT(s.closing_time)}`:'';
-    return `<div class="salon-card" onclick="openShopDetail(${i})">
+    return `<div class="salon-card" onclick="prevScreen='home';openShopDetail(${i})">
       <div class="salon-img" style="background:linear-gradient(135deg,#181010,#281810);position:relative;overflow:hidden;">${imgHtml}${openBadge}</div>
       <div class="salon-body"><div class="salon-name">${s.name}</div>
       <div class="salon-meta">${distHtml}${timing?`<span>⏰ ${timing}</span>`:''}${minPrice?`<span style="color:var(--or);font-weight:600;">₹${minPrice} से</span>`:''}</div></div></div>`;
@@ -698,11 +704,26 @@ function openShopDetail(i){
     photosBtn.style.pointerEvents=cnt>0?'auto':'none';
   }
 
-  // Services count hint
+  // Service buttons — clickable multi-select
+  const svcBtns = document.getElementById('detail-service-buttons');
   const hint = document.getElementById('detail-services-hint');
-  if(hint){
-    const cnt = selectedShop.services ? selectedShop.services.length : 0;
-    hint.textContent = cnt > 0 ? `${cnt} services available` : '';
+  const bookBtn = document.getElementById('detail-book-btn');
+  if(svcBtns && selectedShop.services && selectedShop.services.length){
+    const cnt = selectedShop.services.length;
+    if(hint) hint.textContent = cnt + ' सेवाएँ उपलब्ध हैं';
+    const svcEmojis = {'Haircut':'✂️','Shave':'🪒','Styling':'💇','Facial':'💆','Colour':'🎨','Beard':'🪒','Massage':'💆','Wash':'🚿','Threading':'🧵'};
+    svcBtns.innerHTML = selectedShop.services.map((s,i)=>{
+      const emoji = svcEmojis[s.name]||'✂️';
+      return `<button id="det-svc-${i}" onclick="toggleDetailSvc(${i})"
+        style="background:var(--bg3);border:1px solid var(--bd2);color:var(--tx2);
+        padding:8px 14px;border-radius:20px;font-size:11px;font-weight:600;
+        cursor:pointer;font-family:'DM Sans';transition:all .2s;display:flex;align-items:center;gap:6px;">
+        ${emoji} ${s.name} <span style="color:var(--or);">₹${s.price}</span>
+      </button>`;
+    }).join('');
+  } else {
+    if(svcBtns) svcBtns.innerHTML = '';
+    if(hint) hint.textContent = '';
   }
 
   // Open/close
@@ -717,6 +738,41 @@ function openShopDetail(i){
     :`🔴 <strong style="color:var(--re)">Closed</strong>`;
 
   goScreen('detail');
+}
+
+// ─── DETAIL PAGE SERVICE TOGGLE ─────────────────────
+function toggleDetailSvc(i){
+  const s = selectedShop.services[i];
+  const btn = document.getElementById('det-svc-'+i);
+  const bookBtn = document.getElementById('detail-book-btn');
+  const idx = selectedServices.findIndex(x=>x.name===s.name);
+  if(idx === -1){
+    selectedServices.push({name:s.name, price:s.price, duration:s.duration||30});
+    if(btn){ btn.style.background='var(--or2)'; btn.style.borderColor='var(--or)'; btn.style.color='var(--or)'; }
+  } else {
+    selectedServices.splice(idx,1);
+    if(btn){ btn.style.background='var(--bg3)'; btn.style.borderColor='var(--bd2)'; btn.style.color='var(--tx2)'; }
+  }
+  // Enable/disable book button
+  if(bookBtn){
+    if(selectedServices.length > 0){
+      bookBtn.disabled = false;
+      bookBtn.style.opacity = '1';
+      const total = selectedServices.reduce((sum,s)=>sum+s.price,0);
+      bookBtn.textContent = selectedServices.length + ' सर्विस चुनी · ₹'+total+' — आगे बड़ें →';
+    } else {
+      bookBtn.disabled = true;
+      bookBtn.style.opacity = '0.4';
+      bookBtn.textContent = 'सर्विस चुने और आगे बड़े →';
+    }
+  }
+}
+
+// ─── START FROM DETAIL (skip sc-services, go to barber) ──
+function startBookingFromDetail(){
+  if(!selectedServices.length){ toast('❌ Pehle koi service chunein'); return; }
+  // Go directly to barber step
+  goToBarberStep();
 }
 
 // ─── START BOOKING FLOW ──────────────────────────────
@@ -968,7 +1024,17 @@ async function loadBookings(){
   const countEl = document.getElementById('profile-booking-count');
   if(currentUser && nameEl){
     const {data:u} = await sb.from('users').select('name,phone').eq('id',currentUser.id).maybeSingle();
-    if(u){ nameEl.textContent=u.name||'User'; phoneEl.textContent=u.phone||'—'; }
+    if(u){
+      nameEl.textContent=u.name||'User';
+      phoneEl.textContent=u.phone||'—';
+      // Dynamic initials
+      const avEl = document.getElementById('profile-av-initials');
+      if(avEl && u.name){
+        const parts = u.name.trim().split(' ');
+        const initials = parts.length>=2 ? parts[0][0]+parts[1][0] : parts[0].slice(0,2);
+        avEl.textContent = initials.toUpperCase();
+      }
+    }
   }
   if(countEl) countEl.textContent=`${allBookings.length} bookings`;
 }
@@ -1183,6 +1249,32 @@ function toggleSvc(el){ el.classList.toggle('on'); }
 // ─── SEARCH ──────────────────────────────────────────
 function normalizeText(str){ return (str||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
 
+// Hindi → English transliteration map for search
+const hindiToEng = {
+  'अ':'a','आ':'a','इ':'i','ई':'i','उ':'u','ऊ':'u','ए':'e','ऐ':'ai','ओ':'o','औ':'au',
+  'क':'k','ख':'kh','ग':'g','घ':'gh','च':'ch','छ':'chh','ज':'j','झ':'jh',
+  'ट':'t','ठ':'th','ड':'d','ढ':'dh','त':'t','थ':'th','द':'d','ध':'dh',
+  'न':'n','प':'p','फ':'f','ब':'b','भ':'bh','म':'m','य':'y','र':'r',
+  'ल':'l','व':'v','श':'sh','ष':'sh','स':'s','ह':'h','क्ष':'ksh','ज्ञ':'gy',
+  'ा':'a','ि':'i','ी':'i','ु':'u','ू':'u','े':'e','ै':'ai','ो':'o','ौ':'au',
+  'ं':'n','ः':'','्':''
+};
+function hindiToEnglish(str){
+  return (str||'').split('').map(c=>hindiToEng[c]||c).join('').toLowerCase();
+}
+function searchMatch(shopField, query){
+  const q = query.toLowerCase().trim();
+  const field = (shopField||'').toLowerCase();
+  // Direct match (Hindi or English)
+  if(field.includes(q)) return true;
+  // Hindi field → English transliteration match
+  const fieldEng = hindiToEnglish(shopField);
+  if(fieldEng.includes(q)) return true;
+  // Normalized match
+  if(normalizeText(field).includes(normalizeText(q))) return true;
+  return false;
+}
+
 function filterSearch(q){
   const resultsEl=document.getElementById('search-results');
   const searchList=document.getElementById('search-list');
@@ -1201,12 +1293,10 @@ function filterSearch(q){
       return dA-dB;
     });
   } else {
-    const q_norm=normalizeText(term);
     filtered=allShops.filter(s=>
-      normalizeText(s.name).includes(q_norm)||
-      (s.name||'').includes(term)||   // Hindi direct match
-      normalizeText(s.city).includes(q_norm)||
-      normalizeText(s.address||'').includes(q_norm)||
+      searchMatch(s.name, term)||
+      searchMatch(s.city, term)||
+      searchMatch(s.address||'', term)||
       (s.pincode||'').toString().includes(term)
     );
   }
@@ -1224,7 +1314,7 @@ function filterSearch(q){
     let distHtml=s.latitude&&s.longitude&&userLat&&userLng?`<span>📍 ${calcDist(userLat,userLng,s.latitude,s.longitude)} किमी दूर</span>`:`<span>📍 ${s.city||'—'}</span>`;
     function fmtT(t){if(!t)return'';const[h,m]=t.split(':').map(Number);const ap=h>=12?'PM':'AM';return`${h%12||12}:${String(m).padStart(2,'0')} ${ap}`;}
     const timing=(s.opening_time&&s.closing_time)?`${fmtT(s.opening_time)}–${fmtT(s.closing_time)}`:'';
-    return `<div class="salon-card" onclick="openShopDetail(${origIdx})">
+    return `<div class="salon-card" onclick="prevScreen='search';openShopDetail(${origIdx})">
       <div class="salon-img" style="background:linear-gradient(135deg,#181010,#281810);position:relative;overflow:hidden;">${imgHtml}${openBadge}</div>
       <div class="salon-body"><div class="salon-name">${s.name}</div>
       <div class="salon-meta">${distHtml}${timing?`<span>⏰ ${timing}</span>`:''}${minPrice?`<span style="color:var(--or);font-weight:600;">₹${minPrice} से</span>`:''}</div></div></div>`;
@@ -1284,7 +1374,7 @@ function showFeedbackNotification(booking){
     <div style="font-size:11px;color:var(--tx2);font-family:var(--dv);margin-bottom:12px;">⭐ <strong style="color:var(--tx);">${barberName}</strong> ke saath aapka experience kaisa raha?</div>
     <div style="display:flex;gap:8px;">
       <button onclick="document.getElementById('feedback-notif').remove()" style="flex:1;background:var(--bg3);border:1px solid var(--bd2);color:var(--tx2);padding:8px;border-radius:9px;font-size:11px;cursor:pointer;">Baad mein</button>
-      <button onclick="document.getElementById('feedback-notif').remove();openFeedbackModal('${booking.id}','${(booking.shop_name||'').replace(/'/g,"\\'")}','${(booking.barber_name||'').replace(/'/g,"\\'")}') " style="flex:2;background:var(--or);border:none;color:#fff;padding:8px;border-radius:9px;font-size:11px;font-weight:600;cursor:pointer;">⭐ Rating dein</button>
+      <button onclick="document.getElementById('feedback-notif').remove();openFeedbackModal('${booking.id}','${(booking.shop_name||'').replace(/'/g,"\\'")}','${(booking.barber_name||'').replace(/'/g,"\\'")}');" style="flex:2;background:var(--or);border:none;color:#fff;padding:8px;border-radius:9px;font-size:11px;font-weight:600;cursor:pointer;">⭐ Rating dein</button>
     </div>`;
   document.body.appendChild(notif);
   setTimeout(()=>{ if(document.getElementById('feedback-notif')) document.getElementById('feedback-notif').remove(); },10000);
