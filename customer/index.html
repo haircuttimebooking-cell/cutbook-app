@@ -295,15 +295,19 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
       </div>
       <!-- START BOOKING CTA -->
       <div style="padding:0 16px 20px;">
-        <!-- Service buttons — clickable, multi-select -->
-        <div style="margin-bottom:12px;">
-          <div id="detail-service-buttons" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+        <!-- Services icon chips — horizontal scroll -->
+        <div style="margin-bottom:14px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+            <div style="font-size:12px;font-weight:600;font-family:var(--dv);">सर्विसेज</div>
+            <div style="font-size:10px;color:var(--or);cursor:pointer;font-family:var(--dv);" onclick="startBookingFlow()">सभी सर्विसेज देखें →</div>
+          </div>
+          <div id="detail-service-icons" style="display:flex;gap:12px;overflow-x:auto;scrollbar-width:none;padding-bottom:4px;"></div>
         </div>
-        <button id="detail-book-btn" onclick="startBookingFromDetail()" disabled
-          style="width:100%;background:var(--or);border:none;color:#fff;padding:16px;border-radius:14px;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans';display:flex;align-items:center;justify-content:center;gap:8px;opacity:0.4;transition:opacity .2s;">
-          सर्विस चुने और आगे बड़े →
+        <!-- CTA Button -->
+        <button onclick="startBookingFlow()" style="width:100%;background:var(--or);border:none;color:#fff;padding:16px;border-radius:14px;font-size:14px;font-weight:700;cursor:pointer;font-family:var(--dv);display:flex;align-items:center;justify-content:center;gap:8px;">
+          ✂️ सर्विस चुनें और आगे बढ़ें →
         </button>
-        <div id="detail-services-hint" style="text-align:center;margin-top:8px;font-size:10px;color:var(--tx3);font-family:var(--dv);"></div>
+        <div id="detail-services-hint" style="text-align:center;margin-top:8px;font-size:11px;color:var(--tx3);font-family:var(--dv);"></div>
       </div>
     </div>
 
@@ -704,25 +708,34 @@ function openShopDetail(i){
     photosBtn.style.pointerEvents=cnt>0?'auto':'none';
   }
 
-  // Service buttons — clickable multi-select
-  const svcBtns = document.getElementById('detail-service-buttons');
+  // Services icon chips — home page jaisi style
+  const iconsEl = document.getElementById('detail-service-icons');
   const hint = document.getElementById('detail-services-hint');
-  const bookBtn = document.getElementById('detail-book-btn');
-  if(svcBtns && selectedShop.services && selectedShop.services.length){
+  if(iconsEl && selectedShop.services && selectedShop.services.length){
     const cnt = selectedShop.services.length;
     if(hint) hint.textContent = cnt + ' सेवाएँ उपलब्ध हैं';
-    const svcEmojis = {'Haircut':'✂️','Shave':'🪒','Styling':'💇','Facial':'💆','Colour':'🎨','Beard':'🪒','Massage':'💆','Wash':'🚿','Threading':'🧵'};
-    svcBtns.innerHTML = selectedShop.services.map((s,i)=>{
-      const emoji = svcEmojis[s.name]||'✂️';
-      return `<button id="det-svc-${i}" onclick="toggleDetailSvc(${i})"
-        style="background:var(--bg3);border:1px solid var(--bd2);color:var(--tx2);
-        padding:8px 14px;border-radius:20px;font-size:11px;font-weight:600;
-        cursor:pointer;font-family:'DM Sans';transition:all .2s;display:flex;align-items:center;gap:6px;">
-        ${emoji} ${s.name} <span style="color:var(--or);">₹${s.price}</span>
-      </button>`;
-    }).join('');
+    const svcEmojis = {
+      'haircut':'✂️','हेयरकट':'✂️','बाल':'✂️','बच्च':'✂️',
+      'shave':'🪒','शेव':'🪒','दाढ़ी':'🪒','daadhi':'🪒','beard':'🪒',
+      'styling':'💇','स्टाइल':'💇',
+      'facial':'💆','फेशियल':'💆','face':'💆',
+      'colour':'🎨','color':'🎨','कलर':'🎨','डाई':'🎨','dye':'🎨',
+      'massage':'💆','मसाज':'💆',
+      'wash':'🚿','धोना':'🚿',
+      'trim':'✂️','ट्रिम':'✂️','सेट':'✂️'
+    };
+    const getEmoji = (name) => {
+      const n = name.toLowerCase();
+      for(const k in svcEmojis){ if(n.includes(k.toLowerCase())) return svcEmojis[k]; }
+      return '✂️';
+    };
+    iconsEl.innerHTML = selectedShop.services.map(s=>`
+      <div style="display:flex;flex-direction:column;align-items:center;gap:5px;flex-shrink:0;cursor:pointer;" onclick="startBookingFlow()">
+        <div style="width:44px;height:44px;background:var(--bg3);border:1px solid var(--bd);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:20px;">${getEmoji(s.name)}</div>
+        <span style="font-size:9px;color:var(--tx2);font-family:var(--dv);text-align:center;max-width:46px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${s.name}</span>
+      </div>`).join('');
   } else {
-    if(svcBtns) svcBtns.innerHTML = '';
+    if(iconsEl) iconsEl.innerHTML = '';
     if(hint) hint.textContent = '';
   }
 
