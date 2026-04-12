@@ -860,17 +860,17 @@ function goToBarberStep(){
       </div>
       ${i===0?`<div style="width:20px;height:20px;background:var(--or);border-radius:50%;display:flex;align-items:center;justify-content:center;" id="barber-check-${i}"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>`:`<div style="width:20px;height:20px;border:2px solid var(--bd2);border-radius:50%;" id="barber-check-${i}"></div>`}
     </div>`).join('') +
-    `<div class="barber-card" id="barber-card-any" onclick="pickBarberNew(-1,'Any Barber (Fastest Available)')">
+    `<div class="barber-card" id="barber-card-any" onclick="pickBarberNew(-1,'कोई भी नाई चुनें (जो सबसे जल्दी उपलब्ध हो)')">
       <div class="barber-av-lg" style="font-size:14px;color:var(--tx3);">Any</div>
       <div class="barber-card-info">
-        <div class="barber-card-name">Any Barber (Fastest Available)</div>
-        <div class="barber-card-sub">System automatically assign karega</div>
+        <div class="barber-card-name">कोई भी नाई चुनें (जो सबसे जल्दी उपलब्ध हो)</div>
+        <div class="barber-card-sub">सिस्टम अपने आप सबसे जल्दी उपलब्ध नाई को असाइन करेगा</div>
       </div>
       <div style="width:20px;height:20px;border:2px solid var(--bd2);border-radius:50%;" id="barber-check-any"></div>
     </div>`;
 
   // Default: first barber selected
-  selectedBarber = barbers.length > 0 ? barbers[0] : 'Any Barber (Fastest Available)';
+  selectedBarber = barbers.length > 0 ? barbers[0] : 'कोई भी नाई चुनें (जो सबसे जल्दी उपलब्ध हो)';
   goScreen('barber');
 }
 
