@@ -295,9 +295,12 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
       </div>
       <!-- START BOOKING CTA -->
       <div style="padding:0 16px 20px;">
-        <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:14px;padding:14px;margin-bottom:12px;">
-          <div style="font-size:11px;color:var(--tx3);font-family:var(--dv);margin-bottom:8px;">उपलब्ध सर्विसेज:</div>
-          <div id="detail-services-preview" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+        <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:14px;padding:12px 14px;margin-bottom:12px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+            <div style="font-size:11px;font-weight:600;">सर्विसेज</div>
+            <div style="font-size:10px;color:var(--or);">सभी सर्विसेज देखें →</div>
+          </div>
+          <div id="detail-services-preview" style="display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;"></div>
         </div>
         <button onclick="startBookingFlow()" style="width:100%;background:var(--or);border:none;color:#fff;padding:14px;border-radius:14px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans';">
           ✂️ Booking Shuru Karein →
@@ -701,12 +704,16 @@ function openShopDetail(i){
     photosBtn.style.pointerEvents=cnt>0?'auto':'none';
   }
 
-  // Services preview
+  // Services preview — home page jaisi icon chips
   const preview = document.getElementById('detail-services-preview');
   if(preview && selectedShop.services && selectedShop.services.length){
-    const svcEmojis={'Haircut':'✂️','Shave':'🪒','Shaving':'🪒','Styling':'💇','Facial':'💆','Colour':'🎨','Color':'🎨','Beard':'🧔','Massage':'💆','Hair Color':'🎨','Bal':'✂️','Daadhi':'🪒','Dhai':'🪒'};
+    const svcEmojis={'Haircut':'✂️','Shave':'🪒','Shaving':'🪒','Styling':'💇','Facial':'💆','Colour':'🎨','Color':'🎨','Beard':'🧔','Massage':'💆','Hair Color':'🎨','Bal':'✂️','Daadhi':'🪒','Dhai':'🪒','Trim':'✂️','बाल':'✂️','दाढ़ी':'🪒','हेयर':'✂️','फेशियल':'💆','कलर':'🎨'};
     const getEmoji=(name)=>{ for(const k in svcEmojis){ if(name.toLowerCase().includes(k.toLowerCase())) return svcEmojis[k]; } return '✂️'; };
-    preview.innerHTML = selectedShop.services.map(s=>`<span class="pill pill-gy" style="font-size:9px;">${getEmoji(s.name)} ${s.name} ₹${s.price}</span>`).join('');
+    preview.innerHTML = selectedShop.services.map(s=>`
+      <div style="display:flex;flex-direction:column;align-items:center;gap:5px;flex-shrink:0;cursor:pointer;" onclick="startBookingFlow()">
+        <div style="width:44px;height:44px;background:var(--bg3);border:1px solid var(--bd);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:20px;">${getEmoji(s.name)}</div>
+        <span style="font-size:9px;color:var(--tx2);font-family:var(--dv);text-align:center;max-width:48px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${s.name}</span>
+      </div>`).join('');
   }
 
   // Open/close
