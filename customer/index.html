@@ -441,6 +441,18 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
         </div>
         <!-- Hold countdown -->
         <div id="hold-countdown-banner" style="background:rgba(244,180,32,0.1);border:1px solid rgba(244,180,32,0.3);border-radius:10px;padding:8px 12px;text-align:center;font-size:12px;font-weight:600;color:var(--am);margin-bottom:12px;display:none;">⏳ Slot hold है — 3:00 बाकी</div>
+        <!-- Customer details -->
+        <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:14px;padding:14px;margin-bottom:12px;">
+          <div style="font-size:11px;font-weight:600;margin-bottom:10px;font-family:var(--dv);">👤 आपकी जानकारी</div>
+          <div style="margin-bottom:10px;">
+            <div style="font-size:10px;color:var(--tx3);font-family:var(--dv);margin-bottom:5px;">आपका नाम *</div>
+            <input id="booking-name" type="text" placeholder="नाम लिखें" style="width:100%;background:var(--bg3);border:1px solid var(--bd2);color:var(--tx);border-radius:10px;padding:10px 12px;font-size:13px;font-family:var(--dv);outline:none;">
+          </div>
+          <div>
+            <div style="font-size:10px;color:var(--tx3);font-family:var(--dv);margin-bottom:5px;">मोबाइल नंबर *</div>
+            <input id="booking-phone" type="tel" maxlength="10" placeholder="10 अंक का नंबर" oninput="this.value=this.value.replace(/\D/g,'')" style="width:100%;background:var(--bg3);border:1px solid var(--bd2);color:var(--tx);border-radius:10px;padding:10px 12px;font-size:13px;font-family:'DM Sans';outline:none;">
+          </div>
+        </div>
       </div>
       <div class="sticky-cta">
         <button class="cta-btn" onclick="confirmBook()">
@@ -815,12 +827,12 @@ function buildServicesScreen(){
       return '✂️';
     };
     const emoji = getEmoji(s.name);
-    const dur = s.duration ? `${s.duration} min` : '30 min';
+    const dur = s.duration ? `${s.duration} min` : null;
     return `<div class="svc-card" id="svc-card-${i}" onclick="toggleServiceCart(${i})">
       <div class="svc-card-icon">${emoji}</div>
       <div class="svc-card-info">
         <div class="svc-card-name">${s.name}</div>
-        <div class="svc-card-dur">⏱ ${dur}</div>
+        <div class="svc-card-dur">${dur ? '⏱ '+dur : ''}</div>
       </div>
       <div class="svc-card-price">₹${s.price}</div>
       <div class="svc-card-check">
@@ -863,7 +875,13 @@ function updateCartBar(){
 
 // ─── STEP 2: BARBER ──────────────────────────────────
 function goToBarberStep(){
-  if(!selectedServices.length){ toast('❌ Pehle ek service chunein'); return; }
+  if(!selectedServices.length){
+    toast('❌ Pehle kam se kam ek service chunein');
+    // Shake the button
+    const btn = document.getElementById('svc-continue-btn');
+    if(btn){ btn.style.transform='translateX(-5px)'; setTimeout(()=>btn.style.transform='translateX(5px)',100); setTimeout(()=>btn.style.transform='',200); }
+    return;
+  }
   const total = selectedServices.reduce((sum,s)=>sum+s.price,0);
   document.getElementById('barber-step-summary').textContent =
     `${selectedServices.map(s=>s.name).join(', ')} · ₹${total}`;
@@ -991,10 +1009,19 @@ async function confirmBook(){
   if(!selectedServices.length){ toast('❌ Services chunein'); return; }
   if(!selectedSlot){ toast('❌ Time slot chunein'); return; }
 
+  // Fix 3: Name + Phone validation
+  const bookingName = document.getElementById('booking-name')?.value.trim();
+  const bookingPhone = document.getElementById('booking-phone')?.value.trim();
+  if(!bookingName){ toast('❌ Apna naam likhein'); document.getElementById('booking-name')?.focus(); return; }
+  if(!bookingPhone || bookingPhone.length !== 10){ toast('❌ 10 digit mobile number likhein'); document.getElementById('booking-phone')?.focus(); return; }
+
   const barberName = selectedBarber||'Koi bhi';
   const svcNames = selectedServices.map(s=>s.name).join(', ');
   const totalPrice = selectedServices.reduce((sum,s)=>sum+s.price,0);
-  const {data:userData} = await sb.from('users').select('name,phone').eq('id',currentUser.id).maybeSingle();
+
+  // Fix 4: Auto accept check
+  const isAutoAccept = selectedShop.auto_accept === true || selectedShop.auto_accept === 'true';
+  const bookingStatus = isAutoAccept ? 'accepted' : 'pending';
 
   const {error} = await sb.from('bookings').insert([{
     customer_id: currentUser.id,
@@ -1005,9 +1032,9 @@ async function confirmBook(){
     booking_date: selectedDate,
     booking_time: selectedSlot,
     barber_name: barberName,
-    customer_name: userData?.name||'Customer',
-    customer_phone: userData?.phone||'',
-    status: 'pending',
+    customer_name: bookingName,
+    customer_phone: '+91' + bookingPhone,
+    status: bookingStatus,
   }]);
 
   if(error){ toast('❌ Booking fail — '+error.message); return; }
@@ -1022,6 +1049,17 @@ async function confirmBook(){
   document.getElementById('success-shop').textContent = selectedShop.name;
   document.getElementById('success-services').textContent = '💇 '+svcNames+' · ₹'+totalPrice;
   document.getElementById('success-time').textContent = `⏰ ${selectedDate} · ${selectedSlot} · ${barberName}`;
+
+  // Fix 4: Auto accept — seedha confirmed dikhao
+  const statusEl = document.querySelector('#sc-success .pill');
+  const successMsg = document.querySelector('#sc-success .success-wrap > div:nth-child(3)');
+  if(isAutoAccept){
+    if(statusEl){ statusEl.className='pill pill-gr'; statusEl.textContent='✅ Confirmed'; }
+    if(successMsg) successMsg.textContent='Booking confirmed ho gayi! Time pe aa jaana. 🎉';
+  } else {
+    if(statusEl){ statusEl.className='pill pill-am'; statusEl.textContent='⏳ Pending'; }
+    if(successMsg) successMsg.textContent='Shopkeeper jald hi confirm karega';
+  }
 
   await loadBookings();
   goScreen('success');
@@ -1066,14 +1104,61 @@ function subscribeBookings(){
   sb.channel('bookings-customer')
     .on('postgres_changes',{event:'UPDATE',schema:'public',table:'bookings'},async(payload)=>{
       const updated=payload.new;
-      if(updated.customer_id===currentUser?.id && updated.status==='completed' && prevStatuses[updated.id]!=='completed'){
-        showFeedbackNotification(updated);
+      if(updated.customer_id===currentUser?.id){
+        const prev = prevStatuses[updated.id];
+        // Notification sound + popup on status change
+        if(prev && prev !== updated.status){
+          playNotifSound();
+          showStatusPopup(updated);
+        }
+        if(updated.status==='completed' && prev!=='completed'){
+          showFeedbackNotification(updated);
+        }
       }
       prevStatuses[updated.id]=updated.status;
       await loadBookings();
     })
     .on('postgres_changes',{event:'INSERT',schema:'public',table:'bookings'},()=>loadBookings())
     .subscribe();
+}
+
+// Notification sound
+function playNotifSound(){
+  try{
+    const ctx = new (window.AudioContext||window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.frequency.setValueAtTime(880, ctx.currentTime);
+    osc.frequency.setValueAtTime(660, ctx.currentTime+0.1);
+    gain.gain.setValueAtTime(0.3, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+0.4);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime+0.4);
+  }catch(e){}
+}
+
+// Status popup
+function showStatusPopup(booking){
+  const stMsg = {
+    accepted: {icon:'✅', title:'Booking Confirmed!', msg:`${booking.shop_name} ne aapki booking confirm kar di. Time pe aa jaana!`, color:'var(--gr)'},
+    cancelled: {icon:'❌', title:'Booking Cancel Ho Gayi', msg:`${booking.shop_name} ne booking cancel kar di. Naya slot book karo.`, color:'var(--re)'},
+    completed: {icon:'🏁', title:'Service Complete!', msg:`${booking.shop_name} mein service complete ho gayi. Review do!`, color:'var(--or)'},
+  };
+  const info = stMsg[booking.status];
+  if(!info) return;
+  const el = document.createElement('div');
+  el.style.cssText=`position:fixed;top:16px;left:50%;transform:translateX(-50%);background:var(--bg2);border:1px solid ${info.color};border-radius:16px;padding:16px 18px;z-index:9999;max-width:320px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,0.7);`;
+  el.innerHTML=`
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+      <div style="font-size:22px;">${info.icon}</div>
+      <div style="font-size:13px;font-weight:700;color:${info.color};">${info.title}</div>
+      <div onclick="this.parentElement.parentElement.remove()" style="margin-left:auto;cursor:pointer;color:var(--tx3);font-size:18px;">✕</div>
+    </div>
+    <div style="font-size:11px;color:var(--tx2);font-family:var(--dv);line-height:1.5;">${info.msg}</div>
+  `;
+  document.body.appendChild(el);
+  setTimeout(()=>{ if(el.parentNode) el.remove(); }, 6000);
 }
 
 // ─── RENDER BOOKINGS ────────────────────────────────
