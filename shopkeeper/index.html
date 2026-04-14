@@ -301,8 +301,7 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
       </div>
       <div id="analytics-content"></div>
       <div style="margin:0 16px 14px;display:flex;gap:8px;">
-        <button class="btn btn-gy" style="flex:1;padding:11px;font-size:11px;" onclick="downloadReport('text')">📄 Text Report</button>
-        <button class="btn btn-or" style="flex:1;padding:11px;font-size:11px;" onclick="downloadReport('pdf')">📥 PDF Download</button>
+        <button class="btn btn-or" style="width:100%;padding:11px;font-size:11px;" onclick="downloadReport('pdf')">📥 PDF Report Download</button>
       </div>
     </div>
 
@@ -1785,24 +1784,89 @@ async function downloadReport(type){
   const today=new Date().toISOString().split('T')[0];
   const cutoff=new Date(Date.now()-30*86400000).toISOString().split('T')[0];
   const filtered=bookings.filter(b=>b.booking_date>=cutoff&&b.booking_date<=today);
-  const revenue=filtered.filter(b=>b.status==='completed').reduce((s,b)=>s+b.price,0);
-  const reportText=`CutBook — ${currentShop.name}
-Report Date: ${today}
-Period: Last 30 days
-=====================================
-Total Bookings: ${filtered.length}
-Completed: ${filtered.filter(b=>b.status==='completed').length}
-Cancelled: ${filtered.filter(b=>b.status==='cancelled').length}
-Total Revenue: Rs.${revenue}
-=====================================
-Booking Details:
-${filtered.map(b=>`${b.booking_date} ${b.time} | ${b.name} | ${b.svc} | Rs.${b.price} | ${b.status}`).join('\n')}`;
-  const blob=new Blob([reportText],{type:'text/plain'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');a.href=url;a.download=`cutbook-report-${today}.txt`;a.click();
-  URL.revokeObjectURL(url);
-  toast('📄 Report download ho raha hai...');
+  const completed=filtered.filter(b=>b.status==='completed');
+  const cancelled=filtered.filter(b=>b.status==='cancelled');
+  const pending=filtered.filter(b=>b.status==='pending');
+  const revenue=completed.reduce((s,b)=>s+(b.price||0),0);
+  const avgVal=completed.length>0?Math.round(revenue/completed.length):0;
+  const compRate=filtered.length>0?Math.round((completed.length/filtered.length)*100):0;
+
+  const printWin=window.open('','_blank','width=800,height=600');
+  if(!printWin){toast('❌ Popup block hai — browser mein allow karo');return;}
+
+  const rows=filtered.length>0
+    ?filtered.map((b,i)=>`<tr style="background:${i%2===0?'#f9f9f9':'#fff'}">
+        <td>${b.booking_date||'—'}</td>
+        <td>${b.booking_time||b.time||'—'}</td>
+        <td>${b.customer_name||b.name||'—'}</td>
+        <td>${b.customer_phone||b.phone||'—'}</td>
+        <td>${b.service||b.svc||'—'}</td>
+        <td style="text-align:right">₹${b.price||0}</td>
+        <td style="text-align:center;font-size:11px">${b.status||'—'}</td>
+      </tr>`).join('')
+    :'<tr><td colspan="7" style="text-align:center;padding:20px;color:#666">Koi booking nahi</td></tr>';
+
+  printWin.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
+<title>CutBook Report</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Arial,sans-serif;padding:30px;color:#1a1a1a;font-size:13px}
+.hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;padding-bottom:14px;border-bottom:2px solid #F47B20}
+.logo{font-size:22px;font-weight:800;color:#F47B20}
+.logo span{color:#1a1a1a}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
+.stat{background:#f5f5f5;border-radius:8px;padding:14px;text-align:center}
+.stat-num{font-size:24px;font-weight:800;color:#F47B20}
+.stat-lbl{font-size:10px;color:#888;margin-top:3px;text-transform:uppercase}
+.stat.gr .stat-num{color:#28a745}
+.stat.re .stat-num{color:#dc3545}
+.stat.bl .stat-num{color:#007bff}
+.sumbox{background:#fff8f0;border:1px solid #F47B20;border-radius:8px;padding:14px;margin-bottom:20px;display:flex;gap:24px}
+.si .lbl{font-size:10px;color:#888;text-transform:uppercase}
+.si .val{font-size:15px;font-weight:700;color:#F47B20}
+table{width:100%;border-collapse:collapse}
+th{background:#F47B20;color:#fff;padding:9px 10px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase}
+td{padding:8px 10px;border-bottom:1px solid #eee;font-size:12px}
+.footer{margin-top:20px;padding-top:10px;border-top:1px solid #eee;font-size:10px;color:#aaa;text-align:center}
+@media print{body{padding:15px}}
+</style></head><body>
+<div class="hdr">
+  <div>
+    <div class="logo">Cut<span>Book</span></div>
+    <div style="font-size:18px;font-weight:700;margin-top:4px">${currentShop.name}</div>
+    <div style="font-size:11px;color:#888;margin-top:2px">📍 ${currentShop.city||currentShop.address||'—'}</div>
+  </div>
+  <div style="text-align:right;font-size:11px;color:#666">
+    <div style="font-weight:700;margin-bottom:2px">Booking Report</div>
+    <div>Date: ${today}</div>
+    <div>Period: Last 30 days</div>
+    <div>${cutoff} se ${today} tak</div>
+  </div>
+</div>
+<div class="stats">
+  <div class="stat"><div class="stat-num">${filtered.length}</div><div class="stat-lbl">Total Bookings</div></div>
+  <div class="stat gr"><div class="stat-num">${completed.length}</div><div class="stat-lbl">Completed</div></div>
+  <div class="stat re"><div class="stat-num">${cancelled.length}</div><div class="stat-lbl">Cancelled</div></div>
+  <div class="stat bl"><div class="stat-num">₹${revenue}</div><div class="stat-lbl">Total Revenue</div></div>
+</div>
+<div class="sumbox">
+  <div class="si"><div class="lbl">Completion Rate</div><div class="val">${compRate}%</div></div>
+  <div class="si"><div class="lbl">Avg Booking</div><div class="val">₹${avgVal}</div></div>
+  <div class="si"><div class="lbl">Pending</div><div class="val">${pending.length}</div></div>
+  <div class="si"><div class="lbl">Phone</div><div class="val" style="font-size:12px">${currentShop.phone||'—'}</div></div>
+</div>
+<div style="font-size:14px;font-weight:700;margin-bottom:8px">📋 Booking Details</div>
+<table>
+  <thead><tr><th>Date</th><th>Time</th><th>Customer</th><th>Phone</th><th>Service</th><th style="text-align:right">Amount</th><th>Status</th></tr></thead>
+  <tbody>${rows}</tbody>
+</table>
+<div class="footer">Generated by CutBook · ${new Date().toLocaleString('hi-IN')}</div>
+<script>window.onload=function(){window.print()}<\/script>
+</body></html>`);
+  printWin.document.close();
+  toast('📥 PDF report generate ho raha hai...');
 }
+
 
 // ─── LOGOUT / DELETE ──────────────────────────────────
 function doLogout(){
