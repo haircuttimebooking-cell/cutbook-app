@@ -1083,16 +1083,33 @@ async function submitRegistration(){
 
   // ── Photos Supabase Storage mein upload karo ──
   setMsg('submit-msg','<span class="spinner"></span> Photos upload ho rahi hain...','');
-  const allPhotosToUpload = boardPhoto ? [boardPhoto, ...interiorPhotos] : [...interiorPhotos];
   const photoUrls = [];
-  for(let i=0; i<allPhotosToUpload.length; i++){
-    const photo = allPhotosToUpload[i];
+
+  // Board photo → boards/ folder (mandatory)
+  if(boardPhoto){
+    const ext = boardPhoto.file.type === 'image/png' ? 'png' : 'jpg';
+    const fileName = `boards/${regUserId}_${Date.now()}.${ext}`;
+    const { data: upData, error: upErr } = await sb.storage
+      .from('shop-photos')
+      .upload(fileName, boardPhoto.file, { contentType: boardPhoto.file.type, upsert: true });
+    if(upErr){
+      console.warn('Board photo upload error:', upErr.message);
+      setMsg('submit-msg','❌ Board photo upload fail: ' + upErr.message,'error');
+      return;
+    }
+    const { data: urlData } = sb.storage.from('shop-photos').getPublicUrl(fileName);
+    if(urlData?.publicUrl) photoUrls.push(urlData.publicUrl);
+  }
+
+  // Interior photos → interior/ folder (optional, max 4)
+  for(let i=0; i<interiorPhotos.length; i++){
+    const photo = interiorPhotos[i];
     const ext = photo.file.type === 'image/png' ? 'png' : 'jpg';
-    const fileName = `${regUserId}_${Date.now()}_${i}.${ext}`;
+    const fileName = `interior/${regUserId}_${Date.now()}_${i}.${ext}`;
     const { data: upData, error: upErr } = await sb.storage
       .from('shop-photos')
       .upload(fileName, photo.file, { contentType: photo.file.type, upsert: true });
-    if(upErr){ console.warn('Photo upload error:', upErr.message); continue; }
+    if(upErr){ console.warn('Interior photo upload error:', upErr.message); continue; }
     const { data: urlData } = sb.storage.from('shop-photos').getPublicUrl(fileName);
     if(urlData?.publicUrl) photoUrls.push(urlData.publicUrl);
   }
