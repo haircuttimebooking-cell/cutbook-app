@@ -260,58 +260,50 @@ option{background:var(--bg3);}
   <div class="step" id="step-3">
     <div class="step-icon">🏪</div>
     <div class="step-title">दुकान की जानकारी</div>
-    <div class="step-sub">Aapki dukan kahan hai aur uska naam kya hai</div>
+    <div class="step-sub">Dukan ka pura pata sahi bharein — customers isi se dhundhenge</div>
     <div class="field">
       <div class="field-label">दुकान का नाम *</div>
       <input class="field-input" id="shop-name" type="text" placeholder="जैसे: राज हेयर स्टूडियो">
     </div>
-    <div class="field-row">
-      <div class="field">
-        <div class="field-label">शहर *</div>
-        <input class="field-input" id="shop-city" type="text" placeholder="लखनऊ" list="city-list">
-        <datalist id="city-list">
-          <option>अंबेडकर नगर</option><option>अमेठी</option><option>अमरोहा</option>
-          <option>अलीगढ़</option><option>अररिया</option><option>अरवल</option>
-          <option>औरंगाबाद</option><option>आगरा</option><option>आज़मगढ़</option>
-          <option>इटावा</option><option>कटिहार</option><option>कानपुर देहात</option>
-          <option>कानपुर नगर</option><option>कासगंज</option><option>किशनगंज</option>
-          <option>कुशीनगर</option><option>कैमूर</option><option>कौशांबी</option>
-          <option>खगड़िया</option><option>खीरी</option><option>गाज़ियाबाद</option>
-          <option>गाज़ीपुर</option><option>गोंडा</option><option>गोपालगंज</option>
-          <option>गोरखपुर</option><option>चंदौली</option><option>चित्रकूट</option>
-          <option>जालौन</option><option>जौनपुर</option><option>झांसी</option>
-          <option>दरभंगा</option><option>देवरिया</option><option>नालंदा</option>
-          <option>नवादा</option><option>पटना</option><option>पूर्णिया</option>
-          <option>पूर्वी चंपारण</option><option>प्रतापगढ़</option><option>प्रयागराज</option>
-          <option>फतेहपुर</option><option>फर्रुखाबाद</option><option>फिरोज़ाबाद</option>
-          <option>बक्सर</option><option>बदायूं</option><option>बरेली</option>
-          <option>बलिया</option><option>बलरामपुर</option><option>बस्ती</option>
-          <option>बहराइच</option><option>बांदा</option><option>बागपत</option>
-          <option>बाराबंकी</option><option>बिजनौर</option><option>बेगूसराय</option>
-          <option>भागलपुर</option><option>भोजपुर</option><option>मऊ</option>
-          <option>मथुरा</option><option>मधुबनी</option><option>मधेपुरा</option>
-          <option>मुज़फ्फरनगर</option><option>मुज़फ्फरपुर</option><option>मुरादाबाद</option>
-          <option>मेरठ</option><option>मैनपुरी</option><option>महाराजगंज</option>
-          <option>महोबा</option><option>मिर्जापुर</option><option>मुंगेर</option>
-          <option>रायबरेली</option><option>रामपुर</option><option>रोहतास</option>
-          <option>लखनऊ</option><option>लखीमपुर खीरी</option><option>लखीसराय</option>
-          <option>वाराणसी</option><option>शाहजहांपुर</option><option>शामली</option>
-          <option>शिवहर</option><option>श्रावस्ती</option><option>संत कबीर नगर</option>
-          <option>संत रविदास नगर</option><option>संभल</option><option>सहारनपुर</option>
-          <option>सहरसा</option><option>सीतापुर</option><option>सीवान</option>
-          <option>सुपौल</option><option>सुलतानपुर</option><option>सोनभद्र</option>
-          <option>हमीरपुर</option><option>हरदोई</option><option>हाथरस</option>
-          <option>हापुड़</option>
-        </datalist>
-      </div>
-      <div class="field">
-        <div class="field-label">PIN कोड *</div>
-        <input class="field-input" id="shop-pin" type="tel" maxlength="6" placeholder="226001" oninput="this.value=this.value.replace(/\D/g,'')">
-      </div>
+    <div class="field">
+      <div class="field-label">जिला (District) *</div>
+      <input class="field-input" id="shop-district" type="text" placeholder="जैसे: बस्ती, गोरखपुर, लखनऊ" list="district-list">
+      <datalist id="district-list">
+        <option>अंबेडकर नगर</option><option>अमेठी</option><option>अमरोहा</option>
+        <option>अलीगढ़</option><option>आगरा</option><option>आज़मगढ़</option>
+        <option>इटावा</option><option>कानपुर नगर</option><option>कुशीनगर</option>
+        <option>कौशांबी</option><option>गाज़ियाबाद</option><option>गाज़ीपुर</option>
+        <option>गोंडा</option><option>गोरखपुर</option><option>चंदौली</option>
+        <option>जालौन</option><option>जौनपुर</option><option>झांसी</option>
+        <option>देवरिया</option><option>प्रतापगढ़</option><option>प्रयागराज</option>
+        <option>फतेहपुर</option><option>बरेली</option><option>बलिया</option>
+        <option>बलरामपुर</option><option>बस्ती</option><option>बहराइच</option>
+        <option>बाराबंकी</option><option>बिजनौर</option><option>मऊ</option>
+        <option>मथुरा</option><option>मुज़फ्फरनगर</option><option>मुरादाबाद</option>
+        <option>मेरठ</option><option>महाराजगंज</option><option>मिर्जापुर</option>
+        <option>रायबरेली</option><option>रामपुर</option><option>लखनऊ</option>
+        <option>लखीमपुर खीरी</option><option>वाराणसी</option><option>शाहजहांपुर</option>
+        <option>संत कबीर नगर</option><option>सहारनपुर</option><option>सीतापुर</option>
+        <option>सुलतानपुर</option><option>सोनभद्र</option><option>हरदोई</option>
+        <option>हाथरस</option><option>श्रावस्ती</option><option>संभल</option>
+      </datalist>
     </div>
     <div class="field">
-      <div class="field-label">पूरा पता *</div>
-      <textarea class="field-input" id="shop-address" rows="3" placeholder="मकान नंबर, गली, मोहल्ला, लैंडमार्क..." style="resize:none;line-height:1.5;"></textarea>
+      <div class="field-label">शहर / बाज़ार का नाम *</div>
+      <input class="field-input" id="shop-city" type="text" placeholder="जैसे: बस्ती सदर, हर्रैया बाज़ार, नगर पालिका">
+
+    </div>
+    <div class="field">
+      <div class="field-label">गली / रोड का नाम *</div>
+      <input class="field-input" id="shop-road" type="text" placeholder="जैसे: स्टेशन रोड, सिविल लाइन्स, मेन मार्केट">
+    </div>
+    <div class="field">
+      <div class="field-label">दुकान / रूम नंबर *</div>
+      <input class="field-input" id="shop-room" type="text" placeholder="जैसे: दुकान नं. 12, शॉप 5B, पहली मंजिल">
+    </div>
+    <div class="field">
+      <div class="field-label">PIN कोड * <span style="font-size:10px;color:var(--tx3);font-family:var(--dv);">(दुकान वाले area का 6 अंक)</span></div>
+      <input class="field-input" id="shop-pin" type="tel" maxlength="6" placeholder="272001" oninput="this.value=this.value.replace(/\D/g,'')">
     </div>
 
     <!-- Location -->
@@ -671,9 +663,11 @@ function rotpNext(i){
 // ─── SHOP DETAILS VALIDATE ───────────────────────────
 function handleShopNext(){
   if(!document.getElementById('shop-name').value.trim()){setMsg('shop-msg','❌ Dukan ka naam daalo','error');return;}
-  if(!document.getElementById('shop-city').value.trim()){setMsg('shop-msg','❌ Shehar daalo','error');return;}
+  if(!document.getElementById('shop-district').value.trim()){setMsg('shop-msg','❌ Jila (District) daalo','error');return;}
+  if(!document.getElementById('shop-city').value.trim()){setMsg('shop-msg','❌ Shehar / Bazaar ka naam daalo','error');return;}
+  if(!document.getElementById('shop-road').value.trim()){setMsg('shop-msg','❌ Gali / Road ka naam daalo','error');return;}
+  if(!document.getElementById('shop-room').value.trim()){setMsg('shop-msg','❌ Dukan / Room number daalo','error');return;}
   if(document.getElementById('shop-pin').value.length!==6){setMsg('shop-msg','❌ 6 digit PIN code daalo','error');return;}
-  if(!document.getElementById('shop-address').value.trim()){setMsg('shop-msg','❌ Pura pata daalo','error');return;}
   goStep(4);
 }
 
@@ -689,10 +683,17 @@ function openMap(){
   if(!leafletMap){
     leafletMap = L.map('map').setView([26.8, 80.9], 13);
 
-    // OSM layer — labels, road names, area names sab dikhte hain (FREE, no API key)
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
-      attribution:'© OpenStreetMap contributors',
+    // Satellite base layer (Esri — free, no API key, no block)
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{
+      attribution:'© Esri © OpenStreetMap',
       maxZoom: 19
+    }).addTo(leafletMap);
+
+    // Labels layer upar — area naam, road naam, city naam sab dikhte hain
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',{
+      attribution:'',
+      maxZoom: 19,
+      opacity: 1
     }).addTo(leafletMap);
 
     leafletPin = L.marker([26.8, 80.9], {draggable: true}).addTo(leafletMap);
@@ -1036,9 +1037,11 @@ function renderReview(){
     <div class="review-card">
       <div class="review-card-head">🏪 दुकान की जानकारी</div>
       <div class="review-row"><div class="review-key">नाम</div><div class="review-val">${document.getElementById('shop-name').value||'—'}</div></div>
-      <div class="review-row"><div class="review-key">शहर</div><div class="review-val">${document.getElementById('shop-city').value||'—'}</div></div>
+      <div class="review-row"><div class="review-key">जिला</div><div class="review-val">${document.getElementById('shop-district').value||'—'}</div></div>
+      <div class="review-row"><div class="review-key">शहर / बाज़ार</div><div class="review-val">${document.getElementById('shop-city').value||'—'}</div></div>
+      <div class="review-row"><div class="review-key">गली / रोड</div><div class="review-val">${document.getElementById('shop-road').value||'—'}</div></div>
+      <div class="review-row"><div class="review-key">दुकान नं.</div><div class="review-val">${document.getElementById('shop-room').value||'—'}</div></div>
       <div class="review-row"><div class="review-key">PIN</div><div class="review-val">${document.getElementById('shop-pin').value||'—'}</div></div>
-      <div class="review-row"><div class="review-key">पता</div><div class="review-val">${document.getElementById('shop-address').value||'—'}</div></div>
       ${shopLat ? `<div class="review-row"><div class="review-key">📍 लोकेशन</div><div class="review-val"><a href="https://www.openstreetmap.org/?mlat=${shopLat}&mlon=${shopLng}" target="_blank" style="color:var(--or);">🗺️ Map पर देखें ↗</a></div></div>` : ''}
     </div>
     <div class="review-card">
@@ -1100,9 +1103,17 @@ async function submitRegistration(){
     owner_id: regUserId,
     owner_name: document.getElementById('owner-name').value.trim(),
     name: document.getElementById('shop-name').value.trim(),
+    district: document.getElementById('shop-district').value.trim(),
     city: document.getElementById('shop-city').value.trim(),
+    road: document.getElementById('shop-road').value.trim(),
+    room_number: document.getElementById('shop-room').value.trim(),
     pincode: document.getElementById('shop-pin').value.trim(),
-    address: document.getElementById('shop-address').value.trim(),
+    address: [
+      document.getElementById('shop-room').value.trim(),
+      document.getElementById('shop-road').value.trim(),
+      document.getElementById('shop-city').value.trim(),
+      document.getElementById('shop-district').value.trim(),
+    ].filter(Boolean).join(', '),
     opening_time: document.getElementById('open-time').value,
     closing_time: document.getElementById('close-time').value,
     closed_days: closedDays,
