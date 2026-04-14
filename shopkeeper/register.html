@@ -688,23 +688,41 @@ function openMap(){
 
   if(!leafletMap){
     leafletMap = L.map('map').setView([26.8, 80.9], 13);
-    // Satellite layer (Esri — free, no API key)
-    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{
-      attribution:'© Esri © OpenStreetMap'
+
+    // OSM layer — labels, road names, area names sab dikhte hain (FREE, no API key)
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+      attribution:'© OpenStreetMap contributors',
+      maxZoom: 19
     }).addTo(leafletMap);
-    leafletPin = L.marker([26.8,80.9],{draggable:true}).addTo(leafletMap);
+
+    leafletPin = L.marker([26.8, 80.9], {draggable: true}).addTo(leafletMap);
+
+    // Pin drag se location update ho
     leafletPin.on('dragend', ()=>{
       const pos = leafletPin.getLatLng();
       reverseGeocode(pos.lat, pos.lng);
     });
-    // Map click se bhi pin move ho
+
+    // Map click se pin wahan drop ho — FIX: GPS override nahi karega
     leafletMap.on('click', e=>{
       leafletPin.setLatLng(e.latlng);
       reverseGeocode(e.latlng.lat, e.latlng.lng);
     });
+
+    // GPS sirf pehli baar auto-call karo (agar location nahi select ki abhi tak)
+    if(!shopLat && !shopLng){
+      getCurrentLocation();
+    } else {
+      // Already location hai — wahan zoom karo, GPS call mat karo
+      leafletMap.setView([shopLat, shopLng], 17);
+      leafletPin.setLatLng([shopLat, shopLng]);
+      setMsg('loc-msg','','');
+    }
+  } else {
+    // Map already init hai — sirf resize fix karo, GPS DOBARA mat bulao
+    setMsg('loc-msg','','');
   }
 
-  getCurrentLocation();
   setTimeout(()=>leafletMap.invalidateSize(),300);
 }
 
