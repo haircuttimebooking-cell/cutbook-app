@@ -303,7 +303,7 @@ option{background:var(--bg3);}
     </div>
     <div class="field">
       <div class="field-label">PIN कोड * <span style="font-size:10px;color:var(--tx3);font-family:var(--dv);">(दुकान वाले area का 6 अंक)</span></div>
-      <input class="field-input" id="shop-pin" type="tel" maxlength="6" placeholder="272001" autocomplete="off" style="background:var(--bg3);color:var(--tx);-webkit-text-fill-color:var(--tx);" oninput="this.value=this.value.replace(/\D/g,'')">
+      <input class="field-input" id="shop-pin" type="tel" maxlength="6" placeholder="272001" oninput="this.value=this.value.replace(/\D/g,'');if(this.value.length===6) pinAutoCenter(this.value)">
     </div>
 
     <!-- Location -->
@@ -662,13 +662,28 @@ function rotpNext(i){
 
 // ─── SHOP DETAILS VALIDATE ───────────────────────────
 function handleShopNext(){
-  if(!document.getElementById('shop-name').value.trim()){setMsg('shop-msg','❌ दुकान का नाम भरें (ऊपर वाला field)','error');window.scrollTo(0,0);return;}
+  if(!document.getElementById('shop-name').value.trim()){setMsg('shop-msg','❌ Dukan ka naam daalo','error');return;}
   if(!document.getElementById('shop-district').value.trim()){setMsg('shop-msg','❌ Jila (District) daalo','error');return;}
   if(!document.getElementById('shop-city').value.trim()){setMsg('shop-msg','❌ Shehar / Bazaar ka naam daalo','error');return;}
   if(!document.getElementById('shop-road').value.trim()){setMsg('shop-msg','❌ Gali / Road ka naam daalo','error');return;}
   if(!document.getElementById('shop-room').value.trim()){setMsg('shop-msg','❌ Dukan / Room number daalo','error');return;}
   if(document.getElementById('shop-pin').value.length!==6){setMsg('shop-msg','❌ 6 digit PIN code daalo','error');return;}
   goStep(4);
+}
+
+// PIN code se map auto-center
+async function pinAutoCenter(pin){
+  if(!leafletMap || pin.length !== 6) return;
+  try{
+    const res = await fetch(`https://nominatim.openstreetmap.org/search?postalcode=${pin}&country=India&format=json&limit=1`);
+    const data = await res.json();
+    if(data && data[0]){
+      const lat = parseFloat(data[0].lat);
+      const lng = parseFloat(data[0].lon);
+      leafletMap.setView([lat, lng], 15);
+      leafletPin.setLatLng([lat, lng]);
+    }
+  }catch(e){}
 }
 
 // ─── LOCATION / MAP ──────────────────────────────────
@@ -681,13 +696,19 @@ function openMap(){
   setMsg('loc-msg','<span class="spinner"></span> लोकेशन ढूंढ रहे हैं...','');
 
   if(!leafletMap){
-    leafletMap = L.map('map').setView([26.8, 80.9], 13);
+    leafletMap = L.map('map', {zoomControl: true}).setView([26.8, 80.9], 15);
 
-    // OpenStreetMap base layer — road names, gali, area sab dikhte hain, fast load
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
-      attribution:'© OpenStreetMap contributors',
+    // Satellite base layer (Esri — free, no API key, no block)
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{
+      attribution:'© Esri © OpenStreetMap',
+      maxZoom: 19
+    }).addTo(leafletMap);
+
+    // Labels layer upar — area naam, road naam, city naam sab dikhte hain
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',{
+      attribution:'',
       maxZoom: 19,
-      subdomains: ['a','b','c']
+      opacity: 1
     }).addTo(leafletMap);
 
     leafletPin = L.marker([26.8, 80.9], {draggable: true}).addTo(leafletMap);
@@ -727,7 +748,7 @@ function getCurrentLocation(){
     navigator.geolocation.getCurrentPosition(pos=>{
       const lat = pos.coords.latitude;
       const lng = pos.coords.longitude;
-      leafletMap.setView([lat,lng],17);
+      leafletMap.setView([lat,lng],18);
       leafletPin.setLatLng([lat,lng]);
       reverseGeocode(lat,lng);
     }, err=>{
@@ -742,51 +763,20 @@ async function reverseGeocode(lat,lng){
   shopLat = lat; shopLng = lng;
   setMsg('loc-msg','<span class="spinner"></span> पता ढूंढ रहे हैं...','');
   try{
-    const res = await fetch(
-      `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&addressdetails=1&accept-language=hi`,
-      { headers: { 'Accept-Language': 'hi,en' } }
-    );
-    if(!res.ok) throw new Error('Network error');
+    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`);
     const data = await res.json();
-    const a = data.address || {};
-
-    // Road / gali / area naam extract karo
-    const road     = a.road || a.pedestrian || a.footway || a.path || '';
-    const suburb   = a.suburb || a.neighbourhood || a.quarter || '';
-    const village  = a.village || a.town || a.city_district || '';
-    const city     = a.city || a.town || a.county || '';
-    const state    = a.state || '';
-    const postcode = a.postcode || '';
-
-    // Short display address — road + area + city
-    const parts = [road, suburb, village, city, state, postcode].filter(Boolean);
-    const shortAddr = parts.length > 0 ? parts.join(', ') : data.display_name || `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
-
-    document.getElementById('loc-addr-txt').textContent = shortAddr;
+    const addr = data.display_name || `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+    document.getElementById('loc-addr-txt').textContent = addr;
     document.getElementById('loc-info').style.display='block';
-    document.getElementById('loc-map-link').href = `https://www.google.com/maps?q=${lat},${lng}`;
+    document.getElementById('loc-map-link').href = `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}`;
     document.getElementById('loc-btn').classList.add('active');
     document.getElementById('loc-btn').innerHTML = '✅ लोकेशन चुनी गई — बदलने के लिए tap करें';
-
-    // Auto-fill address field agar khaali ho
     if(!document.getElementById('shop-address').value.trim()){
-      document.getElementById('shop-address').value = shortAddr;
+      document.getElementById('shop-address').value = addr;
     }
-    // Auto-fill PIN agar mila ho
-    const pinEl = document.getElementById('shop-pin');
-    if(postcode && postcode.length===6 && !pinEl.value.trim()){
-      pinEl.value = postcode;
-    }
-    setMsg('loc-msg','✅ लोकेशन मिल गई','success');
-  }catch(e){
-    // Fallback — coordinates dikhao, error mat dikhao
-    const fallback = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
-    document.getElementById('loc-addr-txt').textContent = fallback;
-    document.getElementById('loc-info').style.display='block';
-    document.getElementById('loc-map-link').href = `https://www.google.com/maps?q=${lat},${lng}`;
-    document.getElementById('loc-btn').classList.add('active');
-    document.getElementById('loc-btn').innerHTML = '✅ लोकेशन चुनी गई — बदलने के लिए tap करें';
     setMsg('loc-msg','','');
+  }catch(e){
+    setMsg('loc-msg','⚠️ पता नहीं मिला — Manual भरें','error');
   }
 }
 
@@ -1108,33 +1098,16 @@ async function submitRegistration(){
 
   // ── Photos Supabase Storage mein upload karo ──
   setMsg('submit-msg','<span class="spinner"></span> Photos upload ho rahi hain...','');
+  const allPhotosToUpload = boardPhoto ? [boardPhoto, ...interiorPhotos] : [...interiorPhotos];
   const photoUrls = [];
-
-  // Board photo → boards/ folder (mandatory)
-  if(boardPhoto){
-    const ext = boardPhoto.file.type === 'image/png' ? 'png' : 'jpg';
-    const fileName = `boards/${regUserId}_${Date.now()}.${ext}`;
-    const { data: upData, error: upErr } = await sb.storage
-      .from('shop-photos')
-      .upload(fileName, boardPhoto.file, { contentType: boardPhoto.file.type, upsert: true });
-    if(upErr){
-      console.warn('Board photo upload error:', upErr.message);
-      setMsg('submit-msg','❌ Board photo upload fail: ' + upErr.message,'error');
-      return;
-    }
-    const { data: urlData } = sb.storage.from('shop-photos').getPublicUrl(fileName);
-    if(urlData?.publicUrl) photoUrls.push(urlData.publicUrl);
-  }
-
-  // Interior photos → interior/ folder (optional, max 4)
-  for(let i=0; i<interiorPhotos.length; i++){
-    const photo = interiorPhotos[i];
+  for(let i=0; i<allPhotosToUpload.length; i++){
+    const photo = allPhotosToUpload[i];
     const ext = photo.file.type === 'image/png' ? 'png' : 'jpg';
-    const fileName = `interior/${regUserId}_${Date.now()}_${i}.${ext}`;
+    const fileName = `${regUserId}_${Date.now()}_${i}.${ext}`;
     const { data: upData, error: upErr } = await sb.storage
       .from('shop-photos')
       .upload(fileName, photo.file, { contentType: photo.file.type, upsert: true });
-    if(upErr){ console.warn('Interior photo upload error:', upErr.message); continue; }
+    if(upErr){ console.warn('Photo upload error:', upErr.message); continue; }
     const { data: urlData } = sb.storage.from('shop-photos').getPublicUrl(fileName);
     if(urlData?.publicUrl) photoUrls.push(urlData.publicUrl);
   }
