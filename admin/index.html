@@ -317,12 +317,20 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;color:var(--tx);min-h
         <div class="page-hdr">
           <div><div class="page-title">All Bookings</div><div class="page-sub">Platform pe sabhi bookings</div></div>
         </div>
+        <!-- Filter tabs -->
+        <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+          <button class="btn btn-or btn-sm" id="bk-filter-all" onclick="loadBookingsPanel('all',this)">Sab</button>
+          <button class="btn btn-ghost btn-sm" id="bk-filter-pending" onclick="loadBookingsPanel('pending',this)">⏳ Pending</button>
+          <button class="btn btn-ghost btn-sm" id="bk-filter-accepted" onclick="loadBookingsPanel('accepted',this)">✅ Confirmed</button>
+          <button class="btn btn-ghost btn-sm" id="bk-filter-completed" onclick="loadBookingsPanel('completed',this)">🏁 Completed</button>
+          <button class="btn btn-ghost btn-sm" id="bk-filter-cancelled" onclick="loadBookingsPanel('cancelled',this)">❌ Cancelled</button>
+        </div>
         <div class="card">
           <div class="card-body" style="padding:0;">
             <table class="tbl">
-              <thead><tr><th>Customer</th><th>Shop</th><th>Service</th><th>Date/Time</th><th>Price</th><th>Status</th></tr></thead>
+              <thead><tr><th>Customer</th><th>Shop</th><th>Service</th><th>Date/Time</th><th>Price</th><th>Status</th><th>Action</th></tr></thead>
               <tbody id="all-bookings-list">
-                <tr><td colspan="6" style="text-align:center;padding:24px;color:var(--tx3);">Loading...</td></tr>
+                <tr><td colspan="7" style="text-align:center;padding:24px;color:var(--tx3);">Loading...</td></tr>
               </tbody>
             </table>
           </div>
@@ -337,7 +345,7 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;color:var(--tx);min-h
         <div class="card">
           <div class="card-body" style="padding:0;">
             <table class="tbl">
-              <thead><tr><th>Name</th><th>Phone</th><th>Role</th><th>Joined</th></tr></thead>
+              <thead><tr><th>Name</th><th>Phone</th><th>Role</th><th>Joined</th><th>Action</th></tr></thead>
               <tbody id="all-users-list">
                 <tr><td colspan="4" style="text-align:center;padding:24px;color:var(--tx3);">Loading...</td></tr>
               </tbody>
@@ -567,12 +575,17 @@ function approveShop(shopId, shopName){
 }
 
 function rejectShop(shopId, shopName){
-  showConfirm('❌', `"${shopName}" reject karein?`,
-    'Shop ko rejected status milegi.',
-    'var(--re)', async()=>{
+  showReasonModal('❌', `"${shopName}" reject karein?`,
+    'Shop ko rejected status milegi. Reason optional hai.',
+    'var(--re)', 'Haan, Reject karo',
+    async(reason)=>{
       toast('⏳ Reject ho raha hai...');
       try {
         await updateShopStatus(shopId, 'rejected');
+        // Reason save karo agar diya
+        if(reason){
+          await sb.from('shops').update({reject_reason: reason}).eq('id', shopId);
+        }
         toast(`❌ "${shopName}" reject ho gayi.`);
         await loadAllData();
         await loadPendingApprovals();
@@ -580,14 +593,74 @@ function rejectShop(shopId, shopName){
           await loadShopsPanel('all');
         }
       } catch(e){
-        if(e.message === 'RLS_POLICY'){
-          toast('❌ RLS Policy issue — Supabase dashboard mein policy check karein');
-        } else {
-          toast('❌ Error: ' + e.message);
-        }
+        toast('❌ Error: ' + e.message);
         console.error('Reject error:', e);
       }
     });
+}
+
+function suspendShop(shopId, shopName){
+  showReasonModal('🚫', `"${shopName}" suspend karein?`,
+    'Shop temporarily band ho jayegi. Reason batao.',
+    'var(--am)', 'Haan, Suspend karo',
+    async(reason)=>{
+      toast('⏳ Suspend ho raha hai...');
+      try {
+        await updateShopStatus(shopId, 'suspended');
+        if(reason){
+          await sb.from('shops').update({suspend_reason: reason}).eq('id', shopId);
+        }
+        toast(`🚫 "${shopName}" suspend ho gayi.`);
+        await loadAllData();
+        if(document.getElementById('panel-shops').classList.contains('active')){
+          await loadShopsPanel('all');
+        }
+      } catch(e){
+        toast('❌ Error: ' + e.message);
+      }
+    });
+}
+
+function deleteShop(shopId, shopName){
+  showConfirm('🗑️', `"${shopName}" permanently delete karein?`,
+    '⚠️ Yeh action undo nahi ho sakta! Shop aur uski saari bookings delete ho jayengi.',
+    'var(--re)', async()=>{
+      toast('⏳ Delete ho raha hai...');
+      try {
+        const {error} = await sb.from('shops').delete().eq('id', shopId);
+        if(error) throw new Error(error.message);
+        toast(`🗑️ "${shopName}" delete ho gayi.`);
+        await loadAllData();
+        if(document.getElementById('panel-shops').classList.contains('active')){
+          await loadShopsPanel('all');
+        }
+      } catch(e){
+        toast('❌ Error: ' + e.message);
+      }
+    });
+}
+
+// Reason modal helper
+let reasonCb = null;
+function showReasonModal(icon, title, sub, btnColor, btnText, cb){
+  reasonCb = cb;
+  document.getElementById('rm-icon').textContent = icon;
+  document.getElementById('rm-title').textContent = title;
+  document.getElementById('rm-sub').textContent = sub;
+  document.getElementById('rm-reason').value = '';
+  const btn = document.getElementById('rm-yes-btn');
+  btn.textContent = btnText;
+  btn.style.background = btnColor;
+  btn.onclick = ()=>{
+    const reason = document.getElementById('rm-reason').value.trim();
+    closeReasonModal();
+    if(reasonCb) reasonCb(reason);
+  };
+  document.getElementById('reason-modal').classList.add('open');
+}
+function closeReasonModal(){
+  document.getElementById('reason-modal').classList.remove('open');
+  reasonCb = null;
 }
 
 // ─── PENDING APPROVALS ────────────────────────────────
@@ -683,19 +756,36 @@ async function loadShopsPanel(filter='all'){
           <button class="btn btn-approve btn-sm" onclick="approveShop('${s.id}','${shopNameSafe}')">✅ Approve</button>
           <button class="btn btn-reject btn-sm" onclick="rejectShop('${s.id}','${shopNameSafe}')">❌ Reject</button>
         </div>`
-        : s.status==='active'?`<button class="btn btn-reject btn-sm" onclick="rejectShop('${s.id}','${shopNameSafe}')">Suspend</button>`
-        : `<button class="btn btn-approve btn-sm" onclick="approveShop('${s.id}','${shopNameSafe}')">Restore</button>`}
+        : s.status==='active'?`<div style="display:flex;gap:4px;">
+            <button class="btn btn-reject btn-sm" onclick="suspendShop('${s.id}','${shopNameSafe}')">🚫 Suspend</button>
+            <button class="btn btn-ghost btn-sm" onclick="deleteShop('${s.id}','${shopNameSafe}')">🗑️</button>
+          </div>`
+        : s.status==='suspended'?`<div style="display:flex;gap:4px;">
+            <button class="btn btn-approve btn-sm" onclick="approveShop('${s.id}','${shopNameSafe}')">✅ Restore</button>
+            <button class="btn btn-ghost btn-sm" onclick="deleteShop('${s.id}','${shopNameSafe}')">🗑️</button>
+          </div>`
+        : `<div style="display:flex;gap:4px;">
+            <button class="btn btn-approve btn-sm" onclick="approveShop('${s.id}','${shopNameSafe}')">✅ Restore</button>
+            <button class="btn btn-ghost btn-sm" onclick="deleteShop('${s.id}','${shopNameSafe}')">🗑️</button>
+          </div>`}
       </td>
     </tr>`;
   }).join('');
 }
 
 // ─── ALL BOOKINGS PANEL ───────────────────────────────
-async function loadBookingsPanel(){
-  const {data, error} = await sb.from('bookings').select('*').order('created_at',{ascending:false}).limit(100);
+async function loadBookingsPanel(filter='all', el=null){
+  // Filter button highlight
+  if(el){
+    document.querySelectorAll('[id^="bk-filter-"]').forEach(b=>b.className='btn btn-ghost btn-sm');
+    el.className='btn btn-or btn-sm';
+  }
+  let query = sb.from('bookings').select('*').order('created_at',{ascending:false}).limit(100);
+  if(filter !== 'all') query = query.eq('status', filter);
+  const {data, error} = await query;
   const tbody = document.getElementById('all-bookings-list');
   if(error || !data || !data.length){
-    tbody.innerHTML='<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--tx3);">Koi booking nahi</td></tr>';
+    tbody.innerHTML='<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--tx3);">Koi booking nahi</td></tr>';
     return;
   }
   const stMap={pending:'badge-pending',accepted:'badge-active',completed:'badge-active',cancelled:'badge-rejected'};
@@ -708,7 +798,30 @@ async function loadBookingsPanel(){
       <td><div style="font-size:11px;">${b.booking_date||'—'}</div><div style="font-size:10px;color:var(--tx3);">${b.booking_time||''}</div></td>
       <td style="font-size:11px;color:var(--gr);font-weight:600;">₹${b.price||0}</td>
       <td><span class="badge ${stMap[b.status]||'badge-pending'}" style="font-size:9px;">${stLbl[b.status]||b.status}</span></td>
+      <td>
+        <div style="display:flex;gap:4px;flex-wrap:wrap;">
+          ${b.status==='pending'?`
+            <button class="btn btn-approve btn-sm" onclick="forceBookingStatus('${b.id}','accepted')">✅</button>
+            <button class="btn btn-reject btn-sm" onclick="forceBookingStatus('${b.id}','cancelled')">❌</button>`
+          :b.status==='accepted'?`
+            <button class="btn btn-approve btn-sm" onclick="forceBookingStatus('${b.id}','completed')">🏁</button>
+            <button class="btn btn-reject btn-sm" onclick="forceBookingStatus('${b.id}','cancelled')">❌</button>`
+          :'—'}
+        </div>
+      </td>
     </tr>`).join('');
+}
+
+async function forceBookingStatus(bookingId, status){
+  const labels = {accepted:'Confirm',completed:'Complete',cancelled:'Cancel'};
+  showConfirm('⚡', `Booking ${labels[status]||status} karein?`,
+    'Admin force action — customer ko notify nahi hoga.',
+    status==='cancelled'?'var(--re)':'var(--gr)', async()=>{
+      const {error} = await sb.from('bookings').update({status}).eq('id',bookingId).select();
+      if(error){ toast('❌ Error: '+error.message); return; }
+      toast(`✅ Booking ${labels[status]} ho gayi`);
+      loadBookingsPanel();
+    });
 }
 
 // ─── USERS PANEL ─────────────────────────────────────
@@ -716,7 +829,7 @@ async function loadUsersPanel(){
   const {data, error} = await sb.from('users').select('*').order('created_at',{ascending:false});
   const tbody = document.getElementById('all-users-list');
   if(error || !data || !data.length){
-    tbody.innerHTML='<tr><td colspan="4" style="text-align:center;padding:24px;color:var(--tx3);">Koi user nahi</td></tr>';
+    tbody.innerHTML='<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--tx3);">Koi user nahi</td></tr>';
     return;
   }
   const roleMap={customer:'badge-active',shopkeeper:'badge-pending',admin:'badge-rejected'};
@@ -726,7 +839,25 @@ async function loadUsersPanel(){
       <td style="font-size:11px;">${u.phone||'—'}</td>
       <td><span class="badge ${roleMap[u.role]||'badge-pending'}" style="font-size:9px;">${u.role||'—'}</span></td>
       <td style="font-size:10px;color:var(--tx3);">${new Date(u.created_at).toLocaleDateString('hi-IN')}</td>
+      <td>
+        ${u.role!=='admin' ? (u.blocked
+          ? `<button class="btn btn-approve btn-sm" onclick="toggleUserBlock('${u.id}',false,'${(u.name||'').replace(/'/g,"\'")}')">✅ Unblock</button>`
+          : `<button class="btn btn-reject btn-sm" onclick="toggleUserBlock('${u.id}',true,'${(u.name||'').replace(/'/g,"\'")}')">🚫 Block</button>`
+        ) : '—'}
+      </td>
     </tr>`).join('');
+}
+
+async function toggleUserBlock(userId, block, userName){
+  showConfirm(block?'🚫':'✅',
+    block?`"${userName}" block karein?`:`"${userName}" unblock karein?`,
+    block?'User login nahi kar payega.':'User dobara login kar sakega.',
+    block?'var(--re)':'var(--gr)', async()=>{
+      const {error} = await sb.from('users').update({blocked: block}).eq('id', userId);
+      if(error){ toast('❌ Error: '+error.message); return; }
+      toast(block?`🚫 "${userName}" block ho gaya`:`✅ "${userName}" unblock ho gaya`);
+      loadUsersPanel();
+    });
 }
 
 // ─── ANALYTICS PANEL ─────────────────────────────────
@@ -867,6 +998,24 @@ function toast(msg){
   }
 })();
 </script>
+
+
+<!-- ══ REASON MODAL ══ -->
+<div class="confirm-modal" id="reason-modal">
+  <div class="confirm-box" style="width:360px;">
+    <div class="confirm-icon" id="rm-icon">❌</div>
+    <div class="confirm-title" id="rm-title">Reason batao</div>
+    <div class="confirm-sub" id="rm-sub" style="margin-bottom:12px;"></div>
+    <textarea id="rm-reason" rows="3" placeholder="Reason likhein (optional)..."
+      style="width:100%;background:var(--bg3);border:1px solid var(--bd2);color:var(--tx);
+      border-radius:10px;padding:10px 12px;font-size:12px;font-family:var(--dv);
+      outline:none;resize:none;margin-bottom:16px;"></textarea>
+    <div class="confirm-btns">
+      <button onclick="closeReasonModal()" style="background:var(--bg3);color:var(--tx2);border:1px solid var(--bd2);">Nahi</button>
+      <button id="rm-yes-btn" style="background:var(--re);color:#fff;">Haan, Proceed</button>
+    </div>
+  </div>
+</div>
 
 <!-- ══ ADMIN PHOTO MODAL ══ -->
 <div id="admin-photo-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;align-items:center;justify-content:center;">
