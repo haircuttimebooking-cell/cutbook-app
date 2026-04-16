@@ -1791,82 +1791,105 @@ async function downloadReport(type){
   const avgVal=completed.length>0?Math.round(revenue/completed.length):0;
   const compRate=filtered.length>0?Math.round((completed.length/filtered.length)*100):0;
 
+  // ── Barber wise breakdown ──
+  const barberMap={};
+  completed.forEach(b=>{
+    const bn=b.barber_name||b.barber||'Unknown';
+    if(!barberMap[bn])barberMap[bn]={count:0,rev:0};
+    barberMap[bn].count++;
+    barberMap[bn].rev+=(b.price||0);
+  });
+  const barberRows=Object.keys(barberMap).length>0
+    ?Object.entries(barberMap).map(([name,d])=>`<tr><td>${name}</td><td style="text-align:center">${d.count}</td><td style="text-align:right">Rs.${d.rev}</td></tr>`).join('')
+    :'<tr><td colspan="3" style="text-align:center;color:#666">Koi data nahi</td></tr>';
+
+  // ── Service wise breakdown ──
+  const svcMap={};
+  completed.forEach(b=>{
+    const sn=b.service||b.svc||'Unknown';
+    if(!svcMap[sn])svcMap[sn]={count:0,rev:0};
+    svcMap[sn].count++;
+    svcMap[sn].rev+=(b.price||0);
+  });
+  const svcRows=Object.keys(svcMap).length>0
+    ?Object.entries(svcMap).map(([name,d])=>`<tr><td>${name}</td><td style="text-align:center">${d.count}</td><td style="text-align:right">Rs.${d.rev}</td></tr>`).join('')
+    :'<tr><td colspan="3" style="text-align:center;color:#666">Koi data nahi</td></tr>';
+
+  // ── Booking detail rows ──
+  const rows=filtered.length>0
+    ?filtered.map(b=>`<tr>
+        <td>${b.booking_date||'—'}</td>
+        <td>${b.customer_name||b.name||'—'}</td>
+        <td>${b.barber_name||b.barber||'—'}</td>
+        <td>${b.service||b.svc||'—'}</td>
+        <td style="text-align:right">Rs.${b.price||0}</td>
+        <td style="text-align:center;text-transform:uppercase;font-weight:600">${b.status||'—'}</td>
+      </tr>`).join('')
+    :'<tr><td colspan="6" style="text-align:center;padding:16px;color:#666">Koi booking nahi</td></tr>';
+
   const printWin=window.open('','_blank','width=800,height=600');
   if(!printWin){toast('❌ Popup block hai — browser mein allow karo');return;}
 
-  const rows=filtered.length>0
-    ?filtered.map((b,i)=>`<tr style="background:${i%2===0?'#f9f9f9':'#fff'}">
-        <td>${b.booking_date||'—'}</td>
-        <td>${b.booking_time||b.time||'—'}</td>
-        <td>${b.customer_name||b.name||'—'}</td>
-        <td>${b.customer_phone||b.phone||'—'}</td>
-        <td>${b.service||b.svc||'—'}</td>
-        <td style="text-align:right">₹${b.price||0}</td>
-        <td style="text-align:center;font-size:11px">${b.status||'—'}</td>
-      </tr>`).join('')
-    :'<tr><td colspan="7" style="text-align:center;padding:20px;color:#666">Koi booking nahi</td></tr>';
-
   printWin.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
-<title>CutBook Report</title>
+<title>Analytics Report - ${currentShop.name}</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:Arial,sans-serif;padding:30px;color:#1a1a1a;font-size:13px}
-.hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;padding-bottom:14px;border-bottom:2px solid #F47B20}
-.logo{font-size:22px;font-weight:800;color:#F47B20}
-.logo span{color:#1a1a1a}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
-.stat{background:#f5f5f5;border-radius:8px;padding:14px;text-align:center}
-.stat-num{font-size:24px;font-weight:800;color:#F47B20}
-.stat-lbl{font-size:10px;color:#888;margin-top:3px;text-transform:uppercase}
-.stat.gr .stat-num{color:#28a745}
-.stat.re .stat-num{color:#dc3545}
-.stat.bl .stat-num{color:#007bff}
-.sumbox{background:#fff8f0;border:1px solid #F47B20;border-radius:8px;padding:14px;margin-bottom:20px;display:flex;gap:24px}
-.si .lbl{font-size:10px;color:#888;text-transform:uppercase}
-.si .val{font-size:15px;font-weight:700;color:#F47B20}
-table{width:100%;border-collapse:collapse}
-th{background:#F47B20;color:#fff;padding:9px 10px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase}
-td{padding:8px 10px;border-bottom:1px solid #eee;font-size:12px}
-.footer{margin-top:20px;padding-top:10px;border-top:1px solid #eee;font-size:10px;color:#aaa;text-align:center}
+h1{font-size:18px;font-weight:700;text-align:center;margin-bottom:4px}
+.sub{font-size:11px;color:#444;margin-bottom:16px}
+table{width:100%;border-collapse:collapse;margin-bottom:24px}
+th{background:#1a1a1a;color:#fff;padding:8px 10px;text-align:left;font-size:11px}
+th.right{text-align:right}th.center{text-align:center}
+td{padding:7px 10px;border:1px solid #ddd;font-size:12px}
+tr:last-child td{border-bottom:1px solid #ddd}
+.rev-row td{background:#c8f0c8;font-weight:700}
+.barber-head th{background:#2e7d32}
+.svc-head th{background:#1a237e}
+.booking-head th{background:#1a237e;font-size:10px}
+h2{font-size:13px;font-weight:700;margin-bottom:6px;margin-top:0}
+.footer{font-size:10px;color:#aaa;text-align:center;margin-top:20px;border-top:1px solid #eee;padding-top:10px}
 @media print{body{padding:15px}}
 </style></head><body>
-<div class="hdr">
-  <div>
-    <div class="logo">Cut<span>Book</span></div>
-    <div style="font-size:18px;font-weight:700;margin-top:4px">${currentShop.name}</div>
-    <div style="font-size:11px;color:#888;margin-top:2px">📍 ${currentShop.city||currentShop.address||'—'}</div>
-  </div>
-  <div style="text-align:right;font-size:11px;color:#666">
-    <div style="font-weight:700;margin-bottom:2px">Booking Report</div>
-    <div>Date: ${today}</div>
-    <div>Period: Last 30 days</div>
-    <div>${cutoff} se ${today} tak</div>
-  </div>
-</div>
-<div class="stats">
-  <div class="stat"><div class="stat-num">${filtered.length}</div><div class="stat-lbl">Total Bookings</div></div>
-  <div class="stat gr"><div class="stat-num">${completed.length}</div><div class="stat-lbl">Completed</div></div>
-  <div class="stat re"><div class="stat-num">${cancelled.length}</div><div class="stat-lbl">Cancelled</div></div>
-  <div class="stat bl"><div class="stat-num">₹${revenue}</div><div class="stat-lbl">Total Revenue</div></div>
-</div>
-<div class="sumbox">
-  <div class="si"><div class="lbl">Completion Rate</div><div class="val">${compRate}%</div></div>
-  <div class="si"><div class="lbl">Avg Booking</div><div class="val">₹${avgVal}</div></div>
-  <div class="si"><div class="lbl">Pending</div><div class="val">${pending.length}</div></div>
-  <div class="si"><div class="lbl">Phone</div><div class="val" style="font-size:12px">${currentShop.phone||'—'}</div></div>
-</div>
-<div style="font-size:14px;font-weight:700;margin-bottom:8px">📋 Booking Details</div>
+
+<h1>Analytics Report - ${currentShop.name}</h1>
+<div class="sub">Period: Last 30 days (${cutoff} – ${today})<br>Generated: ${new Date().toLocaleString('en-IN')}</div>
+
+<h2>Summary:</h2>
 <table>
-  <thead><tr><th>Date</th><th>Time</th><th>Customer</th><th>Phone</th><th>Service</th><th style="text-align:right">Amount</th><th>Status</th></tr></thead>
+  <thead class=""><tr><th>Status</th><th class="right">Count</th></tr></thead>
+  <tbody>
+    <tr><td>Total Bookings</td><td style="text-align:right">${filtered.length}</td></tr>
+    <tr><td>Completed</td><td style="text-align:right">${completed.length}</td></tr>
+    <tr><td>Pending</td><td style="text-align:right">${pending.length}</td></tr>
+    <tr><td>Cancelled</td><td style="text-align:right">${cancelled.length}</td></tr>
+    <tr class="rev-row"><td><strong>Total Revenue</strong></td><td style="text-align:right"><strong>Rs.${revenue}</strong></td></tr>
+  </tbody>
+</table>
+
+<h2>Barber wise Work &amp; Revenue:</h2>
+<table>
+  <thead class="barber-head"><tr><th>Barber Name</th><th class="center">Completed</th><th class="right">Revenue (Rs.)</th></tr></thead>
+  <tbody>${barberRows}</tbody>
+</table>
+
+<h2>Service wise Breakdown:</h2>
+<table>
+  <thead class="svc-head"><tr><th>Service</th><th class="center">Count</th><th class="right">Revenue (Rs.)</th></tr></thead>
+  <tbody>${svcRows}</tbody>
+</table>
+
+<h2>Booking Details:</h2>
+<table>
+  <thead class="booking-head"><tr><th>Date</th><th>Customer</th><th>Barber</th><th>Service</th><th class="right">Price</th><th class="center">Status</th></tr></thead>
   <tbody>${rows}</tbody>
 </table>
-<div class="footer">Generated by CutBook · ${new Date().toLocaleString('hi-IN')}</div>
+
+<div class="footer">Generated by My Haircut Booking · ${new Date().toLocaleString('en-IN')}</div>
 <script>window.onload=function(){window.print()}<\/script>
 </body></html>`);
   printWin.document.close();
   toast('📥 PDF report generate ho raha hai...');
 }
-
 
 // ─── LOGOUT / DELETE ──────────────────────────────────
 function doLogout(){
