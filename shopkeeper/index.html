@@ -342,6 +342,18 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
         <div id="profile-barbers-list"><div style="padding:14px;font-size:11px;color:var(--tx3);">Loading...</div></div>
       </div>
 
+      <!-- Barber Slot Controls -->
+      <div style="margin:0 16px 12px;background:var(--bg2);border:1px solid var(--bd);border-radius:14px;overflow:hidden;">
+        <div style="padding:10px 14px;background:var(--bg3);border-bottom:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-size:11px;font-weight:600;">🕐 Barber Slot Management</span>
+          <span style="font-size:10px;color:var(--re);cursor:pointer;" onclick="closeAllSlots()">Sab Band</span>
+        </div>
+        <div style="padding:10px 14px 0;">
+          <div id="barber-slot-tabs" style="display:flex;gap:6px;margin-bottom:10px;overflow-x:auto;scrollbar-width:none;"></div>
+          <div id="barber-slot-panels"></div>
+        </div>
+      </div>
+
       <!-- Settings -->
       <div style="margin:0 16px;background:var(--bg2);border:1px solid var(--bd);border-radius:14px;">
         <div class="pr-row" onclick="openShopSettingsModal()"><div class="pr-icon-wrap">🏪</div><div class="pr-lbl">Shop Details Edit</div><span style="color:var(--tx3);">›</span></div>
@@ -716,8 +728,7 @@ async function loadShopData(){
   const ct = fmtTime(shop.closing_time||'21:00');
   const timingEl = document.getElementById('pr-timing-val');
   if(timingEl) timingEl.textContent = ot+' – '+ct;
-  const dsT = document.getElementById('ds-timing');
-  if(dsT) dsT.textContent = (shop.opening_time||'9').split(':')[0]+'–'+(shop.closing_time||'21').split(':')[0];
+
   // Photos
   const photoEl = document.getElementById('pr-photo-val');
   if(photoEl) photoEl.textContent = (shop.photos?.length||0)+' photos';
@@ -740,12 +751,6 @@ async function loadBookingsFromDB(){
     .order('created_at',{ascending:false}).limit(1).maybeSingle();
   if(!shopRow) return;
   const today = new Date().toISOString().split('T')[0];
-  const {data,error} = await sb.from('bookings')
-    .select('*')
-    .eq('shop_id', shopRow.id)
-    .order('booking_date',{ascending:true}).then ? await sb.from('bookings').select('*').eq('shop_id',shopRow.id).order('created_at',{ascending:false}) : {data:null};
-
-  // Broader query
   const res = await sb.from('bookings').select('*').eq('shop_id',shopRow.id).order('booking_date',{ascending:true});
   const allData = res.data || [];
 
@@ -2013,7 +2018,7 @@ function goScreen(id){
   if(id==='schedule'){updateSchedDate();}
 }
 
-function openYoutubeHelp(){window.open('https://www.youtube.com/results?search_query=cutbook+shopkeeper+tutorial','_blank');}
+function openYoutubeHelp(){window.open('https://youtube.com/@my_haircut_booking_official?si=DrGlb96V35bb5GiS','_blank');}
 
 function toast(msg){
   const t=document.getElementById('toast');
