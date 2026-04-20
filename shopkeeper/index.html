@@ -1183,10 +1183,8 @@ function donePrompt(id){
 function closeDoneModal(){document.getElementById('done-modal').classList.remove('open');doneTarget=null;}
 
 async function openManualBooking(){
-  // Ensure shop data is loaded
-  if(!currentShop && currentShopOwnerId){
-    await loadShopData();
-  }
+  // Always reload shop data to get latest services
+  if(currentShopOwnerId) await loadShopData();
   const svcs=currentShop?.services||[];
   const barbers=currentShop?.barbers||['Barber 1'];
 
@@ -1885,6 +1883,7 @@ function renderAnalytics(period){
 }
 
 async function downloadReport(type){
+  if(!currentShop && currentShopOwnerId) await loadShopData();
   if(!currentShop){toast('❌ Shop data load nahi hua');return;}
   const today=new Date().toISOString().split('T')[0];
   const cutoff=new Date(Date.now()-30*86400000).toISOString().split('T')[0];

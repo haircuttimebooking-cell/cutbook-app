@@ -675,7 +675,7 @@ async function loadPendingApprovals(){
     <tr>
       <td>
         <div class="shop-cell-name">🏪 ${s.name||'—'}</div>
-        <div class="shop-cell-meta">${s.services && s.services.length ? s.services.map(sv=>sv.name).join(', ') : '—'}</div>
+        <div class="shop-cell-meta">${s.services && s.services.length ? (s.services.slice(0,3).map(sv=>sv.name).join(', ') + (s.services.length>3 ? ` +${s.services.length-3} aur` : '')) : '—'}</div>
       </td>
       <td>
         <div style="font-size:11px;font-weight:500;">${s.owner_name||'—'}</div>
@@ -749,7 +749,7 @@ async function loadShopsPanel(filter='all'){
       </td>
       <td><div style="font-size:11px;">${s.owner_name||'—'}</div><div style="font-size:10px;color:var(--tx3);">${s.phone||'—'}</div></td>
       <td style="font-size:11px;">${s.city||'—'}</td>
-      <td style="font-size:10px;color:var(--tx3);">${s.services && s.services.length ? s.services.map(sv=>sv.name).join(', ') : '—'}</td>
+      <td style="font-size:10px;color:var(--tx3);">${s.services && s.services.length ? (s.services.slice(0,3).map(sv=>sv.name).join(', ') + (s.services.length>3 ? ` +${s.services.length-3} aur` : '')) : '—'}</td>
       <td><span class="badge ${stMap[s.status]||'badge-pending'}">${stLbl[s.status]||s.status}</span></td>
       <td>
         ${s.status==='pending'?`<div style="display:flex;gap:4px;">
