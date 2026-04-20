@@ -474,8 +474,9 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
           <input id="mb-phone" class="field-input" type="tel" placeholder="9876543210">
         </div>
         <div>
-          <div class="field-label">Service</div>
-          <select id="mb-svc" class="field-input"></select>
+          <div class="field-label">Service (ek ya zyada chunein)</div>
+          <div id="mb-svc-list" style="background:var(--bg3);border:1px solid var(--bd2);border-radius:10px;padding:6px 10px;max-height:120px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;"></div>
+          <div style="font-size:9px;color:var(--tx3);margin-top:4px;font-family:var(--dv);">Total: ₹<span id="mb-total-price">0</span></div>
         </div>
         <div>
           <div class="field-label">Barber / Chair</div>
@@ -1188,22 +1189,47 @@ async function openManualBooking(){
   }
   const svcs=currentShop?.services||[];
   const barbers=currentShop?.barbers||['Barber 1'];
-  const svcEl=document.getElementById('mb-svc');
-  svcEl.innerHTML=svcs.length?svcs.map(s=>`<option value="${s.price}">${s.name} — ₹${s.price}</option>`)
-    .join(''):'<option value="80">Haircut — ₹80</option>';
+
+  // Multi-select checkboxes
+  const svcList=document.getElementById('mb-svc-list');
+  if(svcs.length){
+    svcList.innerHTML=svcs.map((s,i)=>`
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:4px 0;">
+        <input type="checkbox" id="mb-svc-${i}" value="${s.price}" data-name="${s.name}" data-price="${s.price}"
+          style="width:15px;height:15px;accent-color:var(--or);cursor:pointer;"
+          onchange="updateMbTotal()">
+        <span style="font-size:11px;color:var(--tx);">${s.name} — <span style="color:var(--or);font-weight:600;">₹${s.price}</span></span>
+      </label>`).join('');
+  } else {
+    svcList.innerHTML=`<label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:4px 0;">
+      <input type="checkbox" id="mb-svc-0" value="80" data-name="Haircut" data-price="80" checked
+        style="width:15px;height:15px;accent-color:var(--or);cursor:pointer;" onchange="updateMbTotal()">
+      <span style="font-size:11px;color:var(--tx);">Haircut — <span style="color:var(--or);font-weight:600;">₹80</span></span>
+    </label>`;
+  }
+  document.getElementById('mb-total-price').textContent='0';
+
   const barberEl=document.getElementById('mb-barber');
   barberEl.innerHTML=barbers.map((b,i)=>`<option value="${b}">💈 ${b} — Chair ${i+1}</option>`).join('');
   updateMbSlots();
   document.getElementById('manual-modal').classList.add('open');
+}
+
+function updateMbTotal(){
+  const checks=document.querySelectorAll('#mb-svc-list input[type="checkbox"]:checked');
+  const total=Array.from(checks).reduce((s,c)=>s+parseInt(c.dataset.price||0),0);
+  document.getElementById('mb-total-price').textContent=total;
 }
 function closeManualModal(){document.getElementById('manual-modal').classList.remove('open');}
 
 async function confirmManualBooking(){
   const name=document.getElementById('mb-name').value.trim()||'Walk-in Customer';
   const phone=document.getElementById('mb-phone').value.trim()||'0000000000';
-  const svcSel=document.getElementById('mb-svc');
-  const svcName=svcSel.options[svcSel.selectedIndex]?.text.split(' — ')[0]||'Service';
-  const price=parseInt(document.getElementById('mb-svc').value)||80;
+  // Multi-select: read all checked services
+  const checks=document.querySelectorAll('#mb-svc-list input[type="checkbox"]:checked');
+  if(!checks.length){toast('❌ Kam se kam ek service chunein');return;}
+  const svcNames=Array.from(checks).map(c=>c.dataset.name).join(', ');
+  const price=Array.from(checks).reduce((s,c)=>s+parseInt(c.dataset.price||0),0);
   const time=document.getElementById('mb-time').value;
   const barberSel=document.getElementById('mb-barber');
   const barberName=barberSel.value;
@@ -1213,7 +1239,7 @@ async function confirmManualBooking(){
   const {error}=await sb.from('bookings').insert([{
     shop_id:currentShop.id,shop_name:currentShop.name,
     customer_name:name,customer_phone:'+91'+phone.replace(/\D/g,''),
-    service:svcName,price,booking_date:today,booking_time:time,
+    service:svcNames,price,booking_date:today,booking_time:time,
     barber_name:barberName,chair:'Chair '+chairNum,status:'accepted',
   }]);
   if(error){toast('❌ Error: '+error.message);return;}
@@ -1931,12 +1957,23 @@ h2{font-size:13px;font-weight:700;margin-bottom:6px;margin-top:0}
 </style></head><body>
 
 <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
-  <div>
-    <div style="font-size:26px;font-weight:800;line-height:1;">
-      <span style="color:#1a1a1a;">My Haircut</span><span style="color:#F47B20;">Booking</span>
+  <div style="display:flex;align-items:flex-start;gap:14px;">
+    <div style="width:64px;height:64px;background:#F47B20;border-radius:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+      <svg width="38" height="38" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="9" cy="9" r="5" stroke="white" stroke-width="2.2"/>
+        <circle cx="9" cy="31" r="5" stroke="white" stroke-width="2.2"/>
+        <line x1="13.5" y1="11.5" x2="33" y2="31" stroke="white" stroke-width="2.2" stroke-linecap="round"/>
+        <line x1="13.5" y1="28.5" x2="33" y2="9" stroke="white" stroke-width="2.2" stroke-linecap="round"/>
+        <line x1="25" y1="20" x2="33" y2="20" stroke="white" stroke-width="2" stroke-linecap="round"/>
+      </svg>
     </div>
-    <div style="font-size:16px;font-weight:700;margin-top:4px;color:#1a1a1a;" id="pdf-shop-name">${currentShop.name}</div>
-    <div style="font-size:12px;color:#555;margin-top:2px;">📍 ${currentShop.city||''}</div>
+    <div>
+      <div style="font-size:28px;font-weight:800;line-height:1.1;">
+        <span style="color:#F47B20;">My Haircut</span> <span style="color:#1a1a1a;">Booking</span>
+      </div>
+      <div style="font-size:16px;font-weight:700;margin-top:4px;color:#1a1a1a;">${currentShop.name}</div>
+      <div style="font-size:12px;color:#555;margin-top:2px;">📍 ${currentShop.city||''}</div>
+    </div>
   </div>
   <div style="text-align:right;">
     <div style="font-size:11px;font-weight:600;color:#1a1a1a;">Booking Report</div>
