@@ -1221,8 +1221,10 @@ function updateMbTotal(){
 function closeManualModal(){document.getElementById('manual-modal').classList.remove('open');}
 
 async function confirmManualBooking(){
-  const name=document.getElementById('mb-name').value.trim()||'Walk-in Customer';
-  const phone=document.getElementById('mb-phone').value.trim()||'0000000000';
+  const name=document.getElementById('mb-name').value.trim();
+  const phone=document.getElementById('mb-phone').value.trim();
+  if(!name){toast('❌ Customer ka naam daalo');return;}
+  if(!phone||phone.length<10){toast('❌ Sahi phone number daalo');return;}
   // Multi-select: read all checked services
   const checks=document.querySelectorAll('#mb-svc-list input[type="checkbox"]:checked');
   if(!checks.length){toast('❌ Kam se kam ek service chunein');return;}
@@ -1981,8 +1983,8 @@ h2{font-size:13px;font-weight:700;margin-bottom:6px;margin-top:0}
     <div style="font-size:10px;color:#555;">${cutoff} se ${today} tak</div>
   </div>
 </div>
-<div style="height:3px;background:linear-gradient(90deg,#F47B20,#ff9a4a);border-radius:2px;margin-bottom:16px;"></div>
-<div class="sub">Period: Last 30 days (${cutoff} – ${today})<br>Generated: ${new Date().toLocaleString('en-IN')}</div>
+<div style="height:4px;background:#F47B20;margin-bottom:16px;"></div>
+<div class="sub">Generated: ${new Date().toLocaleString('en-IN')}</div>
 
 <h2>Summary:</h2>
 <table>
