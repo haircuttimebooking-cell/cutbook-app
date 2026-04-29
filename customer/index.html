@@ -734,19 +734,19 @@ function openShopDetail(i){
     if(hint) hint.textContent = cnt + ' सेवाएँ उपलब्ध हैं';
     const getEmoji=(name)=>{
       const n=(name||'').toLowerCase();
-      if(n.includes('हेयरकट')||n.includes('haircut')||n.includes('बच्च')) return '✂️';
-      if(n.includes('दाढ़ी')||n.includes('शेव')||n.includes('shave')||n.includes('beard')) return '🪒';
-      if(n.includes('स्टाइल')||n.includes('styling')) return '💇';
-      if(n.includes('फेशियल')||n.includes('facial')) return '💆';
-      if(n.includes('कलर')||n.includes('डाई')||n.includes('colour')||n.includes('color')||n.includes('dye')) return '🎨';
-      if(n.includes('मसाज')||n.includes('massage')) return '💆';
-      if(n.includes('स्पेशल')||n.includes('special')) return '⭐';
-      if(n.includes('ट्रिम')||n.includes('trim')||n.includes('सेट')) return '✂️';
-      return '✂️';
+      if(n.includes('हेयरकट')||n.includes('haircut')||n.includes('बच्च')) return '../assets/cat-haircut.png';
+      if(n.includes('दाढ़ी')||n.includes('शेव')||n.includes('shave')||n.includes('beard')) return '../assets/cat-shave.png';
+      if(n.includes('स्टाइल')||n.includes('styling')) return '../assets/cat-color.png';
+      if(n.includes('फेशियल')||n.includes('facial')) return '../assets/cat-facial.png';
+      if(n.includes('कलर')||n.includes('डाई')||n.includes('colour')||n.includes('color')||n.includes('dye')) return '../assets/cat-color.png';
+      if(n.includes('मसाज')||n.includes('massage')||n.includes('स्पा')||n.includes('spa')) return '../assets/cat-massage.png';
+      if(n.includes('ट्रिम')||n.includes('trim')||n.includes('सेट')) return '../assets/cat-shave.png';
+      if(n.includes('स्पेशल')||n.includes('special')) return '../assets/cat-haircut.png';
+      return '../assets/cat-haircut.png';
     };
     if(chipsEl) chipsEl.innerHTML = selectedShop.services.map(s=>`
       <div class="svc-chip" onclick="startBookingFlow()" style="flex-shrink:0;">
-        <div class="svc-icon">${getEmoji(s.name)}</div>
+        <div class="svc-icon" style="overflow:hidden;padding:0;"><img src="${getEmoji(s.name)}" alt="" style="width:100%;height:100%;object-fit:cover;"></div>
         <span style="font-family:var(--dv);max-width:44px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${s.name}</span>
       </div>`).join('');
   } else {
@@ -824,20 +824,20 @@ function buildServicesScreen(){
   list.innerHTML = selectedShop.services.map((s,i)=>{
     const getEmoji=(name)=>{
       const n=(name||'').toLowerCase();
-      if(n.includes('हेयरकट')||n.includes('haircut')||n.includes('बाल')||n.includes('बच्च')) return '✂️';
-      if(n.includes('दाढ़ी')||n.includes('शेव')||n.includes('shave')||n.includes('beard')) return '🪒';
-      if(n.includes('स्टाइल')||n.includes('styling')) return '💇';
-      if(n.includes('फेशियल')||n.includes('facial')||n.includes('face')) return '💆';
-      if(n.includes('कलर')||n.includes('डाई')||n.includes('colour')||n.includes('color')||n.includes('dye')) return '🎨';
-      if(n.includes('मसाज')||n.includes('massage')) return '💆';
-      if(n.includes('ट्रिम')||n.includes('trim')||n.includes('सेट')||n.includes('set')) return '✂️';
-      if(n.includes('स्पेशल')||n.includes('special')) return '⭐';
-      return '✂️';
+      if(n.includes('हेयरकट')||n.includes('haircut')||n.includes('बाल')||n.includes('बच्च')) return '../assets/cat-haircut.png';
+      if(n.includes('दाढ़ी')||n.includes('शेव')||n.includes('shave')||n.includes('beard')) return '../assets/cat-shave.png';
+      if(n.includes('स्टाइल')||n.includes('styling')) return '../assets/cat-color.png';
+      if(n.includes('फेशियल')||n.includes('facial')||n.includes('face')) return '../assets/cat-facial.png';
+      if(n.includes('कलर')||n.includes('डाई')||n.includes('colour')||n.includes('color')||n.includes('dye')) return '../assets/cat-color.png';
+      if(n.includes('मसाज')||n.includes('massage')||n.includes('स्पा')||n.includes('spa')) return '../assets/cat-massage.png';
+      if(n.includes('ट्रिम')||n.includes('trim')||n.includes('सेट')||n.includes('set')) return '../assets/cat-shave.png';
+      if(n.includes('स्पेशल')||n.includes('special')) return '../assets/cat-haircut.png';
+      return '../assets/cat-haircut.png';
     };
     const emoji = getEmoji(s.name);
     const dur = s.duration ? `${s.duration} min` : null;
     return `<div class="svc-card" id="svc-card-${i}" onclick="toggleServiceCart(${i})">
-      <div class="svc-card-icon">${emoji}</div>
+      <div class="svc-card-icon" style="overflow:hidden;padding:0;"><img src="${emoji}" alt="" style="width:100%;height:100%;object-fit:cover;"></div>
       <div class="svc-card-info">
         <div class="svc-card-name">${s.name}</div>
         <div class="svc-card-dur">${dur ? '⏱ '+dur : ''}</div>

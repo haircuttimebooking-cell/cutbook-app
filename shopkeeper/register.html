@@ -552,31 +552,31 @@ let leafletPin = null;
 
 const stepNames = ['','Swagat','Owner Details','Shop Details','Timing','Services','Photos','Review','Done'];
 const categories = [
-  {name:'बाल कटिंग', icon:'✂️', suggestions:[
+  {name:'बाल कटिंग', icon:'../assets/cat-haircut.png', suggestions:[
     {n:'हेयरकट',p:50,d:25},
     {n:'बच्चों का हेयरकट',p:50,d:20},
     {n:'स्पेशल हेयरकट',p:80,d:30},
   ]},
-  {name:'दाढ़ी शेव / ट्रिम', icon:'🪒', suggestions:[
+  {name:'दाढ़ी शेव / ट्रिम', icon:'../assets/cat-shave.png', suggestions:[
     {n:'दाढ़ी शेव',p:50,d:15},
     {n:'दाढ़ी सेट/ट्रिम',p:40,d:15},
     {n:'स्पेशल दाढ़ी शेव',p:60,d:20},
     {n:'दाढ़ी ट्रिम',p:40,d:20},
   ]},
-  {name:'हेयर कलर / स्टाइलिंग', icon:'🎨', suggestions:[
+  {name:'हेयर कलर / स्टाइलिंग', icon:'../assets/cat-color.png', suggestions:[
     {n:'हेयर डाई',p:50,d:10},
     {n:'स्पेशल हेयर डाई',p:150,d:20},
     {n:'कर्ली हेयर स्टाइल',p:150,d:45},
     {n:'हेयर कलर',p:200,d:60},
     {n:'हेयर स्टेट',p:1000,d:60},
   ]},
-  {name:'फेशियल', icon:'🧖', suggestions:[
+  {name:'फेशियल', icon:'../assets/cat-facial.png', suggestions:[
     {n:'नॉर्मल फेशियल',p:120,d:20},
     {n:'ब्लीच',p:200,d:30},
     {n:'आईब्रो सेट',p:30,d:10},
     {n:'स्पेशल फेशियल',p:180,d:45},
   ]},
-  {name:'हेड मसाज / स्पा', icon:'💆', suggestions:[
+  {name:'हेड मसाज / स्पा', icon:'../assets/cat-massage.png', suggestions:[
     {n:'हेड मसाज',p:50,d:30},
     {n:'हेयर स्पा',p:80,d:30},
   ]},
@@ -871,7 +871,7 @@ function renderServices(){
   container.innerHTML = servicesData.map((cat,ci)=>`
     <div class="cat-section">
       <div class="cat-header">
-        <span>${cat.icon} ${cat.name}</span>
+        <span style="display:inline-flex;align-items:center;gap:8px;"><img src="${cat.icon}" alt="" style="width:28px;height:28px;border-radius:6px;object-fit:cover;flex-shrink:0;">${cat.name}</span>
         <span onclick="addService(${ci})" style="background:var(--gr);color:#fff;padding:5px 12px;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;font-family:var(--dv);">➕ सेवा जोड़ें</span>
       </div>
       <div class="cat-body" id="cat-body-${ci}">
