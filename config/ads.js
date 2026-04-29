@@ -24,11 +24,11 @@
 window.ADS_CONFIG = {
 
   // Customer home page ka top banner
-  home_banner: {
-    active: true,
-    image:  'https://raw.githubusercontent.com/haircuttimebooking-cell/cutbook-app/refs/heads/main/ChatGPT%20Image%20Apr%2013%2C%202026%2C%2004_16_46%20PM.png',
-    link:   'https://haircuttimebooking-cell.github.io/cutbook-app/'
-  }
+ home_banner: {
+  active: true,
+  image:  '../assets/banner-home.png',
+  link:   'https://haircuttimebooking-cell.github.io/cutbook-app/'
+}
 
   // Future mein aur banners add karne ho to yahan likhna:
   //
