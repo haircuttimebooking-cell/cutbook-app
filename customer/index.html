@@ -234,15 +234,15 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
           </div>
         </a>
       </div>
+      <script src="../config/ads.js"></script>
       <script>
         (function(){
-          var AD_IMAGE_URL = 'https://raw.githubusercontent.com/haircuttimebooking-cell/cutbook-app/refs/heads/main/ChatGPT%20Image%20Apr%2013%2C%202026%2C%2004_16_46%20PM.png';
-          var AD_CLICK_URL = 'https://haircuttimebooking-cell.github.io/cutbook-app/';
-          if(AD_IMAGE_URL){
-            document.getElementById('ad-image').src = AD_IMAGE_URL;
+          var ad = (window.ADS_CONFIG && window.ADS_CONFIG.home_banner) || {};
+          if(ad.active && ad.image){
+            document.getElementById('ad-image').src = ad.image;
             document.getElementById('ad-image').style.display = 'block';
             document.getElementById('ad-placeholder').style.display = 'none';
-            document.getElementById('ad-link').href = AD_CLICK_URL;
+            if(ad.link) document.getElementById('ad-link').href = ad.link;
           }
         })();
       </script>
