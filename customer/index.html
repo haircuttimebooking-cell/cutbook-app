@@ -234,15 +234,15 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
           </div>
         </a>
       </div>
-      <script src="../config/ads.js"></script>
       <script>
         (function(){
-          var ad = (window.ADS_CONFIG && window.ADS_CONFIG.home_banner) || {};
-          if(ad.active && ad.image){
-            document.getElementById('ad-image').src = ad.image;
+          var AD_IMAGE_URL = 'https://raw.githubusercontent.com/haircuttimebooking-cell/cutbook-app/refs/heads/main/ChatGPT%20Image%20Apr%2013%2C%202026%2C%2004_16_46%20PM.png';
+          var AD_CLICK_URL = 'https://haircuttimebooking-cell.github.io/cutbook-app/';
+          if(AD_IMAGE_URL){
+            document.getElementById('ad-image').src = AD_IMAGE_URL;
             document.getElementById('ad-image').style.display = 'block';
             document.getElementById('ad-placeholder').style.display = 'none';
-            if(ad.link) document.getElementById('ad-link').href = ad.link;
+            document.getElementById('ad-link').href = AD_CLICK_URL;
           }
         })();
       </script>
@@ -292,10 +292,13 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
             <div style="font-size:12px;font-weight:600;font-family:var(--dv);">सर्विसेज</div>
             <div style="font-size:10px;color:var(--or);cursor:pointer;font-family:var(--dv);" onclick="startBookingFlow()">सभी सर्विसेज देखें →</div>
           </div>
-          <div id="detail-service-chips" style="display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;padding-bottom:4px;"></div>
+          <!-- 5 main categories grid -->
+          <div id="detail-categories-grid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;"></div>
+          <!-- Sub-services panel (opens on category tap) -->
+          <div id="detail-subservices-panel" style="display:none;margin-top:10px;background:var(--bg2);border:1px solid var(--bd);border-radius:12px;padding:10px 12px;"></div>
         </div>
-        <button onclick="startBookingFlow()" style="width:100%;background:var(--or);border:none;color:#fff;padding:16px;border-radius:14px;font-size:14px;font-weight:700;cursor:pointer;font-family:var(--dv);display:flex;align-items:center;justify-content:center;gap:8px;">
-          ✂️ सर्विस चुनें और आगे बढ़ें →
+        <button id="detail-book-btn" onclick="startBookingFromDetail()" disabled style="width:100%;background:var(--or);border:none;color:#fff;padding:16px;border-radius:14px;font-size:14px;font-weight:700;cursor:pointer;font-family:var(--dv);display:flex;align-items:center;justify-content:center;gap:8px;opacity:0.4;">
+          ✂️ पहले सर्विस चुनें →
         </button>
         <div id="detail-services-hint" style="text-align:center;margin-top:8px;font-size:11px;color:var(--tx3);font-family:var(--dv);"></div>
       </div>
@@ -726,33 +729,20 @@ function openShopDetail(i){
     photosBtn.style.pointerEvents=cnt>0?'auto':'none';
   }
 
-  // Services hint count + chips
+  // Services hint count + categories grid
   const hint = document.getElementById('detail-services-hint');
-  const chipsEl = document.getElementById('detail-service-chips');
   if(selectedShop.services && selectedShop.services.length){
     const cnt = selectedShop.services.length;
-    if(hint) hint.textContent = cnt + ' सेवाएँ उपलब्ध हैं';
-    const getEmoji=(name)=>{
-      const n=(name||'').toLowerCase();
-      if(n.includes('हेयरकट')||n.includes('haircut')||n.includes('बच्च')) return '../assets/cat-haircut.png';
-      if(n.includes('दाढ़ी')||n.includes('शेव')||n.includes('shave')||n.includes('beard')) return '../assets/cat-shave.png';
-      if(n.includes('स्टाइल')||n.includes('styling')) return '../assets/cat-color.png';
-      if(n.includes('फेशियल')||n.includes('facial')) return '../assets/cat-facial.png';
-      if(n.includes('कलर')||n.includes('डाई')||n.includes('colour')||n.includes('color')||n.includes('dye')) return '../assets/cat-color.png';
-      if(n.includes('मसाज')||n.includes('massage')||n.includes('स्पा')||n.includes('spa')) return '../assets/cat-massage.png';
-      if(n.includes('ट्रिम')||n.includes('trim')||n.includes('सेट')) return '../assets/cat-shave.png';
-      if(n.includes('स्पेशल')||n.includes('special')) return '../assets/cat-haircut.png';
-      return '../assets/cat-haircut.png';
-    };
-    if(chipsEl) chipsEl.innerHTML = selectedShop.services.map(s=>`
-      <div class="svc-chip" onclick="startBookingFlow()" style="flex-shrink:0;">
-        <div class="svc-icon" style="overflow:hidden;padding:0;"><img src="${getEmoji(s.name)}" alt="" style="width:100%;height:100%;object-fit:cover;"></div>
-        <span style="font-family:var(--dv);max-width:44px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${s.name}</span>
-      </div>`).join('');
+    if(hint) hint.textContent = cnt + ' सेवाएँ उपलब्ध हैं · श्रेणी पर टैप करें';
+    renderDetailCategories();
   } else {
-    if(hint) hint.textContent = '';
-    if(chipsEl) chipsEl.innerHTML = '';
+    if(hint) hint.textContent = 'कोई सर्विस नहीं मिली';
+    const grid = document.getElementById('detail-categories-grid');
+    if(grid) grid.innerHTML = '';
+    const panel = document.getElementById('detail-subservices-panel');
+    if(panel){ panel.style.display='none'; panel.innerHTML=''; }
   }
+  updateDetailBookBtn();
 
   // Open/close
   const now=new Date(),curMin=now.getHours()*60+now.getMinutes();
@@ -798,9 +788,134 @@ function toggleDetailSvc(i){
 
 // ─── START FROM DETAIL (skip sc-services, go to barber) ──
 function startBookingFromDetail(){
-  if(!selectedServices.length){ toast('❌ Pehle koi service chunein'); return; }
-  // Go directly to barber step
+  if(!selectedServices.length){
+    toast('❌ Pehle koi service chunein');
+    const btn = document.getElementById('detail-book-btn');
+    if(btn){
+      btn.style.transform='translateX(-6px)';
+      setTimeout(()=>btn.style.transform='translateX(6px)',90);
+      setTimeout(()=>btn.style.transform='',180);
+    }
+    return;
+  }
+  // Go directly to barber step (services already selected on detail page)
   goToBarberStep();
+}
+
+// ─── 5 MAIN CATEGORIES (2-LEVEL: tap category → see sub-services) ──
+const DETAIL_CATEGORIES = [
+  {id:'haircut', name:'बाल कटिंग',     img:'../assets/cat-haircut.png', emoji:'✂️'},
+  {id:'beard',   name:'दाढ़ी / शेव',    img:'../assets/cat-beard.png',   emoji:'🪒'},
+  {id:'facial',  name:'फेशियल',         img:'../assets/cat-facial.png',  emoji:'💆'},
+  {id:'massage', name:'हेड मसाज / स्पा', img:'../assets/cat-massage.png', emoji:'💆‍♂️'},
+  {id:'color',   name:'कलर / स्टाइलिंग', img:'../assets/cat-color.png',   emoji:'🎨'},
+];
+
+function categorizeService(name){
+  const n = (name||'').toLowerCase();
+  if(n.includes('दाढ़ी')||n.includes('शेव')||n.includes('beard')||n.includes('shave')||n.includes('मूछ')||n.includes('mustache')) return 'beard';
+  if(n.includes('मसाज')||n.includes('massage')||n.includes('स्पा')||n.includes('spa')||n.includes('हेड')) return 'massage';
+  if(n.includes('फेशियल')||n.includes('facial')||n.includes('क्लीन')||n.includes('clean')||n.includes('face')) return 'facial';
+  if(n.includes('कलर')||n.includes('रंग')||n.includes('color')||n.includes('colour')||n.includes('dye')||n.includes('डाई')||n.includes('स्टाइल')||n.includes('styling')||n.includes('हाइलाइट')||n.includes('highlight')) return 'color';
+  return 'haircut';
+}
+
+let _activeDetailCat = null;
+
+function renderDetailCategories(){
+  const grid = document.getElementById('detail-categories-grid');
+  if(!grid || !selectedShop || !selectedShop.services) return;
+
+  // Group services by category
+  const buckets = {};
+  DETAIL_CATEGORIES.forEach(c => buckets[c.id] = []);
+  selectedShop.services.forEach((s, idx) => {
+    const cat = categorizeService(s.name);
+    buckets[cat].push({...s, _origIdx: idx});
+  });
+
+  grid.innerHTML = DETAIL_CATEGORIES.map(c => {
+    const items = buckets[c.id];
+    const count = items.length;
+    const dim = count === 0 ? 'opacity:0.35;pointer-events:none;' : '';
+    const isActive = _activeDetailCat === c.id;
+    const activeBorder = isActive ? 'border-color:var(--or);background:var(--or3);' : 'border-color:var(--bd);background:var(--bg2);';
+    return `<div onclick="openDetailCategory('${c.id}')" style="${dim}cursor:pointer;border:1.5px solid var(--bd);border-radius:12px;padding:10px 8px;display:flex;flex-direction:column;align-items:center;gap:6px;transition:all .2s;${activeBorder}">
+      <img src="${c.img}" alt="${c.name}" style="width:38px;height:38px;object-fit:contain;" onerror="this.outerHTML='<div style=&quot;font-size:26px;line-height:1;&quot;>${c.emoji}</div>'">
+      <div style="font-size:11px;font-weight:600;text-align:center;font-family:var(--dv);line-height:1.2;">${c.name}</div>
+      <div style="font-size:9px;color:${count>0?'var(--or)':'var(--tx3)'};font-family:var(--dv);">${count>0 ? count+' सर्विस' : 'उपलब्ध नहीं'}</div>
+    </div>`;
+  }).join('');
+
+  // If a category was previously open, re-render its panel
+  if(_activeDetailCat) renderDetailSubservices(_activeDetailCat);
+}
+
+function openDetailCategory(catId){
+  _activeDetailCat = (_activeDetailCat === catId) ? null : catId;
+  renderDetailCategories();
+  if(_activeDetailCat) renderDetailSubservices(catId);
+  else {
+    const panel = document.getElementById('detail-subservices-panel');
+    if(panel){ panel.style.display='none'; panel.innerHTML=''; }
+  }
+}
+
+function renderDetailSubservices(catId){
+  const panel = document.getElementById('detail-subservices-panel');
+  if(!panel || !selectedShop || !selectedShop.services) return;
+  const cat = DETAIL_CATEGORIES.find(c => c.id === catId);
+  const items = selectedShop.services
+    .map((s,i) => ({...s, _origIdx: i}))
+    .filter(s => categorizeService(s.name) === catId);
+  if(!items.length){ panel.style.display='none'; panel.innerHTML=''; return; }
+  panel.style.display='block';
+  panel.innerHTML = `
+    <div style="font-size:11px;font-weight:700;color:var(--or);margin-bottom:8px;font-family:var(--dv);">${cat.name} — ${items.length} सर्विस</div>
+    ${items.map(s => {
+      const isSel = selectedServices.some(x => x.name === s.name);
+      const dur = s.duration ? `⏱ ${s.duration} min` : '';
+      return `<div onclick="toggleDetailService(${s._origIdx})" style="display:flex;align-items:center;gap:10px;padding:8px 6px;border-bottom:1px solid var(--bd);cursor:pointer;">
+        <div style="width:18px;height:18px;border-radius:5px;border:2px solid ${isSel?'var(--or)':'var(--bd2)'};background:${isSel?'var(--or)':'transparent'};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          ${isSel?'<svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>':''}
+        </div>
+        <div style="flex:1;">
+          <div style="font-size:12px;font-weight:600;">${s.name}</div>
+          <div style="font-size:10px;color:var(--tx3);font-family:var(--dv);">${dur}</div>
+        </div>
+        <div style="font-size:13px;font-weight:700;color:var(--or);">₹${s.price}</div>
+      </div>`;
+    }).join('')}
+  `;
+}
+
+function toggleDetailService(origIdx){
+  const s = selectedShop.services[origIdx];
+  if(!s) return;
+  const idx = selectedServices.findIndex(x => x.name === s.name);
+  if(idx === -1){
+    selectedServices.push({name:s.name, price:s.price, duration:s.duration||30});
+  } else {
+    selectedServices.splice(idx, 1);
+  }
+  if(_activeDetailCat) renderDetailSubservices(_activeDetailCat);
+  updateDetailBookBtn();
+}
+
+function updateDetailBookBtn(){
+  const btn = document.getElementById('detail-book-btn');
+  if(!btn) return;
+  const count = selectedServices.length;
+  if(count > 0){
+    const total = selectedServices.reduce((sum,s)=>sum+s.price,0);
+    btn.disabled = false;
+    btn.style.opacity = '1';
+    btn.textContent = `${count} सर्विस · ₹${total} — आगे बढ़ें →`;
+  } else {
+    btn.disabled = true;
+    btn.style.opacity = '0.4';
+    btn.textContent = '✂️ पहले सर्विस चुनें →';
+  }
 }
 
 // ─── START BOOKING FLOW ──────────────────────────────
@@ -824,20 +939,20 @@ function buildServicesScreen(){
   list.innerHTML = selectedShop.services.map((s,i)=>{
     const getEmoji=(name)=>{
       const n=(name||'').toLowerCase();
-      if(n.includes('हेयरकट')||n.includes('haircut')||n.includes('बाल')||n.includes('बच्च')) return '../assets/cat-haircut.png';
-      if(n.includes('दाढ़ी')||n.includes('शेव')||n.includes('shave')||n.includes('beard')) return '../assets/cat-shave.png';
-      if(n.includes('स्टाइल')||n.includes('styling')) return '../assets/cat-color.png';
-      if(n.includes('फेशियल')||n.includes('facial')||n.includes('face')) return '../assets/cat-facial.png';
-      if(n.includes('कलर')||n.includes('डाई')||n.includes('colour')||n.includes('color')||n.includes('dye')) return '../assets/cat-color.png';
-      if(n.includes('मसाज')||n.includes('massage')||n.includes('स्पा')||n.includes('spa')) return '../assets/cat-massage.png';
-      if(n.includes('ट्रिम')||n.includes('trim')||n.includes('सेट')||n.includes('set')) return '../assets/cat-shave.png';
-      if(n.includes('स्पेशल')||n.includes('special')) return '../assets/cat-haircut.png';
-      return '../assets/cat-haircut.png';
+      if(n.includes('हेयरकट')||n.includes('haircut')||n.includes('बाल')||n.includes('बच्च')) return '✂️';
+      if(n.includes('दाढ़ी')||n.includes('शेव')||n.includes('shave')||n.includes('beard')) return '🪒';
+      if(n.includes('स्टाइल')||n.includes('styling')) return '💇';
+      if(n.includes('फेशियल')||n.includes('facial')||n.includes('face')) return '💆';
+      if(n.includes('कलर')||n.includes('डाई')||n.includes('colour')||n.includes('color')||n.includes('dye')) return '🎨';
+      if(n.includes('मसाज')||n.includes('massage')) return '💆';
+      if(n.includes('ट्रिम')||n.includes('trim')||n.includes('सेट')||n.includes('set')) return '✂️';
+      if(n.includes('स्पेशल')||n.includes('special')) return '⭐';
+      return '✂️';
     };
     const emoji = getEmoji(s.name);
     const dur = s.duration ? `${s.duration} min` : null;
     return `<div class="svc-card" id="svc-card-${i}" onclick="toggleServiceCart(${i})">
-      <div class="svc-card-icon" style="overflow:hidden;padding:0;"><img src="${emoji}" alt="" style="width:100%;height:100%;object-fit:cover;"></div>
+      <div class="svc-card-icon">${emoji}</div>
       <div class="svc-card-info">
         <div class="svc-card-name">${s.name}</div>
         <div class="svc-card-dur">${dur ? '⏱ '+dur : ''}</div>
@@ -1374,7 +1489,12 @@ function goScreen(id){
     if(sp) sp.style.color='var(--or)';
     const dot=document.createElement('div');dot.className='nav-dot';ni.appendChild(dot);
   }
-  if(id==='bookings'){ document.getElementById('bk-badge').style.display='none'; renderBookings('all'); }
+  if(id==='bookings'){
+    document.getElementById('bk-badge').style.display='none';
+    // Fresh fetch from DB (fallback if realtime missed an update — fixes stale "Shopkeeper ka jawab aa raha hai" note)
+    if(typeof loadBookings==='function' && currentUser) loadBookings();
+    else renderBookings('all');
+  }
 }
 
 function toggleSvc(el){ el.classList.toggle('on'); }
