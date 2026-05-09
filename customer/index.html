@@ -1212,7 +1212,12 @@ async function confirmBook(){
 async function loadBookings(){
   const {data,error} = await sb.from('bookings').select('*').eq('customer_id',currentUser.id).order('created_at',{ascending:false});
   if(error) return;
-  allBookings = data||[];
+  const today = new Date().toISOString().split('T')[0];
+  // Purani completed/cancelled bookings hide karo, pending/accepted hamesha dikhao
+  allBookings = (data||[]).filter(b=>{
+    if(b.status==='pending'||b.status==='accepted'||b.status==='arrived'||b.status==='inservice') return true;
+    return (b.booking_date||'') >= today;
+  });
   renderBookings(curFilter);
   const pending = allBookings.filter(b=>b.status==='pending').length;
   const badge = document.getElementById('bk-badge');
@@ -1308,7 +1313,8 @@ function showStatusPopup(booking){
 function renderBookings(filter){
   curFilter=filter;
   const list=document.getElementById('bk-list');
-  const data=filter==='all'?allBookings:allBookings.filter(b=>b.status===filter);
+  const statusFilter = filter==='confirmed' ? 'accepted' : filter;
+  const data=filter==='all'?allBookings:allBookings.filter(b=>b.status===statusFilter);
   if(!data.length){ list.innerHTML='<div style="text-align:center;padding:40px 16px;color:var(--tx3);font-family:var(--dv);">Koi booking nahi</div>'; return; }
   list.innerHTML=data.map(b=>{
     const st=b.status||'pending';
