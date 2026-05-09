@@ -1205,7 +1205,10 @@ async function openManualBooking(){
       <span style="font-size:11px;color:var(--tx);">Haircut — <span style="color:var(--or);font-weight:600;">₹80</span></span>
     </label>`;
   }
-  document.getElementById('mb-total-price').textContent='0';
+  // Pre-check first service so total shows on open
+  const firstCheck=document.querySelector('#mb-svc-list input[type="checkbox"]');
+  if(firstCheck) firstCheck.checked=true;
+  updateMbTotal();
 
   const barberEl=document.getElementById('mb-barber');
   barberEl.innerHTML=barbers.map((b,i)=>`<option value="${b}">💈 ${b} — Chair ${i+1}</option>`).join('');

@@ -145,8 +145,8 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
 .date-num{font-size:14px;font-weight:600;}
 .date-chip.on .date-num{color:#fff;}
 .slots-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:0 16px;margin-bottom:16px;}
-.slot{padding:7px;border-radius:10px;background:var(--bg3);border:1px solid var(--bd);text-align:center;font-size:10px;cursor:pointer;transition:all .2s;}
-.slot.booked{background:var(--bg2);border-color:transparent;color:var(--tx3);text-decoration:line-through;cursor:default;}
+.slot{padding:7px;border-radius:10px;background:rgba(61,187,120,0.12);border:1px solid rgba(61,187,120,0.45);color:#3DBB78;text-align:center;font-size:10px;cursor:pointer;transition:all .2s;font-weight:500;}
+.slot.booked{background:rgba(224,85,85,0.12);border-color:rgba(224,85,85,0.4);color:#E05555;text-decoration:none;cursor:default;font-weight:400;}
 .slot.on{background:var(--or2);border-color:var(--or);color:var(--or);font-weight:600;}
 
 /* ─── MY BOOKINGS ─── */
@@ -590,13 +590,13 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 var sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const noteMap = {
-  pending:{cls:'pending',txt:'⏳ Shopkeeper ka jawab aa raha hai...'},
+  pending:{cls:'pending',txt:'⏳ Shopkeeper se approval ka wait hai — jaldi confirm hoga'},
   accepted:{cls:'confirmed',txt:'✅ Booking confirmed! Time pe aa jaana.'},
   completed:{cls:'completed',txt:'🏁 Service ho gayi. Review do!'},
   cancelled:{cls:'cancelled',txt:'❌ Cancel ho gayi. Naya slot lo.'},
 };
 const pillMap = {pending:'pill-am',accepted:'pill-gr',completed:'pill-or',cancelled:'pill-re'};
-const pillLbl = {pending:'⏳ Pending',accepted:'✅ Confirmed',completed:'🏁 Completed',cancelled:'❌ Cancelled'};
+const pillLbl = {pending:'⏳ Approval Pending',accepted:'✅ Confirmed',completed:'🏁 Completed',cancelled:'❌ Cancelled'};
 
 let currentUser = null;
 let allBookings = [];
@@ -1142,7 +1142,7 @@ async function confirmBook(){
   const svcNames = selectedServices.map(s=>s.name).join(', ');
   const totalPrice = selectedServices.reduce((sum,s)=>sum+s.price,0);
 
-  // Fix 4: Auto accept check
+  // Auto accept ON hai to turant confirm, warna shopkeeper accept karega
   const isAutoAccept = selectedShop.auto_accept === true || selectedShop.auto_accept === 'true';
   const bookingStatus = isAutoAccept ? 'accepted' : 'pending';
 
