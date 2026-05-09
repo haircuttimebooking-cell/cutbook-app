@@ -1312,13 +1312,15 @@ function toggleOnline(){
 
 // ─── AUTO ACCEPT ──────────────────────────────────────
 function toggleAutoAccept(el){
-  const goingOn=el.checked;el.checked=!goingOn;
+  const goingOn=el.checked;
+  // Checkbox wapas purani state pe rakho jab tak confirm na ho
+  el.checked=!goingOn;
   showConfirm(goingOn?'⚡':'🔄',goingOn?'Auto Accept ON karein?':'Manual Mode ON karein?',
     goingOn?'Booking aate hi turant confirm ho jayegi.':'Ab manually accept karna hoga.',
-    goingOn?'Haan, Auto karo':'Haan',goingOn?'var(--or)':'var(--bl)',async function(){
+    goingOn?'Haan, Auto karo':'Haan, Manual karo',goingOn?'var(--or)':'var(--bl)',async function(){
       autoAccept=goingOn;
-      document.getElementById('auto-accept').checked=goingOn;
-      document.getElementById('auto-accept-profile').checked=goingOn;
+      document.getElementById('auto-accept').checked=autoAccept;
+      document.getElementById('auto-accept-profile').checked=autoAccept;
       document.getElementById('aa-sub-lbl').textContent=autoAccept?'ON — booking instantly confirm ho':'OFF — manually accept karo';
       document.getElementById('pr-aa-lbl').textContent=autoAccept?'ON':'OFF';
       if(currentShop) await sb.from('shops').update({auto_accept:autoAccept}).eq('id',currentShop.id);
@@ -1327,7 +1329,7 @@ function toggleAutoAccept(el){
     });
 }
 function syncAutoAccept(el){
-  document.getElementById('auto-accept').checked=el.checked;
+  // Profile toggle se sync — directly toggleAutoAccept call karo
   toggleAutoAccept(el);
 }
 
