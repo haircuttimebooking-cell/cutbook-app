@@ -721,7 +721,8 @@ async function loadShopData(){
   currentShop = shop;
   document.querySelectorAll('.shop-name').forEach(el=>el.textContent = shop.name||'Dukan');
   document.querySelectorAll('.owner-name').forEach(el=>el.textContent = shop.owner_name||'');
-  autoAccept = shop.auto_accept === true || shop.auto_accept === 'true';
+  // Default ON — sirf explicitly false hone pe OFF
+  autoAccept = shop.auto_accept !== false && shop.auto_accept !== 'false';
   document.getElementById('auto-accept').checked = autoAccept;
   document.getElementById('auto-accept-profile').checked = autoAccept;
   document.getElementById('aa-sub-lbl').textContent = autoAccept ? 'ON — booking instantly confirm ho' : 'OFF — manually accept karo';
@@ -1311,25 +1312,23 @@ function toggleOnline(){
 }
 
 // ─── AUTO ACCEPT ──────────────────────────────────────
-function toggleAutoAccept(el){
-  const goingOn=el.checked;
-  // Checkbox wapas purani state pe rakho jab tak confirm na ho
-  el.checked=!goingOn;
-  showConfirm(goingOn?'⚡':'🔄',goingOn?'Auto Accept ON karein?':'Manual Mode ON karein?',
-    goingOn?'Booking aate hi turant confirm ho jayegi.':'Ab manually accept karna hoga.',
-    goingOn?'Haan, Auto karo':'Haan, Manual karo',goingOn?'var(--or)':'var(--bl)',async function(){
-      autoAccept=goingOn;
-      document.getElementById('auto-accept').checked=autoAccept;
-      document.getElementById('auto-accept-profile').checked=autoAccept;
-      document.getElementById('aa-sub-lbl').textContent=autoAccept?'ON — booking instantly confirm ho':'OFF — manually accept karo';
-      document.getElementById('pr-aa-lbl').textContent=autoAccept?'ON':'OFF';
-      if(currentShop) await sb.from('shops').update({auto_accept:autoAccept}).eq('id',currentShop.id);
-      toast(autoAccept?'⚡ Auto Accept ON':'🔄 Manual mode ON');
-      renderBk(getCurFilter());updateStats();
-    });
+async function toggleAutoAccept(el){
+  const goingOn = el.checked;
+  autoAccept = goingOn;
+  // Dono toggles sync karo
+  document.getElementById('auto-accept').checked = autoAccept;
+  document.getElementById('auto-accept-profile').checked = autoAccept;
+  document.getElementById('aa-sub-lbl').textContent = autoAccept ? 'ON — booking instantly confirm ho' : 'OFF — manually accept karo';
+  document.getElementById('pr-aa-lbl').textContent = autoAccept ? 'ON' : 'OFF';
+  if(currentShop){
+    const {error} = await sb.from('shops').update({auto_accept: autoAccept}).eq('id', currentShop.id);
+    if(error){ toast('❌ Save nahi hua — dobara try karo'); return; }
+  }
+  toast(autoAccept ? '⚡ Auto Accept ON' : '🔄 Manual mode ON');
+  renderBk(getCurFilter()); updateStats();
 }
 function syncAutoAccept(el){
-  // Profile toggle se sync — directly toggleAutoAccept call karo
+  document.getElementById('auto-accept').checked = el.checked;
   toggleAutoAccept(el);
 }
 

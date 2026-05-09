@@ -1140,6 +1140,7 @@ async function submitRegistration(){
     longitude: shopLng,
     barbers: barbersData,
     photos: photoUrls,
+    auto_accept: true,
   }]);
 
   if(error){setMsg('submit-msg','❌ Error: '+error.message,'error');return;}
