@@ -1373,9 +1373,28 @@ function filterBk(el,filter){
   renderBookings(filter);
 }
 
-async function cancelBk(id){
-  await sb.from('bookings').update({status:'cancelled'}).eq('id',id);
-  toast('❌ Booking cancel ho gayi');
+let _cancelTargetId = null;
+
+function cancelBk(id){
+  _cancelTargetId = id;
+  const modal = document.getElementById('cancel-confirm-modal');
+  modal.style.display = 'flex';
+}
+
+function closeCancelModal(){
+  _cancelTargetId = null;
+  document.getElementById('cancel-confirm-modal').style.display = 'none';
+}
+
+async function confirmCancelBk(){
+  if(!_cancelTargetId) return;
+  const id = _cancelTargetId;
+  closeCancelModal();
+  const {error} = await sb.from('bookings').update({status:'cancelled'}).eq('id',id);
+  if(error){ toast('❌ Cancel fail hua — dobara try karo'); return; }
+  allBookings = allBookings.map(b => b.id===id ? {...b, status:'cancelled'} : b);
+  renderBookings(curFilter);
+  toast('✅ Booking cancel ho gayi');
 }
 
 // ─── SLOT HOLD ───────────────────────────────────────
@@ -1821,7 +1840,23 @@ function closeCustAddressPopup(){ document.getElementById('cust-addr-modal').sty
 
 document.getElementById('cust-photo-modal').addEventListener('click',function(e){ if(e.target===this) closeCustPhotoPopup(); });
 document.getElementById('cust-addr-modal').addEventListener('click',function(e){ if(e.target===this) closeCustAddressPopup(); });
-document.addEventListener('keydown',function(e){ if(e.key==='Escape'){ closeCustPhotoPopup(); closeCustAddressPopup(); closeFeedbackModal(); } });
+document.addEventListener('keydown',function(e){ if(e.key==='Escape'){ closeCustPhotoPopup(); closeCustAddressPopup(); closeFeedbackModal(); closeCancelModal(); } });
+document.getElementById('cancel-confirm-modal').addEventListener('click',function(e){ if(e.target===this) closeCancelModal(); });
 </script>
+
+<!-- ══ CANCEL CONFIRM MODAL ══ -->
+<div id="cancel-confirm-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:9999;align-items:flex-end;justify-content:center;">
+  <div style="background:var(--bg2);border-radius:24px 24px 0 0;padding:24px 20px 32px;width:100%;max-width:400px;border-top:1px solid var(--bd);">
+    <div style="text-align:center;font-size:32px;margin-bottom:12px;">❌</div>
+    <div style="text-align:center;font-size:17px;font-weight:700;margin-bottom:8px;">Booking Cancel Karein?</div>
+    <div style="text-align:center;font-size:12px;color:var(--tx3);font-family:var(--dv);margin-bottom:20px;">Yeh booking permanently cancel ho jaayegi aur wapas nahi aayi.</div>
+    <button onclick="confirmCancelBk()" style="width:100%;background:var(--re);border:none;color:#fff;padding:13px;border-radius:14px;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans';margin-bottom:10px;">
+      ❌ Haan, Cancel Karo
+    </button>
+    <button onclick="closeCancelModal()" style="width:100%;background:var(--bg3);border:1px solid var(--bd2);color:var(--tx2);padding:12px;border-radius:14px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans';">
+      Wapas Jao
+    </button>
+  </div>
+</div>
 </body>
 </html>
