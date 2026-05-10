@@ -900,22 +900,26 @@ function fmtTime(val){
   const[h,m]=val.split(':').map(Number);
   return `${h%12||12}:${String(m).padStart(2,'0')} ${h<12?'AM':'PM'}`;
 }
-function getTimeDiff(timeStr){
+function getTimeDiff(timeStr, dateStr){
   if(!timeStr||!timeStr.includes(':')) return 999999999;
   const now=new Date(),parts=timeStr.split(' ');
   if(parts.length<2) return 999999999;
   let[h,m]=parts[0].split(':').map(Number);
   if(parts[1]==='PM'&&h!==12) h+=12;
   if(parts[1]==='AM'&&h===12) h=0;
-  return new Date(now.getFullYear(),now.getMonth(),now.getDate(),h,m).getTime()-now.getTime();
+  // Use booking date if provided, else today
+  let base;
+  if(dateStr){const[y,mo,d]=dateStr.split('-').map(Number);base=new Date(y,mo-1,d,h,m);}
+  else base=new Date(now.getFullYear(),now.getMonth(),now.getDate(),h,m);
+  return base.getTime()-now.getTime();
 }
-function isWithin30Min(t){const d=getTimeDiff(t);return d<30*60*1000&&d>0;}
-function isRunning(t){const d=getTimeDiff(t);return d<=0&&d>-60*60*1000;}
+function isWithin30Min(t,d){const diff=getTimeDiff(t,d);return diff<30*60*1000&&diff>-60*60*1000;}
+function isRunning(t,d){const diff=getTimeDiff(t,d);return diff<=0&&diff>-90*60*1000;}
 function getTimeBadge(b){
   if(b.status==='inprogress') return `<div class="time-badge inprog">🟢 Kaam Chal Raha</div>`;
   if(b.status!=='accepted'&&b.status!=='pending') return '';
-  if(isRunning(b.time)) return `<div class="time-badge running">🔴 Running Now</div>`;
-  const diff=getTimeDiff(b.time);if(diff<=0) return '';
+  if(isRunning(b.time,b.booking_date)) return `<div class="time-badge running">🔴 Running Now</div>`;
+  const diff=getTimeDiff(b.time,b.booking_date);if(diff<=0&&!isRunning(b.time,b.booking_date)) return '';
   const min=Math.round(diff/60000);
   if(min<=30) return `<div class="time-badge soon">⚡ ${min} min mein</div>`;
   if(min<=120) return `<div class="time-badge upcoming">🔵 ${min} min baad</div>`;
@@ -978,7 +982,7 @@ function renderBk(filter='all'){
 
   list.innerHTML=html+data.map(b=>{
     const sc=statusCfg[b.status]||statusCfg.pending;
-    const locked=b.status==='accepted'&&isWithin30Min(b.time);
+    const locked=b.status==='accepted'&&isWithin30Min(b.time,b.booking_date);
     const barberChip=b.barber?`<div class="barber-chip">👨‍🔧 ${b.barber}${b.chair?' · 💺 '+b.chair:''}</div>`:'';
     const timerChip=workTimers[b.id]?`<div class="timer-chip">⏱ ${workTimers[b.id]}</div>`:'';
     const phoneBtn=b.phone?`<div class="bk-phone" onclick="callCustomer('${b.phone}')">📞 ${b.phone}</div>`:'';
