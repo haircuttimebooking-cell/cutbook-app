@@ -1149,6 +1149,20 @@ async function confirmBook(){
   const isAutoAccept = selectedShop.auto_accept === true || selectedShop.auto_accept === 'true';
   const bookingStatus = isAutoAccept ? 'accepted' : 'pending';
 
+  // ── Duplicate booking check ──────────────────────
+  const {data: existingBk} = await sb.from('bookings')
+    .select('id')
+    .eq('customer_id', currentUser.id)
+    .eq('shop_id', selectedShop.id)
+    .eq('booking_date', selectedDate)
+    .eq('booking_time', selectedSlot)
+    .in('status', ['pending','accepted','inprogress'])
+    .maybeSingle();
+  if(existingBk){
+    toast('\u26a0\ufe0f Aapne is slot pe pehle se booking kar rakhi hai!');
+    return;
+  }
+
   const {error} = await sb.from('bookings').insert([{
     customer_id: currentUser.id,
     shop_id: selectedShop.id,
