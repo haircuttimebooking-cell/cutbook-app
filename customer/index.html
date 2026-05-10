@@ -1227,10 +1227,13 @@ async function loadBookings(){
   const {data,error} = await sb.from('bookings').select('*').eq('customer_id',currentUser.id).order('created_at',{ascending:false});
   if(error) return;
   const today = new Date().toISOString().split('T')[0];
-  // Purani completed/cancelled bookings hide karo, pending/accepted hamesha dikhao
+  // Aaj ya future ki bookings dikhao
+  // Pending/accepted: sirf aaj ya future ki
+  // Completed/cancelled: sirf aaj ki
   allBookings = (data||[]).filter(b=>{
-    if(b.status==='pending'||b.status==='accepted'||b.status==='arrived'||b.status==='inservice') return true;
-    return (b.booking_date||'') >= today;
+    const bDate = b.booking_date||'';
+    if(b.status==='pending'||b.status==='accepted'||b.status==='inprogress') return bDate >= today;
+    return bDate === today;
   });
   renderBookings(curFilter);
   const pending = allBookings.filter(b=>b.status==='pending').length;
