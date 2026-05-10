@@ -792,6 +792,8 @@ async function loadHeldSlots(shopId){
 function subscribeBookings(){
   sb.channel('bookings-shop')
     .on('postgres_changes',{event:'INSERT',schema:'public',table:'bookings'},async(payload)=>{
+      // Sirf apni shop ki booking pe sound + notif
+      if(currentShop && payload.new.shop_id !== currentShop.id) return;
       await loadBookingsFromDB();
       playNotifSound();
       sendBrowserNotif('🔔 Nayi Booking!',`${payload.new.customer_name||'Customer'} — ${payload.new.service||''} · ${payload.new.booking_time||''}`);
@@ -884,12 +886,18 @@ function sendBrowserNotif(title,body){
 function playNotifSound(){
   try{
     const ctx=new(window.AudioContext||window.webkitAudioContext)();
-    [880,1100,1320].forEach((f,i)=>{
+    // 3 chimes — ding ding ding (ascending, clear)
+    const notes=[523,659,784]; // C5, E5, G5
+    notes.forEach((f,i)=>{
       const o=ctx.createOscillator(),g=ctx.createGain();
-      o.connect(g);g.connect(ctx.destination);o.frequency.value=f;
-      g.gain.setValueAtTime(0.3,ctx.currentTime+i*0.15);
-      g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+i*0.15+0.3);
-      o.start(ctx.currentTime+i*0.15);o.stop(ctx.currentTime+i*0.15+0.3);
+      o.type='sine';
+      o.connect(g);g.connect(ctx.destination);
+      o.frequency.value=f;
+      const t=ctx.currentTime+i*0.22;
+      g.gain.setValueAtTime(0,t);
+      g.gain.linearRampToValueAtTime(0.5,t+0.05);
+      g.gain.exponentialRampToValueAtTime(0.001,t+0.45);
+      o.start(t);o.stop(t+0.5);
     });
   }catch(e){}
 }
@@ -913,8 +921,15 @@ function getTimeDiff(timeStr, dateStr){
   else base=new Date(now.getFullYear(),now.getMonth(),now.getDate(),h,m);
   return base.getTime()-now.getTime();
 }
-function isWithin30Min(t,d){const diff=getTimeDiff(t,d);return diff<30*60*1000&&diff>-60*60*1000;}
-function isRunning(t,d){const diff=getTimeDiff(t,d);return diff<=0&&diff>-90*60*1000;}
+// Lock zone: 10 min pehle se booking time tak (1:21 - 1:29)
+function isLockZone(t,d){const diff=getTimeDiff(t,d);return diff<=10*60*1000&&diff>0;}
+// Running window: booking time se exactly 30 min baad tak (1:30 - 2:00)
+function isRunningWindow(t,d){const diff=getTimeDiff(t,d);return diff<=0&&diff>-30*60*1000;}
+// Expired: 30 min baad (2:00 ke baad)
+function isExpired(t,d){const diff=getTimeDiff(t,d);return diff<=-30*60*1000;}
+// Keep old names as aliases for getTimeBadge compatibility
+function isWithin30Min(t,d){return isLockZone(t,d)||isRunningWindow(t,d);}
+function isRunning(t,d){return isRunningWindow(t,d);}
 function getTimeBadge(b){
   if(b.status==='inprogress') return `<div class="time-badge inprog">🟢 Kaam Chal Raha</div>`;
   if(b.status!=='accepted'&&b.status!=='pending') return '';
@@ -982,7 +997,7 @@ function renderBk(filter='all'){
 
   list.innerHTML=html+data.map(b=>{
     const sc=statusCfg[b.status]||statusCfg.pending;
-    const locked=b.status==='accepted'&&isWithin30Min(b.time,b.booking_date);
+    // Timing zones handled inside accepted block
     const barberChip=b.barber?`<div class="barber-chip">👨‍🔧 ${b.barber}${b.chair?' · 💺 '+b.chair:''}</div>`:'';
     const timerChip=workTimers[b.id]?`<div class="timer-chip">⏱ ${workTimers[b.id]}</div>`:'';
     const phoneBtn=b.phone?`<div class="bk-phone" onclick="callCustomer('${b.phone}')">📞 ${b.phone}</div>`:'';
@@ -1002,16 +1017,24 @@ function renderBk(filter='all'){
         </div>`;
       }
     } else if(b.status==='accepted'){
-      if(locked){
-        actions=`<div class="bk-lock">🔒 30 min se kam — cancel band hai</div>
-        <div class="bk-actions" style="margin-top:8px;">
+      const lockZone  = isLockZone(b.time, b.booking_date);
+      const runWindow = isRunningWindow(b.time, b.booking_date);
+      const expired   = isExpired(b.time, b.booking_date);
+      if(expired){
+        // 2:00 ke baad — expire
+        actions=`<div style="margin-top:8px;font-size:10px;color:var(--tx3);font-family:var(--dv);text-align:center;">⏰ Booking window expire ho gayi</div>`;
+      } else if(runWindow){
+        // 1:30 → 2:00 — sirf Shuru Karo
+        actions=`<div class="bk-actions">
           <button class="btn btn-am" style="flex:1;" onclick="startWorkPrompt('${b.id}')">▶️ Shuru Karo</button>
-          <button class="btn btn-or" style="flex:1;" onclick="donePrompt('${b.id}')">✔ Done</button>
         </div>`;
+      } else if(lockZone){
+        // 1:21 → 1:29 — lock, koi button nahi
+        actions=`<div class="bk-lock">🔒 Booking time nazdik hai — 1 minute mein Shuru Karo dikhega</div>`;
       } else {
+        // 1:00 → 1:20 — sirf Reject
         actions=`<div class="bk-actions">
           <button class="btn btn-re" style="flex:1;" onclick="rejectPrompt('${b.id}')">✕ Reject</button>
-          <button class="btn btn-am" style="flex:2;" onclick="startWorkPrompt('${b.id}')">▶️ Shuru Karo</button>
         </div>`;
       }
     } else if(b.status==='inprogress'){
