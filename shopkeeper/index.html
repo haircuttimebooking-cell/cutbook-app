@@ -304,6 +304,80 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
     </div>
 
     <!-- ══ PROFILE / SETTINGS ══ -->
+
+
+  <!-- Confirm Modal (generic) -->
+  <div class="modal" id="confirm-modal">
+    <div class="modal-box">
+      <div class="modal-icon or" id="confirm-icon">❓</div>
+      <div class="modal-title" id="confirm-title">Confirm karein?</div>
+      <div class="modal-sub" id="confirm-sub" style="margin-bottom:16px;"></div>
+      <div class="modal-btns">
+        <button onclick="closeConfirmModal()" style="background:var(--bg3);color:var(--tx2);border:1px solid var(--bd2);">Nahi</button>
+        <button id="confirm-yes-btn" style="background:var(--or);color:#fff;">Haan, Karo</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Shop Settings Modal -->
+  <div class="modal-bottom" id="settings-modal">
+    <div class="modal-sheet" style="max-height:85%;overflow-y:auto;">
+      <div class="modal-handle"></div>
+      <div style="font-size:15px;font-weight:700;margin-bottom:16px;">🏪 Shop Details Edit</div>
+      <div class="settings-field">
+        <div class="field-label">दुकान का नाम *</div>
+        <input id="set-shop-name" class="field-input" placeholder="Raj Hair Studio">
+      </div>
+      <div class="settings-field">
+        <div class="field-label">मालिक का नाम</div>
+        <input id="set-owner-name" class="field-input" placeholder="Rajesh Kumar">
+      </div>
+      <div class="settings-field">
+        <div class="field-label">पूरा पता</div>
+        <textarea id="set-address" class="field-input" rows="2" style="resize:none;"></textarea>
+      </div>
+      <div style="display:flex;gap:10px;">
+        <div class="settings-field" style="flex:1;">
+          <div class="field-label">शहर</div>
+          <input id="set-city" class="field-input" placeholder="Lucknow">
+        </div>
+        <div class="settings-field" style="flex:1;">
+          <div class="field-label">PIN कोड</div>
+          <input id="set-pin" class="field-input" type="tel" maxlength="6" placeholder="226001">
+        </div>
+      </div>
+      <div id="settings-msg" style="font-size:11px;min-height:16px;margin-bottom:8px;"></div>
+      <div style="display:flex;gap:10px;">
+        <button onclick="closeSettingsModal()" style="flex:1;background:var(--bg3);border:1px solid var(--bd2);color:var(--tx2);padding:12px;border-radius:12px;font-size:12px;cursor:pointer;">Cancel</button>
+        <button onclick="saveShopSettings()" style="flex:2;background:var(--or);border:none;color:#fff;padding:12px;border-radius:12px;font-size:12px;font-weight:600;cursor:pointer;">💾 Save Karo</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Timing Modal -->
+  <div class="modal-bottom" id="timing-modal">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div style="font-size:15px;font-weight:700;margin-bottom:16px;">🕐 Shop Timing</div>
+      <div style="display:flex;gap:10px;margin-bottom:14px;">
+        <div style="flex:1;">
+          <div class="field-label">खुलने का समय</div>
+          <select id="set-open-time" class="field-input"></select>
+        </div>
+        <div style="flex:1;">
+          <div class="field-label">बंद होने का समय</div>
+          <select id="set-close-time" class="field-input"></select>
+        </div>
+      </div>
+      <div id="timing-msg" style="font-size:11px;color:var(--re);min-height:16px;margin-bottom:10px;"></div>
+      <div style="display:flex;gap:10px;">
+        <button onclick="closeTimingModal()" style="flex:1;background:var(--bg3);border:1px solid var(--bd2);color:var(--tx2);padding:12px;border-radius:12px;font-size:12px;cursor:pointer;">Cancel</button>
+        <button onclick="saveTimingSettings()" style="flex:2;background:var(--or);border:none;color:#fff;padding:12px;border-radius:12px;font-size:12px;font-weight:600;cursor:pointer;">💾 Save Karo</button>
+      </div>
+    </div>
+  </div>
+
+
   <!-- Manual Booking Modal -->
   <div class="modal" id="manual-modal">
     <div class="modal-box" style="width:310px;">
@@ -343,37 +417,6 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
   </div>
 
 
-    <!-- ══ SERVICES EDIT SCREEN ══ -->
-    <div id="sc-svc-edit" class="screen">
-      <div class="screen-wrap">
-        <div style="display:flex;align-items:center;gap:10px;padding:12px 16px 8px;background:var(--bg2);border-bottom:1px solid var(--bd);position:sticky;top:0;z-index:10;">
-          <button onclick="goScreen('profile')" style="background:var(--bg3);border:1px solid var(--bd2);color:var(--tx);width:32px;height:32px;border-radius:10px;font-size:14px;cursor:pointer;">‹</button>
-          <div style="font-size:13px;font-weight:700;">✂️ Services & Prices</div>
-          <div style="margin-left:auto;">
-            <span style="font-size:10px;color:var(--or);cursor:pointer;background:var(--or2);border:1px solid var(--or);padding:5px 10px;border-radius:8px;" onclick="openAddServiceModal()">+ Add</span>
-          </div>
-        </div>
-        <div id="profile-services-list" style="padding:8px 0;"><div style="padding:14px;font-size:11px;color:var(--tx3);font-family:var(--dv);">Loading...</div></div>
-      </div>
-    </div>
-
-    <!-- ══ BARBER SLOT EDIT SCREEN ══ -->
-    <div id="sc-slot-edit" class="screen">
-      <div class="screen-wrap">
-        <div style="display:flex;align-items:center;gap:10px;padding:12px 16px 8px;background:var(--bg2);border-bottom:1px solid var(--bd);position:sticky;top:0;z-index:10;">
-          <button onclick="goScreen('profile')" style="background:var(--bg3);border:1px solid var(--bd2);color:var(--tx);width:32px;height:32px;border-radius:10px;font-size:14px;cursor:pointer;">‹</button>
-          <div style="font-size:13px;font-weight:700;">🕐 Barber Slot Management</div>
-          <div style="margin-left:auto;">
-            <span style="font-size:10px;color:var(--re);cursor:pointer;background:rgba(224,85,85,0.1);border:1px solid rgba(224,85,85,0.3);padding:5px 10px;border-radius:8px;" onclick="closeAllSlots()">Sab Band</span>
-          </div>
-        </div>
-        <div style="padding:10px 16px;">
-          <div id="barber-slot-tabs" style="display:flex;gap:6px;margin-bottom:10px;overflow-x:auto;scrollbar-width:none;"></div>
-          <div id="barber-slot-panels"></div>
-        </div>
-      </div>
-    </div>
-
     <div id="sc-profile" class="screen">
       <div style="padding:16px 16px 14px;display:flex;align-items:center;gap:14px;border-bottom:1px solid var(--bd);">
         <div style="width:56px;height:56px;border-radius:18px;overflow:hidden;"><img src="../assets/logo.png" style="width:56px;height:56px;object-fit:contain;" onerror="this.style.display='none'"></div>
@@ -390,7 +433,7 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
 
       <!-- Services Row Button -->
       <div style="margin:12px 16px 0;background:var(--bg2);border:1px solid var(--bd);border-radius:14px;">
-        <div class="pr-row" onclick="goScreen('svc-edit')">
+        <div class="pr-row" onclick="openSvcFullscreen()">
           <div class="pr-icon-wrap">✂️</div>
           <div style="flex:1;">
             <div class="pr-lbl">Services & Prices</div>
@@ -411,7 +454,7 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
 
       <!-- Barber Slot Row Button -->
       <div style="margin:8px 16px 12px;background:var(--bg2);border:1px solid var(--bd);border-radius:14px;">
-        <div class="pr-row" onclick="goScreen('slot-edit')">
+        <div class="pr-row" onclick="openSlotFullscreen()">
           <div class="pr-icon-wrap">🕐</div>
           <div style="flex:1;">
             <div class="pr-lbl">Barber Slot Management</div>
@@ -523,75 +566,26 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
     </div>
   </div>
 
-
-  <!-- Confirm Modal (generic) -->
-  <div class="modal" id="confirm-modal">
-    <div class="modal-box">
-      <div class="modal-icon or" id="confirm-icon">❓</div>
-      <div class="modal-title" id="confirm-title">Confirm karein?</div>
-      <div class="modal-sub" id="confirm-sub" style="margin-bottom:16px;"></div>
-      <div class="modal-btns">
-        <button onclick="closeConfirmModal()" style="background:var(--bg3);color:var(--tx2);border:1px solid var(--bd2);">Nahi</button>
-        <button id="confirm-yes-btn" style="background:var(--or);color:#fff;">Haan, Karo</button>
-      </div>
+    <!-- Services Fullscreen Modal -->
+  <div id="svc-fullscreen" style="display:none;position:absolute;inset:0;background:var(--bg);z-index:150;overflow-y:auto;scrollbar-width:none;">
+    <div style="display:flex;align-items:center;gap:10px;padding:12px 16px 10px;background:var(--bg2);border-bottom:1px solid var(--bd);position:sticky;top:0;z-index:10;">
+      <button onclick="closeSvcFullscreen()" style="background:var(--bg3);border:1px solid var(--bd2);color:var(--tx);width:32px;height:32px;border-radius:10px;font-size:16px;cursor:pointer;font-weight:700;">‹</button>
+      <div style="font-size:13px;font-weight:700;flex:1;">✂️ Services & Prices</div>
+      <span style="font-size:10px;color:var(--or);cursor:pointer;background:var(--or2);border:1px solid var(--or);padding:6px 12px;border-radius:8px;font-weight:600;" onclick="openAddServiceModal()">+ Add</span>
     </div>
+    <div id="profile-services-list" style="padding:8px 0;"></div>
   </div>
 
-  <!-- Shop Settings Modal -->
-  <div class="modal-bottom" id="settings-modal">
-    <div class="modal-sheet" style="max-height:85%;overflow-y:auto;">
-      <div class="modal-handle"></div>
-      <div style="font-size:15px;font-weight:700;margin-bottom:16px;">🏪 Shop Details Edit</div>
-      <div class="settings-field">
-        <div class="field-label">दुकान का नाम *</div>
-        <input id="set-shop-name" class="field-input" placeholder="Raj Hair Studio">
-      </div>
-      <div class="settings-field">
-        <div class="field-label">मालिक का नाम</div>
-        <input id="set-owner-name" class="field-input" placeholder="Rajesh Kumar">
-      </div>
-      <div class="settings-field">
-        <div class="field-label">पूरा पता</div>
-        <textarea id="set-address" class="field-input" rows="2" style="resize:none;"></textarea>
-      </div>
-      <div style="display:flex;gap:10px;">
-        <div class="settings-field" style="flex:1;">
-          <div class="field-label">शहर</div>
-          <input id="set-city" class="field-input" placeholder="Lucknow">
-        </div>
-        <div class="settings-field" style="flex:1;">
-          <div class="field-label">PIN कोड</div>
-          <input id="set-pin" class="field-input" type="tel" maxlength="6" placeholder="226001">
-        </div>
-      </div>
-      <div id="settings-msg" style="font-size:11px;min-height:16px;margin-bottom:8px;"></div>
-      <div style="display:flex;gap:10px;">
-        <button onclick="closeSettingsModal()" style="flex:1;background:var(--bg3);border:1px solid var(--bd2);color:var(--tx2);padding:12px;border-radius:12px;font-size:12px;cursor:pointer;">Cancel</button>
-        <button onclick="saveShopSettings()" style="flex:2;background:var(--or);border:none;color:#fff;padding:12px;border-radius:12px;font-size:12px;font-weight:600;cursor:pointer;">💾 Save Karo</button>
-      </div>
+  <!-- Barber Slot Fullscreen Modal -->
+  <div id="slot-fullscreen" style="display:none;position:absolute;inset:0;background:var(--bg);z-index:150;overflow-y:auto;scrollbar-width:none;">
+    <div style="display:flex;align-items:center;gap:10px;padding:12px 16px 10px;background:var(--bg2);border-bottom:1px solid var(--bd);position:sticky;top:0;z-index:10;">
+      <button onclick="closeSlotFullscreen()" style="background:var(--bg3);border:1px solid var(--bd2);color:var(--tx);width:32px;height:32px;border-radius:10px;font-size:16px;cursor:pointer;font-weight:700;">‹</button>
+      <div style="font-size:13px;font-weight:700;flex:1;">🕐 Barber Slot Management</div>
+      <span style="font-size:10px;color:var(--re);cursor:pointer;background:rgba(224,85,85,0.1);border:1px solid rgba(224,85,85,0.3);padding:6px 12px;border-radius:8px;font-weight:600;" onclick="closeAllSlots()">Sab Band</span>
     </div>
-  </div>
-
-  <!-- Timing Modal -->
-  <div class="modal-bottom" id="timing-modal">
-    <div class="modal-sheet">
-      <div class="modal-handle"></div>
-      <div style="font-size:15px;font-weight:700;margin-bottom:16px;">🕐 Shop Timing</div>
-      <div style="display:flex;gap:10px;margin-bottom:14px;">
-        <div style="flex:1;">
-          <div class="field-label">खुलने का समय</div>
-          <select id="set-open-time" class="field-input"></select>
-        </div>
-        <div style="flex:1;">
-          <div class="field-label">बंद होने का समय</div>
-          <select id="set-close-time" class="field-input"></select>
-        </div>
-      </div>
-      <div id="timing-msg" style="font-size:11px;color:var(--re);min-height:16px;margin-bottom:10px;"></div>
-      <div style="display:flex;gap:10px;">
-        <button onclick="closeTimingModal()" style="flex:1;background:var(--bg3);border:1px solid var(--bd2);color:var(--tx2);padding:12px;border-radius:12px;font-size:12px;cursor:pointer;">Cancel</button>
-        <button onclick="saveTimingSettings()" style="flex:2;background:var(--or);border:none;color:#fff;padding:12px;border-radius:12px;font-size:12px;font-weight:600;cursor:pointer;">💾 Save Karo</button>
-      </div>
+    <div style="padding:10px 16px;">
+      <div id="barber-slot-tabs" style="display:flex;gap:6px;margin-bottom:10px;overflow-x:auto;scrollbar-width:none;"></div>
+      <div id="barber-slot-panels"></div>
     </div>
   </div>
 
@@ -1367,6 +1361,23 @@ function toggleOnline(){
     });
 }
 
+// ─── FULLSCREEN PANELS ────────────────────────────────
+function openSvcFullscreen(){
+  renderProfileServices();
+  document.getElementById('svc-fullscreen').style.display='block';
+}
+function closeSvcFullscreen(){
+  document.getElementById('svc-fullscreen').style.display='none';
+}
+function openSlotFullscreen(){
+  renderProfileBarbers();
+  renderBarberSlots();
+  document.getElementById('slot-fullscreen').style.display='block';
+}
+function closeSlotFullscreen(){
+  document.getElementById('slot-fullscreen').style.display='none';
+}
+
 // ─── ACCORDION ────────────────────────────────────────
 function toggleAccordion(id){
   const el = document.getElementById(id);
@@ -2118,7 +2129,7 @@ function doDeleteAccount(){
 }
 
 // ─── NAV ──────────────────────────────────────────────
-const screenKeys=['home','schedule','analytics','profile','svc-edit','slot-edit'];
+const screenKeys=['home','schedule','analytics','profile'];
 function goScreen(id){
   screenKeys.forEach(s=>document.getElementById('sc-'+s).classList.remove('active'));
   document.getElementById('sc-'+id).classList.add('active');
@@ -2136,8 +2147,6 @@ function goScreen(id){
   }
   if(id==='analytics') renderAnalytics(curAnalyticsPeriod);
   if(id==='schedule'){updateSchedDate();}
-  if(id==='svc-edit'){renderProfileServices();}
-  if(id==='slot-edit'){renderProfileBarbers();renderBarberSlots();}
 }
 
 function openYoutubeHelp(){window.open('https://youtube.com/@my_haircut_booking_official?si=DrGlb96V35bb5GiS','_blank');}
