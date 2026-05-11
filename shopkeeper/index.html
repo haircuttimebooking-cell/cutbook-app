@@ -199,7 +199,7 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
             <div style="font-size:9px;color:var(--tx3);margin-top:1px;" id="today-date"></div>
           </div>
         </div>
-        <div id="online-btn" onclick="toggleOnline()" style="display:flex;align-items:center;gap:6px;background:rgba(61,187,120,0.1);border:1px solid rgba(61,187,120,0.25);border-radius:10px;padding:7px 12px;cursor:pointer;transition:all .3s;">
+        <div id="online-btn" onclick="toggleOnline()" style="display:none;">
           <div id="online-dot" style="width:8px;height:8px;background:var(--gr);border-radius:50%;animation:pulse 2s infinite;"></div>
           <span id="online-txt" style="font-size:11px;font-weight:600;color:var(--gr);">Online</span>
         </div>
@@ -224,14 +224,8 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
         <span style="font-size:11px;color:var(--re);font-family:var(--dv);">Aaj 3 cancel ho gaye — aur cancel nahi ho sakta!</span>
       </div>
 
-      <!-- Auto Accept Toggle -->
-      <div class="auto-row">
-        <div>
-          <div style="font-size:11px;font-weight:600;">⚡ Auto Accept</div>
-          <div style="font-size:9px;color:var(--tx3);font-family:var(--dv);margin-top:2px;" id="aa-sub-lbl">ON — booking instantly confirm ho</div>
-        </div>
-        <label class="toggle-sw"><input type="checkbox" id="auto-accept" checked onchange="toggleAutoAccept(this)"><span class="toggle-slider"></span></label>
-      </div>
+      <!-- Auto Accept Toggle (moved to profile only) -->
+      <div style="display:none;"><input type="checkbox" id="auto-accept" checked onchange="toggleAutoAccept(this)"></div>
 
       <!-- Booking Tabs -->
       <div class="tabs">
@@ -324,13 +318,16 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
         </div>
       </div>
 
-      <!-- Services -->
-      <div style="margin:12px 16px;background:var(--bg2);border:1px solid var(--bd);border-radius:14px;overflow:hidden;">
-        <div style="padding:10px 14px;background:var(--bg3);border-bottom:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center;">
-          <span style="font-size:11px;font-weight:600;">✂️ Services & Prices</span>
-          <span style="font-size:10px;color:var(--or);cursor:pointer;" onclick="openAddServiceModal()">+ Add</span>
+      <!-- Services Row Button -->
+      <div style="margin:12px 16px 0;background:var(--bg2);border:1px solid var(--bd);border-radius:14px;">
+        <div class="pr-row" onclick="goScreen('svc-edit')">
+          <div class="pr-icon-wrap">✂️</div>
+          <div style="flex:1;">
+            <div class="pr-lbl">Services & Prices</div>
+            <div style="font-size:9px;color:var(--tx3);font-family:var(--dv);" id="svc-count-lbl">services dekhne ke liye tap karein</div>
+          </div>
+          <span style="color:var(--tx3);">›</span>
         </div>
-        <div id="profile-services-list"><div style="padding:14px;font-size:11px;color:var(--tx3);font-family:var(--dv);">Loading...</div></div>
       </div>
 
       <!-- Barbers -->
@@ -342,15 +339,15 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
         <div id="profile-barbers-list"><div style="padding:14px;font-size:11px;color:var(--tx3);">Loading...</div></div>
       </div>
 
-      <!-- Barber Slot Controls -->
-      <div style="margin:0 16px 12px;background:var(--bg2);border:1px solid var(--bd);border-radius:14px;overflow:hidden;">
-        <div style="padding:10px 14px;background:var(--bg3);border-bottom:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center;">
-          <span style="font-size:11px;font-weight:600;">🕐 Barber Slot Management</span>
-          <span style="font-size:10px;color:var(--re);cursor:pointer;" onclick="closeAllSlots()">Sab Band</span>
-        </div>
-        <div style="padding:10px 14px 0;">
-          <div id="barber-slot-tabs" style="display:flex;gap:6px;margin-bottom:10px;overflow-x:auto;scrollbar-width:none;"></div>
-          <div id="barber-slot-panels"></div>
+      <!-- Barber Slot Row Button -->
+      <div style="margin:8px 16px 12px;background:var(--bg2);border:1px solid var(--bd);border-radius:14px;">
+        <div class="pr-row" onclick="goScreen('slot-edit')">
+          <div class="pr-icon-wrap">🕐</div>
+          <div style="flex:1;">
+            <div class="pr-lbl">Barber Slot Management</div>
+            <div style="font-size:9px;color:var(--tx3);font-family:var(--dv);">slots manage karne ke liye tap karein</div>
+          </div>
+          <span style="color:var(--tx3);">›</span>
         </div>
       </div>
 
@@ -1337,6 +1334,15 @@ function toggleOnline(){
     });
 }
 
+// ─── ACCORDION ────────────────────────────────────────
+function toggleAccordion(id){
+  const el = document.getElementById(id);
+  const arrow = document.getElementById(id+'-arrow');
+  const isOpen = el.style.display !== 'none';
+  el.style.display = isOpen ? 'none' : 'block';
+  if(arrow) arrow.textContent = isOpen ? '▼ Dekho' : '▲ Band Karo';
+}
+
 // ─── AUTO ACCEPT ──────────────────────────────────────
 async function toggleAutoAccept(el){
   const goingOn = el.checked;
@@ -1440,6 +1446,12 @@ async function saveTimingSettings(){
 
 // ─── SERVICES ─────────────────────────────────────────
 function renderProfileServices(){
+  // Update count label on profile row
+  const countLbl = document.getElementById('svc-count-lbl');
+  if(countLbl && currentShop && currentShop.services){
+    const cnt = currentShop.services.length;
+    countLbl.textContent = cnt + ' service' + (cnt!==1?'s':'') + ' available';
+  }
   if(!currentShop) return;
   const svcs=currentShop.services||[];
   const el=document.getElementById('profile-services-list');
@@ -2040,6 +2052,7 @@ h2{font-size:13px;font-weight:700;margin-bottom:6px;margin-top:0}
 
 <div class="footer">Generated by My Haircut Booking · ${new Date().toLocaleString('en-IN')}</div>
 <script>window.onload=function(){window.print()}<\/script>
+
 </body></html>`);
   printWin.document.close();
   toast('📥 PDF report generate ho raha hai...');
@@ -2072,7 +2085,7 @@ function doDeleteAccount(){
 }
 
 // ─── NAV ──────────────────────────────────────────────
-const screenKeys=['home','schedule','analytics','profile'];
+const screenKeys=['home','schedule','analytics','profile','svc-edit','slot-edit'];
 function goScreen(id){
   screenKeys.forEach(s=>document.getElementById('sc-'+s).classList.remove('active'));
   document.getElementById('sc-'+id).classList.add('active');
@@ -2107,5 +2120,36 @@ document.getElementById('svc-m-active').addEventListener('change',function(){
 
 init();
 </script>
+
+  <!-- ══ SERVICES EDIT SCREEN ══ -->
+  <div id="sc-svc-edit" class="screen">
+    <div class="screen-wrap">
+      <div style="display:flex;align-items:center;gap:10px;padding:12px 16px 8px;background:var(--bg2);border-bottom:1px solid var(--bd);position:sticky;top:0;z-index:10;">
+        <button onclick="goScreen('profile')" style="background:var(--bg3);border:1px solid var(--bd2);color:var(--tx);width:32px;height:32px;border-radius:10px;font-size:14px;cursor:pointer;">‹</button>
+        <div style="font-size:13px;font-weight:700;">✂️ Services & Prices</div>
+        <div style="margin-left:auto;">
+          <span style="font-size:10px;color:var(--or);cursor:pointer;background:var(--or2);border:1px solid var(--or);padding:5px 10px;border-radius:8px;" onclick="openAddServiceModal()">+ Add</span>
+        </div>
+      </div>
+      <div id="profile-services-list" style="padding:8px 0;"><div style="padding:14px;font-size:11px;color:var(--tx3);font-family:var(--dv);">Loading...</div></div>
+    </div>
+  </div>
+
+  <!-- ══ BARBER SLOT EDIT SCREEN ══ -->
+  <div id="sc-slot-edit" class="screen">
+    <div class="screen-wrap">
+      <div style="display:flex;align-items:center;gap:10px;padding:12px 16px 8px;background:var(--bg2);border-bottom:1px solid var(--bd);position:sticky;top:0;z-index:10;">
+        <button onclick="goScreen('profile')" style="background:var(--bg3);border:1px solid var(--bd2);color:var(--tx);width:32px;height:32px;border-radius:10px;font-size:14px;cursor:pointer;">‹</button>
+        <div style="font-size:13px;font-weight:700;">🕐 Barber Slot Management</div>
+        <div style="margin-left:auto;">
+          <span style="font-size:10px;color:var(--re);cursor:pointer;background:rgba(224,85,85,0.1);border:1px solid rgba(224,85,85,0.3);padding:5px 10px;border-radius:8px;" onclick="closeAllSlots()">Sab Band</span>
+        </div>
+      </div>
+      <div style="padding:10px 16px;">
+        <div id="barber-slot-tabs" style="display:flex;gap:6px;margin-bottom:10px;overflow-x:auto;scrollbar-width:none;"></div>
+        <div id="barber-slot-panels"></div>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
