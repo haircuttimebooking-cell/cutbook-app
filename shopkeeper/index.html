@@ -199,7 +199,7 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
             <div style="font-size:9px;color:var(--tx3);margin-top:1px;" id="today-date"></div>
           </div>
         </div>
-        <div id="online-btn" onclick="toggleOnline()" style="display:none;">
+        <div id="online-btn" onclick="toggleOnline()" style="display:flex;align-items:center;gap:6px;background:rgba(61,187,120,0.1);border:1px solid rgba(61,187,120,0.25);border-radius:10px;padding:7px 12px;cursor:pointer;transition:all .3s;">
           <div id="online-dot" style="width:8px;height:8px;background:var(--gr);border-radius:50%;animation:pulse 2s infinite;"></div>
           <span id="online-txt" style="font-size:11px;font-weight:600;color:var(--gr);">Online</span>
         </div>
@@ -224,8 +224,14 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
         <span style="font-size:11px;color:var(--re);font-family:var(--dv);">Aaj 3 cancel ho gaye — aur cancel nahi ho sakta!</span>
       </div>
 
-      <!-- Auto Accept Toggle (moved to profile only) -->
-      <div style="display:none;"><input type="checkbox" id="auto-accept" checked onchange="toggleAutoAccept(this)"></div>
+      <!-- Auto Accept Toggle -->
+      <div class="auto-row">
+        <div>
+          <div style="font-size:11px;font-weight:600;">⚡ Auto Accept</div>
+          <div style="font-size:9px;color:var(--tx3);font-family:var(--dv);margin-top:2px;" id="aa-sub-lbl">ON — booking instantly confirm ho</div>
+        </div>
+        <label class="toggle-sw"><input type="checkbox" id="auto-accept" checked onchange="toggleAutoAccept(this)"><span class="toggle-slider"></span></label>
+      </div>
 
       <!-- Booking Tabs -->
       <div class="tabs">
@@ -318,20 +324,13 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
         </div>
       </div>
 
-      <!-- Services Accordion -->
+      <!-- Services -->
       <div style="margin:12px 16px;background:var(--bg2);border:1px solid var(--bd);border-radius:14px;overflow:hidden;">
-        <div onclick="toggleAccordion('svc-accordion')" style="padding:10px 14px;background:var(--bg3);display:flex;justify-content:space-between;align-items:center;cursor:pointer;">
+        <div style="padding:10px 14px;background:var(--bg3);border-bottom:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center;">
           <span style="font-size:11px;font-weight:600;">✂️ Services & Prices</span>
-          <div style="display:flex;align-items:center;gap:10px;">
-            <span style="font-size:10px;color:var(--or);" id="svc-accordion-arrow">▲ Band Karo</span>
-          </div>
+          <span style="font-size:10px;color:var(--or);cursor:pointer;" onclick="openAddServiceModal()">+ Add</span>
         </div>
-        <div id="svc-accordion" style="display:block;border-top:1px solid var(--bd);">
-          <div style="padding:6px 14px;display:flex;justify-content:flex-end;border-bottom:1px solid var(--bd);">
-            <span style="font-size:10px;color:var(--or);cursor:pointer;" onclick="openAddServiceModal()">+ Add Service</span>
-          </div>
-          <div id="profile-services-list"><div style="padding:14px;font-size:11px;color:var(--tx3);font-family:var(--dv);">Loading...</div></div>
-        </div>
+        <div id="profile-services-list"><div style="padding:14px;font-size:11px;color:var(--tx3);font-family:var(--dv);">Loading...</div></div>
       </div>
 
       <!-- Barbers -->
@@ -343,20 +342,15 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
         <div id="profile-barbers-list"><div style="padding:14px;font-size:11px;color:var(--tx3);">Loading...</div></div>
       </div>
 
-      <!-- Barber Slot Accordion -->
+      <!-- Barber Slot Controls -->
       <div style="margin:0 16px 12px;background:var(--bg2);border:1px solid var(--bd);border-radius:14px;overflow:hidden;">
-        <div onclick="toggleAccordion('slot-accordion')" style="padding:10px 14px;background:var(--bg3);display:flex;justify-content:space-between;align-items:center;cursor:pointer;">
+        <div style="padding:10px 14px;background:var(--bg3);border-bottom:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center;">
           <span style="font-size:11px;font-weight:600;">🕐 Barber Slot Management</span>
-          <span style="font-size:10px;color:var(--or);" id="slot-accordion-arrow">▲ Band Karo</span>
+          <span style="font-size:10px;color:var(--re);cursor:pointer;" onclick="closeAllSlots()">Sab Band</span>
         </div>
-        <div id="slot-accordion" style="display:block;border-top:1px solid var(--bd);">
-          <div style="padding:6px 14px;display:flex;justify-content:flex-end;border-bottom:1px solid var(--bd);">
-            <span style="font-size:10px;color:var(--re);cursor:pointer;" onclick="closeAllSlots()">Sab Band</span>
-          </div>
-          <div style="padding:10px 14px 0;">
-            <div id="barber-slot-tabs" style="display:flex;gap:6px;margin-bottom:10px;overflow-x:auto;scrollbar-width:none;"></div>
-            <div id="barber-slot-panels"></div>
-          </div>
+        <div style="padding:10px 14px 0;">
+          <div id="barber-slot-tabs" style="display:flex;gap:6px;margin-bottom:10px;overflow-x:auto;scrollbar-width:none;"></div>
+          <div id="barber-slot-panels"></div>
         </div>
       </div>
 
@@ -1341,15 +1335,6 @@ function toggleOnline(){
         txt.style.color='var(--tx3)';txt.textContent='Offline';toast('🔴 Dukan band');
       }
     });
-}
-
-// ─── ACCORDION ────────────────────────────────────────
-function toggleAccordion(id){
-  const el = document.getElementById(id);
-  const arrow = document.getElementById(id+'-arrow');
-  const isOpen = el.style.display !== 'none';
-  el.style.display = isOpen ? 'none' : 'block';
-  if(arrow) arrow.textContent = isOpen ? '▼ Dekho' : '▲ Band Karo';
 }
 
 // ─── AUTO ACCEPT ──────────────────────────────────────
