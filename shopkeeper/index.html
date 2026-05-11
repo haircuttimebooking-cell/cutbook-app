@@ -304,6 +304,76 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
     </div>
 
     <!-- ══ PROFILE / SETTINGS ══ -->
+  <!-- Manual Booking Modal -->
+  <div class="modal" id="manual-modal">
+    <div class="modal-box" style="width:310px;">
+      <div style="background:var(--bl);border:1px solid rgba(74,144,226,0.3);border-radius:14px;padding:10px 18px;text-align:center;margin:0 auto 12px;display:inline-block;">
+        <span style="font-size:13px;font-weight:700;color:#fff;letter-spacing:0.5px;">Manual Booking</span>
+      </div>
+      <div class="modal-title">Manual Booking</div>
+      <div class="modal-sub" style="margin-bottom:12px;">Walk-in ya phone booking add karo</div>
+      <div style="display:flex;flex-direction:column;gap:8px;text-align:left;margin-bottom:16px;">
+        <div>
+          <div class="field-label">Customer ka naam</div>
+          <input id="mb-name" class="field-input" placeholder="Jaise: Rahul Kumar">
+        </div>
+        <div>
+          <div class="field-label">Phone number</div>
+          <input id="mb-phone" class="field-input" type="tel" placeholder="9876543210">
+        </div>
+        <div>
+          <div class="field-label">Service (ek ya zyada chunein)</div>
+          <div id="mb-svc-list" style="background:var(--bg3);border:1px solid var(--bd2);border-radius:10px;padding:6px 10px;max-height:120px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;"></div>
+          <div style="font-size:9px;color:var(--tx3);margin-top:4px;font-family:var(--dv);">Total: ₹<span id="mb-total-price">0</span></div>
+        </div>
+        <div>
+          <div class="field-label">Barber / Chair</div>
+          <select id="mb-barber" class="field-input" onchange="updateMbSlots()"></select>
+        </div>
+        <div>
+          <div class="field-label">Time slot</div>
+          <select id="mb-time" class="field-input"></select>
+        </div>
+      </div>
+      <div class="modal-btns">
+        <button onclick="closeManualModal()" style="background:var(--bg3);color:var(--tx2);border:1px solid var(--bd2);">Cancel</button>
+        <button onclick="confirmManualBooking()" style="background:var(--or);color:#fff;">✅ Book Karo</button>
+      </div>
+    </div>
+  </div>
+
+
+    <!-- ══ SERVICES EDIT SCREEN ══ -->
+    <div id="sc-svc-edit" class="screen">
+      <div class="screen-wrap">
+        <div style="display:flex;align-items:center;gap:10px;padding:12px 16px 8px;background:var(--bg2);border-bottom:1px solid var(--bd);position:sticky;top:0;z-index:10;">
+          <button onclick="goScreen('profile')" style="background:var(--bg3);border:1px solid var(--bd2);color:var(--tx);width:32px;height:32px;border-radius:10px;font-size:14px;cursor:pointer;">‹</button>
+          <div style="font-size:13px;font-weight:700;">✂️ Services & Prices</div>
+          <div style="margin-left:auto;">
+            <span style="font-size:10px;color:var(--or);cursor:pointer;background:var(--or2);border:1px solid var(--or);padding:5px 10px;border-radius:8px;" onclick="openAddServiceModal()">+ Add</span>
+          </div>
+        </div>
+        <div id="profile-services-list" style="padding:8px 0;"><div style="padding:14px;font-size:11px;color:var(--tx3);font-family:var(--dv);">Loading...</div></div>
+      </div>
+    </div>
+
+    <!-- ══ BARBER SLOT EDIT SCREEN ══ -->
+    <div id="sc-slot-edit" class="screen">
+      <div class="screen-wrap">
+        <div style="display:flex;align-items:center;gap:10px;padding:12px 16px 8px;background:var(--bg2);border-bottom:1px solid var(--bd);position:sticky;top:0;z-index:10;">
+          <button onclick="goScreen('profile')" style="background:var(--bg3);border:1px solid var(--bd2);color:var(--tx);width:32px;height:32px;border-radius:10px;font-size:14px;cursor:pointer;">‹</button>
+          <div style="font-size:13px;font-weight:700;">🕐 Barber Slot Management</div>
+          <div style="margin-left:auto;">
+            <span style="font-size:10px;color:var(--re);cursor:pointer;background:rgba(224,85,85,0.1);border:1px solid rgba(224,85,85,0.3);padding:5px 10px;border-radius:8px;" onclick="closeAllSlots()">Sab Band</span>
+          </div>
+        </div>
+        <div style="padding:10px 16px;">
+          <div id="barber-slot-tabs" style="display:flex;gap:6px;margin-bottom:10px;overflow-x:auto;scrollbar-width:none;"></div>
+          <div id="barber-slot-panels"></div>
+        </div>
+      </div>
+    </div>
+
     <div id="sc-profile" class="screen">
       <div style="padding:16px 16px 14px;display:flex;align-items:center;gap:14px;border-bottom:1px solid var(--bd);">
         <div style="width:56px;height:56px;border-radius:18px;overflow:hidden;"><img src="../assets/logo.png" style="width:56px;height:56px;object-fit:contain;" onerror="this.style.display='none'"></div>
@@ -453,43 +523,6 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
     </div>
   </div>
 
-  <!-- Manual Booking Modal -->
-  <div class="modal" id="manual-modal">
-    <div class="modal-box" style="width:310px;">
-      <div style="background:var(--bl);border:1px solid rgba(74,144,226,0.3);border-radius:14px;padding:10px 18px;text-align:center;margin:0 auto 12px;display:inline-block;">
-        <span style="font-size:13px;font-weight:700;color:#fff;letter-spacing:0.5px;">Manual Booking</span>
-      </div>
-      <div class="modal-title">Manual Booking</div>
-      <div class="modal-sub" style="margin-bottom:12px;">Walk-in ya phone booking add karo</div>
-      <div style="display:flex;flex-direction:column;gap:8px;text-align:left;margin-bottom:16px;">
-        <div>
-          <div class="field-label">Customer ka naam</div>
-          <input id="mb-name" class="field-input" placeholder="Jaise: Rahul Kumar">
-        </div>
-        <div>
-          <div class="field-label">Phone number</div>
-          <input id="mb-phone" class="field-input" type="tel" placeholder="9876543210">
-        </div>
-        <div>
-          <div class="field-label">Service (ek ya zyada chunein)</div>
-          <div id="mb-svc-list" style="background:var(--bg3);border:1px solid var(--bd2);border-radius:10px;padding:6px 10px;max-height:120px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;"></div>
-          <div style="font-size:9px;color:var(--tx3);margin-top:4px;font-family:var(--dv);">Total: ₹<span id="mb-total-price">0</span></div>
-        </div>
-        <div>
-          <div class="field-label">Barber / Chair</div>
-          <select id="mb-barber" class="field-input" onchange="updateMbSlots()"></select>
-        </div>
-        <div>
-          <div class="field-label">Time slot</div>
-          <select id="mb-time" class="field-input"></select>
-        </div>
-      </div>
-      <div class="modal-btns">
-        <button onclick="closeManualModal()" style="background:var(--bg3);color:var(--tx2);border:1px solid var(--bd2);">Cancel</button>
-        <button onclick="confirmManualBooking()" style="background:var(--or);color:#fff;">✅ Book Karo</button>
-      </div>
-    </div>
-  </div>
 
   <!-- Confirm Modal (generic) -->
   <div class="modal" id="confirm-modal">
@@ -2103,6 +2136,8 @@ function goScreen(id){
   }
   if(id==='analytics') renderAnalytics(curAnalyticsPeriod);
   if(id==='schedule'){updateSchedDate();}
+  if(id==='svc-edit'){renderProfileServices();}
+  if(id==='slot-edit'){renderProfileBarbers();renderBarberSlots();}
 }
 
 function openYoutubeHelp(){window.open('https://youtube.com/@my_haircut_booking_official?si=DrGlb96V35bb5GiS','_blank');}
@@ -2120,36 +2155,5 @@ document.getElementById('svc-m-active').addEventListener('change',function(){
 
 init();
 </script>
-
-  <!-- ══ SERVICES EDIT SCREEN ══ -->
-  <div id="sc-svc-edit" class="screen">
-    <div class="screen-wrap">
-      <div style="display:flex;align-items:center;gap:10px;padding:12px 16px 8px;background:var(--bg2);border-bottom:1px solid var(--bd);position:sticky;top:0;z-index:10;">
-        <button onclick="goScreen('profile')" style="background:var(--bg3);border:1px solid var(--bd2);color:var(--tx);width:32px;height:32px;border-radius:10px;font-size:14px;cursor:pointer;">‹</button>
-        <div style="font-size:13px;font-weight:700;">✂️ Services & Prices</div>
-        <div style="margin-left:auto;">
-          <span style="font-size:10px;color:var(--or);cursor:pointer;background:var(--or2);border:1px solid var(--or);padding:5px 10px;border-radius:8px;" onclick="openAddServiceModal()">+ Add</span>
-        </div>
-      </div>
-      <div id="profile-services-list" style="padding:8px 0;"><div style="padding:14px;font-size:11px;color:var(--tx3);font-family:var(--dv);">Loading...</div></div>
-    </div>
-  </div>
-
-  <!-- ══ BARBER SLOT EDIT SCREEN ══ -->
-  <div id="sc-slot-edit" class="screen">
-    <div class="screen-wrap">
-      <div style="display:flex;align-items:center;gap:10px;padding:12px 16px 8px;background:var(--bg2);border-bottom:1px solid var(--bd);position:sticky;top:0;z-index:10;">
-        <button onclick="goScreen('profile')" style="background:var(--bg3);border:1px solid var(--bd2);color:var(--tx);width:32px;height:32px;border-radius:10px;font-size:14px;cursor:pointer;">‹</button>
-        <div style="font-size:13px;font-weight:700;">🕐 Barber Slot Management</div>
-        <div style="margin-left:auto;">
-          <span style="font-size:10px;color:var(--re);cursor:pointer;background:rgba(224,85,85,0.1);border:1px solid rgba(224,85,85,0.3);padding:5px 10px;border-radius:8px;" onclick="closeAllSlots()">Sab Band</span>
-        </div>
-      </div>
-      <div style="padding:10px 16px;">
-        <div id="barber-slot-tabs" style="display:flex;gap:6px;margin-bottom:10px;overflow-x:auto;scrollbar-width:none;"></div>
-        <div id="barber-slot-panels"></div>
-      </div>
-    </div>
-  </div>
 </body>
 </html>
