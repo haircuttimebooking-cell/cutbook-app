@@ -187,6 +187,19 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
 /* ─── SUCCESS SCREEN ─── */
 .success-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;text-align:center;min-height:400px;}
 .success-icon{width:72px;height:72px;background:rgba(61,187,120,0.15);border:2px solid rgba(61,187,120,0.3);border-radius:24px;display:flex;align-items:center;justify-content:center;font-size:32px;margin-bottom:20px;}
+
+/* ── Celebration Overlay ── */
+#celebration-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.75);z-index:999;display:none;align-items:center;justify-content:center;flex-direction:column;border-radius:42px;}
+#celebration-overlay.show{display:flex;animation:fadeInOut 3s ease forwards;}
+@keyframes fadeInOut{0%{opacity:0}15%{opacity:1}75%{opacity:1}100%{opacity:0;pointer-events:none;}}
+.cel-emoji{font-size:48px;animation:bounce 0.5s ease infinite alternate;}
+@keyframes bounce{from{transform:translateY(0)}to{transform:translateY(-12px)}}
+.cel-rain{position:absolute;inset:0;pointer-events:none;overflow:hidden;border-radius:42px;}
+.cel-drop{position:absolute;top:-40px;font-size:22px;animation:fall linear forwards;}
+@keyframes fall{to{transform:translateY(780px) rotate(360deg);opacity:0;}}
+
+#detail-subservices-panel{animation:slideDown 0.25s ease;}
+@keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
 </style>
 </head>
 <body>
@@ -293,7 +306,7 @@ body{background:#0A0A0A;font-family:'DM Sans',sans-serif;color:var(--tx);min-hei
             <div style="font-size:10px;color:var(--or);cursor:pointer;font-family:var(--dv);" onclick="startBookingFlow()">सभी सर्विसेज देखें →</div>
           </div>
           <!-- 5 main categories grid -->
-          <div id="detail-categories-grid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;"></div>
+          <div id="detail-categories-grid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;transition:all 0.3s ease;"></div>
           <!-- Sub-services panel (opens on category tap) -->
           <div id="detail-subservices-panel" style="display:none;margin-top:10px;background:var(--bg2);border:1px solid var(--bd);border-radius:12px;padding:10px 12px;"></div>
         </div>
@@ -593,7 +606,7 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 var sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const noteMap = {
-  pending:{cls:'pending',txt:'📋 कृपया दुकान अपने समय पर पहुंच जाएं धन्यवाद 🙏'},
+  pending:{cls:'pending',txt:'_pending_detail_'},
   accepted:{cls:'confirmed',txt:'✅ कृपया अपने समय पर दुकान पर पहुंच जाएं।'},
   completed:{cls:'completed',txt:'🏁 Service ho gayi. Review do!'},
   cancelled:{cls:'cancelled',txt:'❌ Cancel ho gayi. Naya slot lo.'},
@@ -857,9 +870,12 @@ function renderDetailCategories(){
 function openDetailCategory(catId){
   _activeDetailCat = (_activeDetailCat === catId) ? null : catId;
   renderDetailCategories();
-  if(_activeDetailCat) renderDetailSubservices(catId);
-  else {
-    const panel = document.getElementById('detail-subservices-panel');
+  const panel = document.getElementById('detail-subservices-panel');
+  if(_activeDetailCat){
+    renderDetailSubservices(catId);
+    // Smooth scroll to panel after short delay
+    setTimeout(()=>{ if(panel) panel.scrollIntoView({behavior:'smooth',block:'nearest'}); }, 80);
+  } else {
     if(panel){ panel.style.display='none'; panel.innerHTML=''; }
   }
 }
@@ -1175,6 +1191,11 @@ async function confirmBook(){
     customer_name: bookingName,
     customer_phone: '+91' + bookingPhone,
     status: bookingStatus,
+    shop_phone: selectedShop.phone||'',
+    shop_address: selectedShop.address||'',
+    shop_lat: selectedShop.latitude||null,
+    shop_lng: selectedShop.longitude||null,
+    chair: selectedBarber?.chair||'',
   }]);
 
   if(error){ toast('❌ Booking fail — '+error.message); return; }
@@ -1289,6 +1310,7 @@ function subscribeBookings(){
         if(prev && prev !== updated.status){
           playNotifSound();
           showStatusPopup(updated);
+          if(prev==='pending' && updated.status==='accepted') showBookingCelebration();
         }
         if(updated.status==='completed' && prev!=='completed'){
           showFeedbackNotification(updated);
@@ -1357,6 +1379,29 @@ function renderBookings(filter){
       :st==='cancelled'
       ?`<div class="bk-actions"><button class="bk-btn bk-btn-rebook" onclick="goScreen('detail')">↻ Naya book karo</button></div>`
       :'';
+    // Pending card — detailed confirmation layout
+    if(st==='pending'){
+      const svcs=(b.service||'').split(',').map((s,i)=>`${i+1}. ${s.trim()}`).join(', ');
+      const dt=b.booking_date||'';
+      const [y,mo,d]=dt.split('-');
+      const months=['','जन','फ़र','मार्च','अप्रैल','मई','जून','जुलाई','अग','सित','अक्ट','नव','दिस'];
+      const dateHindi=d&&mo&&y?`${parseInt(d)}/${months[parseInt(mo)]||mo}/${y}`:'';
+      const mapLink=b.shop_lat&&b.shop_lng?`https://maps.google.com/?q=${b.shop_lat},${b.shop_lng}`:null;
+      return `<div class="booking-card" style="border-color:rgba(244,180,32,0.3);">
+        <div class="bk-top"><div>
+          <div class="bk-shop">${b.shop_name||''}</div>
+          <div class="bk-svc">${b.service||''}</div>
+          <div class="bk-time">⏰ ${b.booking_date||''} · ${b.booking_time||''}</div>
+        </div><span class="pill pill-or" style="font-size:9px;">📋 Request Bheja</span></div>
+        <div class="bk-note pending" style="line-height:1.7;font-size:10.5px;">
+          🎉 <strong>Congratulation!</strong> बुकिंग हो गई है<br>
+          ${b.barber_name?`✂️ बार्बर: <strong>${b.barber_name}</strong>${b.chair?' · कुर्सी: <strong>#'+b.chair+'</strong>':''}<br>`:''}
+          🛎️ सेवा: ${svcs}<br>
+          🕐 समय: <strong>${b.booking_time||''}</strong>${dateHindi?' · 📅 '+dateHindi:''}<br>
+          ${b.shop_phone?`📞 <a href="tel:${b.shop_phone}" style="color:var(--or);text-decoration:none;">${b.shop_phone}</a><br>`:''}
+          ${mapLink?`📍 <a href="${mapLink}" target="_blank" style="color:var(--or);text-decoration:none;">दुकान का Map देखें</a>`:''}
+        </div>${actions}</div>`;
+    }
     return `<div class="booking-card">
       <div class="bk-top"><div>
         <div class="bk-shop">${b.shop_name||'My Haircut Booking'}</div>
@@ -1842,6 +1887,28 @@ document.getElementById('cust-photo-modal').addEventListener('click',function(e)
 document.getElementById('cust-addr-modal').addEventListener('click',function(e){ if(e.target===this) closeCustAddressPopup(); });
 document.addEventListener('keydown',function(e){ if(e.key==='Escape'){ closeCustPhotoPopup(); closeCustAddressPopup(); closeFeedbackModal(); closeCancelModal(); } });
 document.getElementById('cancel-confirm-modal').addEventListener('click',function(e){ if(e.target===this) closeCancelModal(); });
+
+// ── Celebration Animation ──────────────────────────────
+function showBookingCelebration(){
+  const overlay = document.getElementById('celebration-overlay');
+  const rain = document.getElementById('cel-rain');
+  if(!overlay) return;
+  // Emoji rain
+  const emojis = ['🎉','✂️','💈','🎊','⭐','✅'];
+  rain.innerHTML = '';
+  for(let i=0;i<18;i++){
+    const el=document.createElement('div');
+    el.className='cel-drop';
+    el.textContent=emojis[i%emojis.length];
+    el.style.left=Math.random()*100+'%';
+    el.style.animationDuration=(1.5+Math.random()*1.5)+'s';
+    el.style.animationDelay=(Math.random()*1)+'s';
+    rain.appendChild(el);
+  }
+  overlay.classList.add('show');
+  setTimeout(()=>{ overlay.classList.remove('show'); rain.innerHTML=''; }, 3000);
+}
+
 </script>
 
 <!-- ══ CANCEL CONFIRM MODAL ══ -->
@@ -1858,5 +1925,13 @@ document.getElementById('cancel-confirm-modal').addEventListener('click',functio
     </button>
   </div>
 </div>
+
+  <!-- Celebration Overlay -->
+  <div id="celebration-overlay">
+    <div class="cel-rain" id="cel-rain"></div>
+    <div class="cel-emoji">🎉</div>
+    <div style="color:#fff;font-size:18px;font-weight:700;margin-top:12px;text-align:center;">बुकिंग कन्फर्म हो गई!</div>
+    <div style="color:rgba(255,255,255,0.7);font-size:12px;margin-top:6px;font-family:var(--dv);">Shopkeeper ne accept kar liya ✅</div>
+  </div>
 </body>
 </html>
